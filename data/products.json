@@ -1,0 +1,60 @@
+[
+  {
+    "id": "belvia-neon-keychain",
+    "title": "Minimalist Tag Keychain",
+    "category": "Keychains",
+    "startingPrice": 5.99,
+    "weightGrams": 12,
+    "filamentUsage": 8.5,
+    "description": "A sleek, lightweight keychain customized with your initials. Built with high-precision layers.",
+    "images": [
+      "images/products/keychain-1.webp"
+    ],
+    "colors": [
+      "matte-black",
+      "belvia-gold",
+      "white"
+    ],
+    "materials": [
+      "PLA",
+      "PETG",
+      "TPU"
+    ],
+    "printTimeMinutes": 35,
+    "rating": 4.8,
+    "reviewCount": 18,
+    "makerWorldUrl": "https://makerworld.com/en/models/12345",
+    "specifications": {
+      "dimensions": "70mm x 20mm x 3.5mm",
+      "layerHeight": "0.16mm"
+    }
+  },
+  {
+    "id": "belvia-fox-decor",
+    "title": "Geometric Fox Figurine",
+    "category": "Home Decor",
+    "startingPrice": 24.99,
+    "weightGrams": 140,
+    "filamentUsage": 125.0,
+    "description": "Elegant geometric fox statue matching the Belvia logo. Features premium matte surface finish.",
+    "images": [
+      "images/products/fox-decor.webp"
+    ],
+    "colors": [
+      "matte-black",
+      "belvia-gold",
+      "white"
+    ],
+    "materials": [
+      "PLA"
+    ],
+    "printTimeMinutes": 180,
+    "rating": 5.0,
+    "reviewCount": 7,
+    "makerWorldUrl": "https://makerworld.com/en/models/67890",
+    "specifications": {
+      "dimensions": "120mm x 85mm x 140mm",
+      "layerHeight": "0.20mm"
+    }
+  }
+]

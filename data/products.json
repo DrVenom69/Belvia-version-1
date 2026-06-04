@@ -56,5 +56,34 @@
       "dimensions": "120mm x 85mm x 140mm",
       "layerHeight": "0.20mm"
     }
+  },
+  {
+    "id": "belvia-makerworld-product",
+    "title": "MakerWorld Product",
+    "category": "Keychains",
+    "startingPrice": 12.99,
+    "weightGrams": 24,
+    "filamentUsage": 18.2,
+    "description": "Scraped product details from MakerWorld source files. Made with high efficiency components.",
+    "images": [
+      "images/products/belvia-makerworld-product.webp"
+    ],
+    "colors": [
+      "matte-black",
+      "belvia-gold",
+      "white"
+    ],
+    "materials": [
+      "PLA",
+      "TPU"
+    ],
+    "printTimeMinutes": 50,
+    "rating": 5.0,
+    "reviewCount": 1,
+    "makerWorldUrl": "https://makerworld.com/en/models/12345",
+    "specifications": {
+      "dimensions": "80mm x 30mm x 4mm",
+      "layerHeight": "0.16mm"
+    }
   }
 ]

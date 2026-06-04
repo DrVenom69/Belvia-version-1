@@ -6,6 +6,7 @@
     "startingPrice": 5.99,
     "weightGrams": 12,
     "filamentUsage": 8.5,
+    "isPreOrder": false,
     "description": "A sleek, lightweight keychain customized with your initials. Built with high-precision layers.",
     "images": [
       "images/products/keychain-1.webp"
@@ -22,7 +23,23 @@
     ],
     "printTimeMinutes": 35,
     "rating": 4.8,
-    "reviewCount": 18,
+    "reviewCount": 2,
+    "reviews": [
+      {
+        "userName": "Iffat Rylan",
+        "rating": 5,
+        "comment": "Super clean text execution, love the gold accents!",
+        "verified": true,
+        "date": "2026-06-02"
+      },
+      {
+        "userName": "MKBHD",
+        "rating": 4.6,
+        "comment": "Decent matte feel, highly customizable.",
+        "verified": true,
+        "date": "2026-06-03"
+      }
+    ],
     "makerWorldUrl": "https://makerworld.com/en/models/12345",
     "specifications": {
       "dimensions": "70mm x 20mm x 3.5mm",
@@ -36,6 +53,7 @@
     "startingPrice": 24.99,
     "weightGrams": 140,
     "filamentUsage": 125.0,
+    "isPreOrder": false,
     "description": "Elegant geometric fox statue matching the Belvia logo. Features premium matte surface finish.",
     "images": [
       "images/products/fox-decor.webp"
@@ -50,7 +68,16 @@
     ],
     "printTimeMinutes": 180,
     "rating": 5.0,
-    "reviewCount": 7,
+    "reviewCount": 1,
+    "reviews": [
+      {
+        "userName": "CraftyMaker",
+        "rating": 5,
+        "comment": "Stunning geometric lines. Looks very premium on my desk.",
+        "verified": true,
+        "date": "2026-06-01"
+      }
+    ],
     "makerWorldUrl": "https://makerworld.com/en/models/67890",
     "specifications": {
       "dimensions": "120mm x 85mm x 140mm",
@@ -64,6 +91,7 @@
     "startingPrice": 12.99,
     "weightGrams": 24,
     "filamentUsage": 18.2,
+    "isPreOrder": false,
     "description": "Scraped product details from MakerWorld source files. Made with high efficiency components.",
     "images": [
       "images/products/belvia-makerworld-product.webp"
@@ -79,11 +107,116 @@
     ],
     "printTimeMinutes": 50,
     "rating": 5.0,
-    "reviewCount": 1,
+    "reviewCount": 0,
+    "reviews": [],
     "makerWorldUrl": "https://makerworld.com/en/models/12345",
     "specifications": {
       "dimensions": "80mm x 30mm x 4mm",
       "layerHeight": "0.16mm"
+    }
+  },
+  {
+    "id": "belvia-a1-scrapers",
+    "title": "Bambu Lab A1 Mini Scraper Mod",
+    "category": "A1 Mini Mods",
+    "startingPrice": 14.99,
+    "weightGrams": 45,
+    "filamentUsage": 32.5,
+    "isPreOrder": true,
+    "description": "Premium build plate scraper mod custom designed for the A1 Mini toolhead frame. Pre-Order Only.",
+    "images": [
+      "images/products/a1-scraper.webp"
+    ],
+    "colors": [
+      "matte-black",
+      "belvia-gold"
+    ],
+    "materials": [
+      "PETG",
+      "ABS"
+    ],
+    "printTimeMinutes": 60,
+    "rating": 4.9,
+    "reviewCount": 1,
+    "reviews": [
+      {
+        "userName": "BambuFan",
+        "rating": 5,
+        "comment": "Perfect angle alignment, zero plate scratching.",
+        "verified": true,
+        "date": "2026-05-29"
+      }
+    ],
+    "makerWorldUrl": "https://makerworld.com/en/models/88888",
+    "specifications": {
+      "dimensions": "110mm x 35mm x 15mm",
+      "layerHeight": "0.16mm"
+    }
+  },
+  {
+    "id": "belvia-hotend-assembly",
+    "title": "Hardened Steel Hotend 0.4mm",
+    "category": "Hotends",
+    "startingPrice": 34.99,
+    "weightGrams": 80,
+    "filamentUsage": 0.0,
+    "isPreOrder": true,
+    "description": "Hardened steel hotend nozzle assembly designed for high-temperature carbon fiber printing. Pre-Order Only.",
+    "images": [
+      "images/products/hotend-04.webp"
+    ],
+    "colors": [
+      "matte-black"
+    ],
+    "materials": [
+      "PLA"
+    ],
+    "printTimeMinutes": 0,
+    "rating": 4.7,
+    "reviewCount": 0,
+    "reviews": [],
+    "makerWorldUrl": "https://makerworld.com/en/models/99999",
+    "specifications": {
+      "dimensions": "Standard Bambu Toolhead",
+      "layerHeight": "N/A"
+    }
+  },
+  {
+    "id": "belvia-filament-drybox",
+    "title": "Premium Filament Dry Box Shell",
+    "category": "Imported Goods",
+    "startingPrice": 49.99,
+    "weightGrams": 950,
+    "filamentUsage": 820.0,
+    "isPreOrder": true,
+    "description": "Sealed environment storage container keeping your TPU and nylon dry. Complete with humidity sensor window. Pre-Order Only.",
+    "images": [
+      "images/products/drybox.webp"
+    ],
+    "colors": [
+      "matte-black",
+      "white"
+    ],
+    "materials": [
+      "PLA",
+      "PETG"
+    ],
+    "printTimeMinutes": 480,
+    "rating": 5.0,
+    "reviewCount": 2,
+    "reviews": [
+      {
+        "userName": "NylonPrinter",
+        "rating": 5,
+        "comment": "Humidity drops from 50% to 10% in an hour. Essential.",
+        "verified": true,
+        "date": "2026-05-15"
+      }
+    ],
+    "makerWorldUrl": "https://makerworld.com/en/models/77777",
+    "specifications": {
+      "dimensions": "220mm x 220mm x 250mm",
+      "layerHeight": "0.24mm"
     }
   }
 ]

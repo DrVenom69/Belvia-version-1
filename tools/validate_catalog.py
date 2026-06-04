@@ -15,8 +15,8 @@ def validate():
         print(f"Error: Failed to parse JSON database: {e}")
         sys.exit(1)
 
-    required_keys = ["id", "title", "category", "startingPrice", "weightGrams", "filamentUsage", "images", "colors", "materials", "printTimeMinutes"]
-    valid_categories = ["Keychains", "Home Decor", "Desk Accessories", "Gaming Accessories", "Figures & Collectibles", "Business Merchandise", "Custom Orders", "Functional Prints"]
+    required_keys = ["id", "title", "category", "startingPrice", "weightGrams", "filamentUsage", "images", "colors", "materials", "printTimeMinutes", "isPreOrder", "reviews"]
+    valid_categories = ["Keychains", "Home Decor", "Desk Accessories", "Gaming Accessories", "Figures & Collectibles", "Business Merchandise", "Custom Orders", "Functional Prints", "Imported Goods", "A1 Mini Mods", "Hotends"]
 
     for idx, product in enumerate(catalog):
         for key in required_keys:

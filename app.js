@@ -177,8 +177,8 @@ function renderProductDetails(hash) {
           <div class="config-group">
             <label>Color Selection</label>
             <div class="color-options">
-              ${product.colors.map(col => `
-                <button class="color-dot ${col}" onclick="selectColor(this, '${col}')"></button>
+              ${product.colors.map((col, idx) => `
+                <button class="color-dot ${col} ${idx === 0 ? 'active' : ''}" onclick="selectColor(this, '${col}')"></button>
               `).join('')}
             </div>
           </div>
@@ -186,8 +186,8 @@ function renderProductDetails(hash) {
           <div class="config-group">
             <label>Material Specification</label>
             <div class="material-options">
-              ${product.materials.map(mat => `
-                <button class="option-pill" onclick="selectMaterial(this, '${mat}')">${mat}</button>
+              ${product.materials.map((mat, idx) => `
+                <button class="option-pill ${idx === 0 ? 'active' : ''}" onclick="selectMaterial(this, '${mat}')">${mat}</button>
               `).join('')}
             </div>
           </div>
@@ -341,7 +341,32 @@ function updateCartCount() {
   if (badge) badge.textContent = count;
 }
 
-function addToCart(productId, color = 'belvia-gold', material = 'PLA') {
+window.selectColor = function(element, color) {
+  element.parentNode.querySelectorAll('.color-dot').forEach(el => el.classList.remove('active'));
+  element.classList.add('active');
+};
+
+window.selectMaterial = function(element, material) {
+  element.parentNode.querySelectorAll('.option-pill').forEach(el => el.classList.remove('active'));
+  element.classList.add('active');
+};
+
+window.addToCart = function(productId, color = null, material = null) {
+  if (!color) {
+    const activeColorDot = document.querySelector('.color-dot.active');
+    if (activeColorDot) {
+      const classes = Array.from(activeColorDot.classList);
+      color = classes.find(c => c !== 'color-dot' && c !== 'active') || 'belvia-gold';
+    } else {
+      color = 'belvia-gold';
+    }
+  }
+  
+  if (!material) {
+    const activeMaterialPill = document.querySelector('.option-pill.active');
+    material = activeMaterialPill ? activeMaterialPill.textContent.trim() : 'PLA';
+  }
+
   const existing = state.cart.find(c => c.id === productId && c.color === color && c.material === material);
   if (existing) {
     existing.quantity += 1;
@@ -350,8 +375,8 @@ function addToCart(productId, color = 'belvia-gold', material = 'PLA') {
   }
   localStorage.setItem('belvia_cart', JSON.stringify(state.cart));
   updateCartCount();
-  alert('Added to cart!');
-}
+  alert(`Added to cart: ${color} // ${material}`);
+};
 
 function renderCartItems() {
   const container = document.getElementById('cart-items');

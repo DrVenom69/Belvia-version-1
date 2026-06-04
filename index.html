@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Belvia | Next-Gen 3D Printing Lab</title>
+  <meta name="description" content="Custom and ready-made 3D printed creations. Personalization, collectibles, home decor, and industrial grade STL custom printing services.">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Persistent 3D Spline Canvas Container -->
+  <div id="spline-hero-container">
+    <!-- Placeholder container with visual mock glow -->
+    <div class="spline-placeholder">
+      <div class="glow-orb"></div>
+      <div class="spline-status">3D SPLINE WORKSPACE RESERVED</div>
+    </div>
+  </div>
+
+  <!-- Header Navigation -->
+  <header class="header">
+    <div class="header-container">
+      <a href="#home" class="logo">
+        <svg class="logo-svg" width="36" height="36" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M50 15C30 15 15 30 15 50C15 65 25 78 40 83C42 84 43 83 43 81.5V75C25 72 20 63 20 63C17 56 12 54 12 54C6 50 12 50 12 50C19 51 23 58 23 58C29 68 39 65 43 63C43.5 58 45.5 55 48 53C33 51 18 45 18 19C18 12 21 6 25 2C24 0.5 21 -7 26 -7C26 -7 32 -7 46 3C52 1 59 0 66 0C73 0 80 1 86 3C100 -7 106 -7 106 -7C111 -7 108 0.5 107 2C111 6 114 12 114 19C114 45 99 51 84 53C87 56 89 61 89 68V81.5C89 83 90 84 92 83C107 78 117 65 117 50C117 30 102 15 50 15Z" fill="#f5af19"/>
+        </svg>
+        <span class="logo-text">BELVIA</span>
+      </a>
+      
+      <nav class="nav-links">
+        <a href="#home" class="nav-link">Home</a>
+        <a href="#shop" class="nav-link">Catalog</a>
+        <a href="#custom-print" class="nav-link">Custom Print</a>
+        <a href="#bulk-orders" class="nav-link">Bulk Orders</a>
+      </nav>
+
+      <div class="actions">
+        <button id="cart-toggle-btn" class="cart-btn">
+          Cart (<span id="cart-count">0</span>)
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Router Outlet -->
+  <main id="app-router-view" class="main-content"></main>
+
+  <!-- Cart Sidebar Drawer Overlay -->
+  <div id="cart-sidebar" class="cart-sidebar">
+    <div class="cart-sidebar-header">
+      <h3>YOUR CART</h3>
+      <button id="cart-close-btn" class="close-btn">&times;</button>
+    </div>
+    <div id="cart-items" class="cart-items-container">
+      <p class="empty-msg">Your cart is currently empty.</p>
+    </div>
+    <div class="cart-sidebar-footer">
+      <div class="total-row">
+        <span>Subtotal</span>
+        <span id="cart-subtotal">$0.00</span>
+      </div>
+      <button class="checkout-btn">Checkout Now</button>
+    </div>
+  </div>
+  <div id="cart-overlay" class="cart-overlay"></div>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <p>&copy; 2026 Belvia Labs. All rights reserved.</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

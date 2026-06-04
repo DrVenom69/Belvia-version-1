@@ -11,7 +11,6 @@
 
   <!-- Persistent 3D Spline Canvas Container -->
   <div id="spline-hero-container">
-    <!-- Placeholder container with visual mock glow -->
     <div class="spline-placeholder">
       <div class="glow-orb"></div>
       <div class="spline-status">3D SPLINE WORKSPACE RESERVED</div>
@@ -29,16 +28,39 @@
       </a>
       
       <nav class="nav-links">
-        <a href="#home" class="nav-link">Home</a>
-        <a href="#shop" class="nav-link">Catalog</a>
-        <a href="#custom-print" class="nav-link">Custom Print</a>
+        <a href="#ready-prints" class="nav-link">Ready Prints</a>
+        <a href="#custom-print" class="nav-link">Custom Printing</a>
         <a href="#bulk-orders" class="nav-link">Bulk Orders</a>
+        <a href="#portfolio" class="nav-link">Portfolio</a>
+        <a href="#pre-orders" class="nav-link">Pre-Orders</a>
       </nav>
 
-      <div class="actions">
+      <div class="header-actions">
         <button id="cart-toggle-btn" class="cart-btn">
           Cart (<span id="cart-count">0</span>)
         </button>
+        <!-- User Profile Dropdown Button -->
+        <button id="profile-toggle-btn" class="profile-toggle-btn">
+          <div class="user-avatar">IR</div>
+        </button>
+      </div>
+    </div>
+
+    <!-- Profile Menu Dropdown Menu -->
+    <div id="profile-menu-dropdown" class="profile-dropdown">
+      <div class="dropdown-header">
+        <div class="user-info">
+          <h4>Iffat Rylan</h4>
+          <span>Level 9 Maker</span>
+        </div>
+      </div>
+      <div class="dropdown-links">
+        <a href="#account?tab=profile" class="dropdown-link">User Profile</a>
+        <a href="#account?tab=orders" class="dropdown-link">My Orders</a>
+        <a href="#account?tab=wishlist" class="dropdown-link">My Wishlist</a>
+        <a href="#account?tab=settings" class="dropdown-link">Account Settings</a>
+        <div class="dropdown-divider"></div>
+        <a href="#logout" class="dropdown-link logout">Log Out</a>
       </div>
     </div>
   </header>
@@ -56,14 +78,55 @@
       <p class="empty-msg">Your cart is currently empty.</p>
     </div>
     <div class="cart-sidebar-footer">
+      <!-- Coupon Option -->
+      <div class="coupon-box">
+        <input type="text" id="coupon-input" class="coupon-input" placeholder="Enter Coupon (e.g. BELVIA10)">
+        <button id="coupon-apply-btn" class="coupon-apply-btn">Apply</button>
+      </div>
+      <div id="coupon-message" class="coupon-message"></div>
       <div class="total-row">
         <span>Subtotal</span>
         <span id="cart-subtotal">$0.00</span>
+      </div>
+      <div id="coupon-discount-row" class="total-row discount-row" style="display:none;">
+        <span>Discount</span>
+        <span id="cart-discount">-$0.00</span>
+      </div>
+      <div id="final-total-row" class="total-row final-row" style="display:none;">
+        <span>Total</span>
+        <span id="cart-final-total">$0.00</span>
       </div>
       <button class="checkout-btn">Checkout Now</button>
     </div>
   </div>
   <div id="cart-overlay" class="cart-overlay"></div>
+
+  <!-- Persistent Customer Support Chat Bubble -->
+  <div id="support-chat-widget" class="support-chat-widget">
+    <button id="chat-toggle-btn" class="chat-bubble-btn">
+      <span class="chat-icon">&#128172;</span>
+    </button>
+    
+    <div id="chat-window" class="chat-window">
+      <div class="chat-header">
+        <div class="support-avatar"></div>
+        <div class="support-status">
+          <h4>Belvia Support</h4>
+          <span>Online // AI Helper</span>
+        </div>
+        <button id="chat-close-btn-widget" class="chat-close-widget">&times;</button>
+      </div>
+      <div id="chat-messages" class="chat-messages">
+        <div class="msg support-msg">
+          <p>Hey bro! Welcome to Belvia Support. How can we help you with your 3D print projects today?</p>
+        </div>
+      </div>
+      <div class="chat-input-area">
+        <input type="text" id="chat-input-field" placeholder="Ask about printing, materials...">
+        <button id="chat-send-btn">&#10148;</button>
+      </div>
+    </div>
+  </div>
 
   <!-- Footer -->
   <footer class="footer">

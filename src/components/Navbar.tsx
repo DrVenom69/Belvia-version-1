@@ -30,16 +30,20 @@ export default function Navbar({
   ];
 
   return (
-    <header id="belvia-header" className="sticky top-4 z-50 w-full px-4 sm:px-6 lg:px-8 transition-all duration-300">
-      <div className="max-w-5xl mx-auto bg-[#16112B]/95 backdrop-blur-lg border border-bg-elevated rounded-full h-14 sm:h-16 flex items-center justify-between px-4 sm:px-6 lg:px-8 shadow-2xl">
+    <header id="belvia-header" className="w-full bg-bg-surface/90 backdrop-blur-md border-b border-bg-elevated sticky top-0 z-50 transition-all duration-300">
+      <div className="max-w-7xl mx-auto h-20 sm:h-24 flex items-center justify-between px-4 sm:px-6 lg:px-8">
         
         {/* Logo Section (No text, BELVIA NEW LOGO-03.png only) */}
         <button
           id="nav-logo"
           onClick={() => setActiveTab('home')}
-          className="flex items-center group cursor-pointer focus:outline-none"
+          className="flex items-center group cursor-pointer focus:outline-none py-1"
         >
-          <img src="/logo.png" alt="Belvia Logo" className="h-8 sm:h-10 w-auto object-contain transition-transform group-hover:scale-105 duration-300" />
+          <img 
+            src="/logo.png" 
+            alt="Belvia Logo" 
+            className="h-12 sm:h-16 w-auto object-contain transition-transform group-hover:scale-105 duration-300 filter drop-shadow-[0_0_10px_rgba(245,175,25,0.15)]" 
+          />
         </button>
 
         {/* Navigation Section */}
@@ -52,10 +56,10 @@ export default function Navbar({
                 id={`nav-${link.id}`}
                 key={link.id}
                 onClick={() => setActiveTab(link.id)}
-                className={`flex items-center px-3 py-2 rounded-full text-xs font-medium cursor-pointer transition-all duration-300 ${
+                className={`flex items-center px-4 py-2 rounded-xl text-xs font-mono font-bold uppercase tracking-wider cursor-pointer transition-all duration-300 border ${
                   isActive
-                    ? 'bg-accent/10 text-accent font-bold'
-                    : 'text-gray-400 hover:text-white hover:bg-white/5'
+                    ? 'bg-accent/10 text-accent border-accent/30 shadow-md shadow-accent/5'
+                    : 'text-gray-400 hover:text-white hover:bg-white/5 border-transparent'
                 }`}
                 title={link.name}
               >

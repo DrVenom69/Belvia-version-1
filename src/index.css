@@ -7,21 +7,21 @@
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
 
   /* Brand Color Tokens matching user specifications */
-  --color-bg-base: #0E0B1A;
-  --color-bg-surface: #16112B;
-  --color-bg-elevated: #1E1836;
+  --color-bg-base: #080c14;
+  --color-bg-surface: #0d1322;
+  --color-bg-elevated: #151c2c;
 
-  --color-accent: #C89B3C;
-  --color-accent-hover: #E0B44A;
-  --color-accent-dark: #8A6A22;
-  --color-accent-glow: rgba(200, 155, 60, 0.22);
+  --color-accent: #f5af19;
+  --color-accent-hover: #e09e12;
+  --color-accent-dark: #b8810e;
+  --color-accent-glow: rgba(245, 175, 25, 0.15);
 
   --color-accent-secondary: #7B5CE5;
   --color-accent-secondary-lt: #9B80F0;
 
   --color-text-primary: #F0EAD6;
   --color-text-secondary: #8B8399;
-  --color-text-on-accent: #0E0B1A;
+  --color-text-on-accent: #080c14;
 }
 
 /* Premium radial ambient accent */
@@ -33,10 +33,10 @@
 }
 
 .custom-glass {
-  background: rgba(22, 17, 43, 0.45);
+  background: rgba(13, 19, 34, 0.45);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(200, 155, 60, 0.12);
+  border: 1px solid rgba(245, 175, 25, 0.12);
 }
 
 .premium-neon-btn {
@@ -85,13 +85,12 @@
   background: var(--color-accent);
 }
 
-/* Interactive custom printing pulse */
 @keyframes pulseGlow {
   0%, 100% {
-    box-shadow: 0 0 10px rgba(200, 155, 60, 0.20);
+    box-shadow: 0 0 10px rgba(245, 175, 25, 0.15);
   }
   50% {
-    box-shadow: 0 0 25px rgba(200, 155, 60, 0.50);
+    box-shadow: 0 0 25px rgba(245, 175, 25, 0.40);
   }
 }
 

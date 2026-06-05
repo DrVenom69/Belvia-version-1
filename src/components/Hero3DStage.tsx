@@ -11,10 +11,11 @@ interface Hero3DStageProps {
   sceneUrl: string;
   isActive: boolean;
   materialType: string;
+  removeSplineBg: boolean;
   onLoaded: () => void;
 }
 
-export default function Hero3DStage({ sceneUrl, isActive, materialType, onLoaded }: Hero3DStageProps) {
+export default function Hero3DStage({ sceneUrl, isActive, materialType, removeSplineBg, onLoaded }: Hero3DStageProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isSpline, setIsSpline] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -239,6 +240,35 @@ export default function Hero3DStage({ sceneUrl, isActive, materialType, onLoaded
     );
   }
 
+  const handleSplineLoad = (splineApp: any) => {
+    if (removeSplineBg) {
+      try {
+        const objects = splineApp.getObjects();
+        objects.forEach((obj: any) => {
+          const name = obj.name.toLowerCase();
+          if (
+            name.includes('card') ||
+            name.includes('glass') ||
+            name.includes('text') ||
+            name.includes('plane') ||
+            name.includes('floor') ||
+            name.includes('wall') ||
+            name.includes('bg') ||
+            name.includes('back') ||
+            name.includes('base') ||
+            name.includes('r4x') ||
+            name.includes('spline')
+          ) {
+            obj.visible = false;
+          }
+        });
+      } catch (err) {
+        console.warn('Failed to clean Spline background', err);
+      }
+    }
+    onLoaded();
+  };
+
   return (
     <div
       ref={containerRef}
@@ -250,7 +280,7 @@ export default function Hero3DStage({ sceneUrl, isActive, materialType, onLoaded
         <Suspense fallback={<div className="absolute inset-0 bg-[#080c14] animate-pulse" />}>
           <Spline
             scene={sceneUrl}
-            onLoad={onLoaded}
+            onLoad={handleSplineLoad}
             style={{ width: '100%', height: '100%' }}
           />
         </Suspense>

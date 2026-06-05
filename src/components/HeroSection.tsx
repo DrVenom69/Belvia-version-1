@@ -5,13 +5,14 @@ import HeroCarousel from './HeroCarousel';
 interface HeroSectionProps {
   onStartShopping: () => void;
   onGoToCustom: () => void;
+  onCategoryClick?: (category: string) => void;
 }
 
-export default function HeroSection({ onStartShopping, onGoToCustom }: HeroSectionProps) {
+export default function HeroSection({ onStartShopping, onGoToCustom, onCategoryClick }: HeroSectionProps) {
   return (
     <section
       id="belvia-hero"
-      className="relative overflow-hidden pt-16 pb-8 bg-bg-base border-b border-bg-elevated/40"
+      className="relative overflow-hidden pt-16 pb-2 bg-bg-base border-b border-bg-elevated/40"
     >
       {/* ── Ambient background glows ── */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-accent/5 rounded-full blur-3xl pointer-events-none" />
@@ -69,21 +70,30 @@ export default function HeroSection({ onStartShopping, onGoToCustom }: HeroSecti
       </div>
 
       {/* ── Trending label ── */}
-      <div className="relative z-10 max-w-7xl mx-auto px-4 flex items-center gap-3 mb-4">
+      <div className="relative z-10 max-w-7xl mx-auto px-6 flex items-center gap-3 mb-4">
         <span className="text-[10px] font-mono font-bold tracking-widest text-accent uppercase">
           🔥 Trending Products
         </span>
         <div className="flex-1 h-px bg-gradient-to-r from-accent/30 to-transparent" />
-        <span className="text-[10px] font-mono text-text-secondary">Infinite Showcase</span>
+        <span className="text-[10px] font-mono text-text-secondary">Tap a card to explore</span>
       </div>
 
-      {/* ── Infinite Carousel ── */}
-      <div className="relative z-10 carousel-track">
-        <HeroCarousel />
+      {/* ── Infinite Carousel – single row ── */}
+      <div className="relative z-10">
+        <HeroCarousel
+          onCategoryClick={(cat) => {
+            // Navigate to the main store; App will handle the tab switch
+            if (onCategoryClick) {
+              onCategoryClick(cat);
+            } else {
+              onStartShopping();
+            }
+          }}
+        />
       </div>
 
       {/* ── Bottom fade-to-base ── */}
-      <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-bg-base to-transparent pointer-events-none z-20" />
+      <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-bg-base to-transparent pointer-events-none z-20" />
     </section>
   );
 }

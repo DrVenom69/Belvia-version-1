@@ -136,7 +136,14 @@
   animation: pulseGlow 2s infinite ease-in-out;
 }
 
-/* ─── Infinite Carousel Animations ─────────────────────────────────────────── */
+/* ─── Infinite Carousel Animation ─────────────────────────────────────────── */
+/* Scrolls exactly one copy's width then snaps back – creates seamless loop */
+@keyframes heroCarouselScroll {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* Legacy helpers kept for any other possible usage */
 @keyframes scrollLeft {
   from { transform: translateX(0); }
   to   { transform: translateX(-50%); }
@@ -145,9 +152,4 @@
 @keyframes scrollRight {
   from { transform: translateX(-50%); }
   to   { transform: translateX(0); }
-}
-
-/* Pause carousel on hover */
-.carousel-track:hover > div {
-  animation-play-state: paused;
 }

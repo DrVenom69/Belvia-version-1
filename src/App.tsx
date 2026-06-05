@@ -446,6 +446,7 @@ export default function App() {
             <HeroSection
               onStartShopping={() => setActiveTab('ready-prints')}
               onGoToCustom={() => setActiveTab('custom')}
+              onCategoryClick={() => setActiveTab('ready-prints')}
             />
 
             {/* Instagram Story-style reviews tape */}

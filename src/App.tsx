@@ -412,7 +412,7 @@ export default function App() {
       />
 
       {/* 2. DYNAMIC CONTENT SWITCHBOARD */}
-      <main className="flex-grow">
+      <main className="flex-grow pb-16 sm:pb-0">
         
         {/* VIEW A: LANDING PAGE & SHORT STREAM VIEW */}
         {activeTab === 'home' && (

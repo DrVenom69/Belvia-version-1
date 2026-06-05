@@ -68,14 +68,14 @@ export default function Hero3DStage({ sceneUrl, isActive, materialType, onLoaded
     scene.add(dirLight2);
 
     // Setup material based on preference
-    let customMaterial: THREE.MeshStandardMaterial | THREE.MeshPhysicalMaterial = new THREE.MeshStandardMaterial({
+    let customMaterial = new THREE.MeshStandardMaterial({
       color: 0x1e293b,
       roughness: 0.7,
       metalness: 0.2
     });
 
     if (materialType === 'Reflective Gold Chrome') {
-      customMaterial = new THREE.MeshPhysicalMaterial({
+      customMaterial = new THREE.MeshStandardMaterial({
         color: 0xf5af19, // Gold
         roughness: 0.08,
         metalness: 0.95,
@@ -83,7 +83,7 @@ export default function Hero3DStage({ sceneUrl, isActive, materialType, onLoaded
         clearcoatRoughness: 0.1
       });
     } else if (materialType === 'Ghost Glass (Semi-Transparent)') {
-      customMaterial = new THREE.MeshPhysicalMaterial({
+      customMaterial = new THREE.MeshStandardMaterial({
         color: 0xffffff,
         roughness: 0.1,
         metalness: 0.1,

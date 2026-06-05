@@ -31,7 +31,7 @@ export default function Navbar({
 
   return (
     <header id="belvia-header" className="w-full bg-bg-surface/90 backdrop-blur-md border-b border-bg-elevated sticky top-0 z-50 transition-all duration-300">
-      <div className="max-w-7xl mx-auto h-20 sm:h-24 flex items-center justify-between px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto flex items-center justify-between px-4 sm:px-6 lg:px-8 py-4 sm:py-5">
         
         {/* Logo Section (No text, BELVIA NEW LOGO-03.png only) */}
         <button
@@ -42,7 +42,7 @@ export default function Navbar({
           <img 
             src="/logo.png" 
             alt="Belvia Logo" 
-            className="h-12 sm:h-16 w-auto object-contain transition-transform group-hover:scale-105 duration-300 filter drop-shadow-[0_0_10px_rgba(245,175,25,0.15)]" 
+            className="h-16 sm:h-20 w-auto object-contain transition-transform group-hover:scale-105 duration-300 filter drop-shadow-[0_0_10px_rgba(245,175,25,0.15)]" 
           />
         </button>
 

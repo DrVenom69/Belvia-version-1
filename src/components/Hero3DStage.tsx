@@ -243,7 +243,17 @@ export default function Hero3DStage({ sceneUrl, isActive, materialType, removeSp
   const handleSplineLoad = (splineApp: any) => {
     if (removeSplineBg) {
       try {
-        const objects = splineApp.getObjects();
+        const objects: any[] = [];
+        if (splineApp.scene) {
+          splineApp.scene.traverse((obj: any) => {
+            if (obj.name) {
+              objects.push(obj);
+            }
+          });
+        }
+        console.log('SPLINE OBJECTS IN SCENE:', objects.map((o: any) => `${o.name} (${o.type})`));
+        (window as any).splineObjects = objects.map((o: any) => o.name);
+        
         objects.forEach((obj: any) => {
           const name = obj.name.toLowerCase();
           if (

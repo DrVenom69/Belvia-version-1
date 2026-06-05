@@ -136,3 +136,18 @@
   animation: pulseGlow 2s infinite ease-in-out;
 }
 
+/* ─── Infinite Carousel Animations ─────────────────────────────────────────── */
+@keyframes scrollLeft {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+@keyframes scrollRight {
+  from { transform: translateX(-50%); }
+  to   { transform: translateX(0); }
+}
+
+/* Pause carousel on hover */
+.carousel-track:hover > div {
+  animation-play-state: paused;
+}

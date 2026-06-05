@@ -1,5 +1,4 @@
-import React from 'react';
-import { Layers, ShoppingBag, Terminal, Heart, Home, Globe, Sparkles, User } from 'lucide-react';
+import { Layers, ShoppingBag, Terminal, Heart, Home, Globe, Sparkles, User, Sun, Moon } from 'lucide-react';
 import { CartItem } from '../types';
 
 interface NavbarProps {
@@ -9,6 +8,8 @@ interface NavbarProps {
   setIsCartOpen: (open: boolean) => void;
   wishlistCount: number;
   onWishlistOpen: () => void;
+  theme: 'dark' | 'light';
+  toggleTheme: () => void;
 }
 
 export default function Navbar({
@@ -17,7 +18,9 @@ export default function Navbar({
   cart,
   setIsCartOpen,
   wishlistCount,
-  onWishlistOpen
+  onWishlistOpen,
+  theme,
+  toggleTheme
 }: NavbarProps) {
   const totalItems = cart.reduce((acc, item) => acc + item.quantity, 0);
 
@@ -70,8 +73,22 @@ export default function Navbar({
           </nav>
 
           {/* Interaction Actions */}
-          <div className="flex items-center space-x-5 sm:space-x-5 text-xs">
+          <div className="flex items-center space-x-4 sm:space-x-5 text-xs">
             
+            {/* Light/Dark Mode Toggle */}
+            <button
+              id="theme-toggle-btn"
+              onClick={toggleTheme}
+              className="p-1.5 rounded-full text-gray-400 hover:text-accent bg-white/5 hover:bg-white/10 cursor-pointer transition duration-300 group"
+              title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+            >
+              {theme === 'dark' ? (
+                <Sun className="w-6 h-6 sm:w-5 sm:h-5 text-accent animate-pulse group-hover:scale-105 transition-transform" />
+              ) : (
+                <Moon className="w-6 h-6 sm:w-5 sm:h-5 text-accent group-hover:scale-105 transition-transform" />
+              )}
+            </button>
+
             {/* Cart Trigger */}
             <button
               id="cart-trigger-btn"

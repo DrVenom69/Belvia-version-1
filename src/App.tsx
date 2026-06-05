@@ -43,6 +43,29 @@ export default function App() {
   const [customRequests, setCustomRequests] = useState<CustomPrintRequest[]>([]);
   const [bulkOrders, setBulkOrders] = useState<BulkOrderRequest[]>([]);
 
+  // Light/Dark mode state (syncs with localStorage and document element class)
+  const [theme, setTheme] = useState<'dark' | 'light'>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('belvia_theme');
+      return (saved === 'light' || saved === 'dark') ? saved : 'dark';
+    }
+    return 'dark';
+  });
+
+  useEffect(() => {
+    const root = window.document.documentElement;
+    if (theme === 'dark') {
+      root.classList.add('dark');
+    } else {
+      root.classList.remove('dark');
+    }
+    localStorage.setItem('belvia_theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme(prev => prev === 'dark' ? 'light' : 'dark');
+  };
+
   // Load initial states from localStorage if available
   useEffect(() => {
     // 1. Fetch dynamic products database from /data/products.json
@@ -399,7 +422,7 @@ export default function App() {
   };
 
   return (
-    <div id="belvia-root" className="min-h-screen bg-bg-base flex flex-col text-slate-100 antialiased selection:bg-accent/20 font-sans">
+    <div id="belvia-root" className="min-h-screen bg-bg-base flex flex-col text-text-primary antialiased selection:bg-accent/20 font-sans transition-colors duration-300">
       
       {/* 1. BRAND NAVIGATION HEADER */}
       <Navbar
@@ -409,6 +432,8 @@ export default function App() {
         setIsCartOpen={setIsCartOpen}
         wishlistCount={wishlist.length}
         onWishlistOpen={() => setIsWishlistOpen(true)}
+        theme={theme}
+        toggleTheme={toggleTheme}
       />
 
       {/* 2. DYNAMIC CONTENT SWITCHBOARD */}

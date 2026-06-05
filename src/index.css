@@ -6,37 +6,75 @@
   --font-display: "Outfit", "Inter", sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
 
-  /* Brand Color Tokens matching user specifications */
-  --color-bg-base: #080c14;
-  --color-bg-surface: #0d1322;
-  --color-bg-elevated: #151c2c;
+  /* Bind theme tokens to responsive CSS variables */
+  --color-bg-base: var(--bg-base);
+  --color-bg-surface: var(--bg-surface);
+  --color-bg-elevated: var(--bg-elevated);
 
-  --color-accent: #f5af19;
-  --color-accent-hover: #e09e12;
-  --color-accent-dark: #b8810e;
-  --color-accent-glow: rgba(245, 175, 25, 0.15);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-dark: var(--accent-dark);
+  --color-accent-glow: var(--accent-glow);
 
-  --color-accent-secondary: #7B5CE5;
-  --color-accent-secondary-lt: #9B80F0;
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-on-accent: var(--text-on-accent);
+}
 
-  --color-text-primary: #F0EAD6;
-  --color-text-secondary: #8B8399;
-  --color-text-on-accent: #080c14;
+:root {
+  /* LIGHT MODE CONFIG (Warm, clean, accessible to all) */
+  --bg-base: #f4f6fa;
+  --bg-surface: rgba(255, 255, 255, 0.7);
+  --bg-elevated: rgba(255, 255, 255, 0.85);
+
+  --accent: #f5af19;
+  --accent-hover: #e09e12;
+  --accent-dark: #b8810e;
+  --accent-glow: rgba(245, 175, 25, 0.08);
+
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-on-accent: #ffffff;
+
+  --glass-bg: rgba(255, 255, 255, 0.45);
+  --glass-border: rgba(245, 175, 25, 0.12);
+  --card-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05);
+}
+
+.dark {
+  /* DARK MODE CONFIG (Sleek, immersive, tech-focused) */
+  --bg-base: #080c14;
+  --bg-surface: rgba(13, 19, 34, 0.65);
+  --bg-elevated: rgba(21, 28, 44, 0.78);
+
+  --accent: #f5af19;
+  --accent-hover: #e09e12;
+  --accent-dark: #b8810e;
+  --accent-glow: rgba(245, 175, 25, 0.15);
+
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-on-accent: #080c14;
+
+  --glass-bg: rgba(13, 19, 34, 0.55);
+  --glass-border: rgba(245, 175, 25, 0.12);
+  --card-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
 }
 
 /* Premium radial ambient accent */
 .bg-grid-ambient {
   background-size: 40px 40px;
   background-image: 
-    linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+    linear-gradient(to right, rgba(120, 120, 120, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(120, 120, 120, 0.03) 1px, transparent 1px);
 }
 
 .custom-glass {
-  background: rgba(13, 19, 34, 0.45);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(245, 175, 25, 0.12);
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--card-shadow);
 }
 
 .premium-neon-btn {

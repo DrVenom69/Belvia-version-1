@@ -3,7 +3,7 @@ import os
 import sys
 
 def validate():
-    db_path = "data/products.json"
+    db_path = "public/data/products.json"
     if not os.path.exists(db_path):
         print(f"Error: Database {db_path} does not exist.")
         sys.exit(1)

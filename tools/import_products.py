@@ -41,7 +41,7 @@ def get_product_data_from_makerworld(url):
     }
 
 def optimize_image(raw_url, product_id):
-    out_dir = "images/products"
+    out_dir = "public/images/products"
     os.makedirs(out_dir, exist_ok=True)
     out_path = f"{out_dir}/{product_id}.webp"
     
@@ -88,6 +88,7 @@ def add_product(url, price, category, database_path):
         "startingPrice": price,
         "weightGrams": 24,
         "filamentUsage": 18.2,
+        "isPreOrder": False,
         "description": data["description"],
         "images": [img_rel_path],
         "colors": ["matte-black", "belvia-gold", "white"],
@@ -95,6 +96,7 @@ def add_product(url, price, category, database_path):
         "printTimeMinutes": 50,
         "rating": 5.0,
         "reviewCount": 1,
+        "reviews": [],
         "makerWorldUrl": url,
         "specifications": {
             "dimensions": "80mm x 30mm x 4mm",
@@ -123,6 +125,6 @@ if __name__ == "__main__":
     parser.add_argument("--url", required=True)
     parser.add_argument("--price", type=float, default=9.99)
     parser.add_argument("--category", default="Keychains")
-    parser.add_argument("--database", default="data/products.json")
+    parser.add_argument("--database", default="public/data/products.json")
     args = parser.parse_args()
     add_product(args.url, args.price, args.category, args.database)

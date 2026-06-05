@@ -4,3 +4,6 @@
 __pycache__/
 *.pyc
 node_modules/
+dist/
+belvia-3d-studio/
+belvia-3d-studio.zip

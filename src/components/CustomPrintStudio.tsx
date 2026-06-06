@@ -1,15 +1,17 @@
 import React, { useState, useRef } from 'react';
 import { UploadCloud, CheckCircle2, FileCode, AlertCircle, Sparkles, HelpCircle, HardDrive, Send } from 'lucide-react';
-import { CustomPrintRequest, BulkOrderRequest } from '../types';
+import { CustomPrintRequest, BulkOrderRequest, CartItem } from '../types';
 import BulkOrders from './BulkOrders';
+import NameKeychainBuilder from './NameKeychainBuilder';
 
 interface CustomPrintStudioProps {
   onAddCustomQuote: (quote: CustomPrintRequest) => void;
   onAddBulkOrder: (order: BulkOrderRequest) => void;
+  onAddToCart: (item: CartItem) => void;
 }
 
-export default function CustomPrintStudio({ onAddCustomQuote, onAddBulkOrder }: CustomPrintStudioProps) {
-  const [activeSubTab, setActiveSubTab] = useState<'individual' | 'bulk'>('individual');
+export default function CustomPrintStudio({ onAddCustomQuote, onAddBulkOrder, onAddToCart }: CustomPrintStudioProps) {
+  const [activeSubTab, setActiveSubTab] = useState<'individual' | 'keychain' | 'bulk'>('individual');
   const [dragActive, setDragActive] = useState<boolean>(false);
   const [file, setFile] = useState<{ name: string; size: string; type: string } | null>(null);
   const [isParsing, setIsParsing] = useState<boolean>(false);
@@ -214,6 +216,20 @@ export default function CustomPrintStudio({ onAddCustomQuote, onAddBulkOrder }: 
             </button>
             <button
               onClick={() => {
+                setActiveSubTab('keychain');
+                resetForm();
+              }}
+              className={`flex items-center space-x-2 px-6 py-2.5 rounded-xl font-display text-xs font-bold transition-all duration-200 cursor-pointer ${
+                activeSubTab === 'keychain'
+                  ? 'bg-accent text-white shadow-md shadow-accent/15'
+                  : 'text-gray-400 hover:text-white hover:bg-bg-surface/40'
+              }`}
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>Name Keychain Builder</span>
+            </button>
+            <button
+              onClick={() => {
                 setActiveSubTab('bulk');
                 resetForm();
               }}
@@ -232,6 +248,10 @@ export default function CustomPrintStudio({ onAddCustomQuote, onAddBulkOrder }: 
         {activeSubTab === 'bulk' ? (
           <div className="max-w-4xl mx-auto bg-bg-base/20 border border-gray-850 rounded-2xl p-2.5 shadow-2xl animate-in fade-in slide-in-from-bottom-3 duration-300">
             <BulkOrders onAddBulkOrder={onAddBulkOrder} />
+          </div>
+        ) : activeSubTab === 'keychain' ? (
+          <div className="max-w-5xl mx-auto bg-bg-base/20 border border-gray-850 rounded-2xl p-2.5 shadow-2xl animate-in fade-in slide-in-from-bottom-3 duration-300">
+            <NameKeychainBuilder onAddToCart={onAddToCart} />
           </div>
         ) : submitSuccess ? (
           /* Confirmation tracking visual card */

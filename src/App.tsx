@@ -565,7 +565,11 @@ export default function App() {
         {/* VIEW F: CUSTOM STL SLICING INSTANT STUDIO */}
         {activeTab === 'custom' && (
           <div id="custom-view-container">
-            <CustomPrintStudio onAddCustomQuote={handleAddCustomQuote} onAddBulkOrder={handleAddBulkOrder} />
+            <CustomPrintStudio 
+              onAddCustomQuote={handleAddCustomQuote} 
+              onAddBulkOrder={handleAddBulkOrder} 
+              onAddToCart={handleAddToCart}
+            />
           </div>
         )}
 

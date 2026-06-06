@@ -482,10 +482,10 @@ button {
 /* ─── 3D Keychain Spin Animation ─────────────────────────────────────────── */
 @keyframes spin3d {
   0% {
-    transform: rotateX(20deg) rotateY(-25deg);
+    transform: rotateX(20deg) rotateY(-25deg) scale(1.35);
   }
   100% {
-    transform: rotateX(20deg) rotateY(335deg);
+    transform: rotateX(20deg) rotateY(335deg) scale(1.35);
   }
 }
 

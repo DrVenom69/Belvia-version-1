@@ -63,9 +63,9 @@ function getFontSize(name: string): number {
   return 13;
 }
 
-// Dynamically calculates stroke width proportional to font size
+// Dynamically calculates stroke width proportional to font size (narrower contour outline)
 function getStrokeWidth(fontSize: number): number {
-  return Math.round(fontSize * 0.65);
+  return Math.round(fontSize * 0.45);
 }
 
 export default function NameKeychainBuilder({ onAddToCart }: NameKeychainBuilderProps) {
@@ -362,7 +362,7 @@ export default function NameKeychainBuilder({ onAddToCart }: NameKeychainBuilder
             className={`relative transition-transform duration-75 ${isAutoSpin ? 'animate-[spin3d_10s_linear_infinite]' : ''}`}
             style={{
               transformStyle: 'preserve-3d',
-              transform: isAutoSpin ? undefined : `rotateX(${rotation.x}deg) rotateY(${rotation.y}deg)`,
+              transform: isAutoSpin ? undefined : `rotateX(${rotation.x}deg) rotateY(${rotation.y}deg) scale(1.35)`,
               width: '280px',
               height: '110px'
             }}

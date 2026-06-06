@@ -22,13 +22,6 @@ export default function HeroSection({ onStartShopping, onGoToCustom, onCategoryC
       {/* ── Typography block ── */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10 space-y-6 mb-10">
 
-        {/* Badge pill */}
-        <div className="inline-flex items-center gap-2 text-[11px] font-mono font-bold tracking-widest text-accent bg-accent/10 border border-accent/20 px-4 py-1.5 rounded-full shadow-sm">
-          <Cpu className="w-3.5 h-3.5" />
-          <span>Additive Precision Farm</span>
-          <Sparkles className="w-3 h-3 opacity-60" />
-        </div>
-
         {/* Main heading */}
         <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-text-primary leading-[1.08] uppercase">
           Imagine It.<br />

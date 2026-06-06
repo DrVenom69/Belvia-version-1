@@ -54,6 +54,20 @@ function darkenColor(hex: string, percent: number): string {
   return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
 }
 
+// Dynamically adjusts font size based on text length to prevent clipping in viewport
+function getFontSize(name: string): number {
+  const len = name.length;
+  if (len <= 6) return 22;
+  if (len <= 9) return 19;
+  if (len <= 12) return 16;
+  return 13;
+}
+
+// Dynamically calculates stroke width proportional to font size
+function getStrokeWidth(fontSize: number): number {
+  return Math.round(fontSize * 0.65);
+}
+
 export default function NameKeychainBuilder({ onAddToCart }: NameKeychainBuilderProps) {
   const [name, setName] = useState<string>('BELVIA');
   const [selectedFont, setSelectedFont] = useState<string>('Syne');
@@ -68,6 +82,10 @@ export default function NameKeychainBuilder({ onAddToCart }: NameKeychainBuilder
   // 3D Mouse tilt state (default rest tilt of rotateX(20deg) rotateY(-25deg))
   const [rotation, setRotation] = useState({ x: 20, y: -25 });
   const previewContainerRef = useRef<HTMLDivElement>(null);
+
+  // Sizing and outlines calculation based on name length
+  const fontSize = getFontSize(name);
+  const strokeWidth = getStrokeWidth(fontSize);
 
   // Dynamic specs
   const specs = calculateKeychainSpecs({
@@ -173,7 +191,7 @@ export default function NameKeychainBuilder({ onAddToCart }: NameKeychainBuilder
   // Dynamic rendering helper for the theme layouts
   const renderThemeBackplate = (overrideColor?: string, isSideWall: boolean = false) => {
     const color = overrideColor || strokeColor;
-    const textWidth = Math.max(120, name.length * 20 + 30);
+    const textWidth = Math.max(120, name.length * (fontSize * 0.85) + 45);
     
     switch (theme) {
       case 'floral':
@@ -241,9 +259,28 @@ export default function NameKeychainBuilder({ onAddToCart }: NameKeychainBuilder
       default:
         return (
           <g>
-            <rect x="0" y="20" width={textWidth} height="65" rx="20" fill={color} />
-            <circle cx="20" cy="52" r="12" fill={color} />
-            <circle cx="20" cy="52" r="5" fill="#080c14" />
+            {/* Structural bridge connecting ring loop to letters */}
+            <rect x="22" y="46" width="22" height="12" fill={color} rx="2" />
+            
+            {/* Ring loop */}
+            <circle cx="26" cy="52" r="11" fill={color} />
+            <circle cx="26" cy="52" r="4.5" fill="#080c14" />
+            
+            {/* Contoured Text Silhouette Backplate */}
+            <text
+              x={getThemeTranslationX()}
+              y={getThemeTranslationY()}
+              fill={color}
+              stroke={color}
+              strokeWidth={strokeWidth}
+              strokeLinejoin="round"
+              fontSize={fontSize}
+              fontFamily={selectedFont}
+              fontWeight="800"
+              textAnchor="start"
+            >
+              {name || 'NAME'}
+            </text>
           </g>
         );
     }
@@ -286,7 +323,7 @@ export default function NameKeychainBuilder({ onAddToCart }: NameKeychainBuilder
           x={getThemeTranslationX()}
           y={getThemeTranslationY()}
           fill={textColor}
-          fontSize="22"
+          fontSize={fontSize}
           fontFamily={selectedFont}
           fontWeight="800"
           textAnchor="start"
@@ -406,7 +443,7 @@ export default function NameKeychainBuilder({ onAddToCart }: NameKeychainBuilder
                       x={getThemeTranslationX()}
                       y={getThemeTranslationY()}
                       fill={layerColor}
-                      fontSize="22"
+                      fontSize={fontSize}
                       fontFamily={selectedFont}
                       fontWeight="800"
                       textAnchor="start"
@@ -438,7 +475,7 @@ export default function NameKeychainBuilder({ onAddToCart }: NameKeychainBuilder
                   x={getThemeTranslationX()}
                   y={getThemeTranslationY()}
                   fill={textColor}
-                  fontSize="22"
+                  fontSize={fontSize}
                   fontFamily={selectedFont}
                   fontWeight="800"
                   textAnchor="start"
@@ -451,7 +488,7 @@ export default function NameKeychainBuilder({ onAddToCart }: NameKeychainBuilder
                   x={getThemeTranslationX()}
                   y={getThemeTranslationY()}
                   fill="url(#text-highlight)"
-                  fontSize="22"
+                  fontSize={fontSize}
                   fontFamily={selectedFont}
                   fontWeight="800"
                   textAnchor="start"

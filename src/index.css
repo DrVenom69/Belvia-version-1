@@ -154,34 +154,83 @@
   to   { transform: translateX(0); }
 }
 
-/* ─── Hero Aurora Animated Background ──────────────────────────────────────── */
+/* ══════════════════════════════════════════════════════════════════════════════
+   HERO SECTION — THEME-ADAPTIVE ANIMATED BACKGROUND
+   Works beautifully in both dark and light mode.
+   ══════════════════════════════════════════════════════════════════════════════ */
 
+/* ── Section base ── */
+.hero-section {
+  background-color: var(--bg-base);
+  transition: background-color 0.4s ease;
+}
+
+/* ── Bottom fade adapts to theme ── */
+.hero-bottom-fade {
+  background: linear-gradient(to top, var(--bg-base), transparent);
+}
+
+/* ── Aurora keyframe (shared) ── */
 @keyframes auroraShift {
   0%   { background-position: 0% 50%; }
   50%  { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
 }
 
+/* ── Dark mode aurora: deep navy → violet → carbon ── */
 .hero-aurora {
   position: absolute;
   inset: 0;
-  background: linear-gradient(
+  background-size: 400% 400%;
+  animation: auroraShift 20s ease infinite;
+  /* Light mode: subtle warm ivory gradient */
+  background-image: linear-gradient(
+    135deg,
+    #f4f6fa 0%,
+    #f0f2f8 18%,
+    #f7f4ff 36%,
+    #f4f6fa 50%,
+    #fff8f0 68%,
+    #f0f4fe 84%,
+    #f4f6fa 100%
+  );
+  opacity: 0.9;
+}
+
+.dark .hero-aurora {
+  background-image: linear-gradient(
     135deg,
     #080c14 0%,
     #0d1525 15%,
     #100d1e 30%,
     #080c14 45%,
-    #0e1a10 60%,
-    #0d1025 75%,
+    #0b1420 60%,
+    #0d1228 75%,
     #080c14 100%
   );
-  background-size: 400% 400%;
-  animation: auroraShift 18s ease infinite;
   opacity: 1;
 }
 
-/* ─── Drifting Glow Orbs ──────────────────────────────────────────────────── */
+/* ── Central spotlight: soft glow behind the heading ── */
+.hero-spotlight {
+  /* Light mode: warm gold sunlight glow from center-top */
+  background: radial-gradient(ellipse 70% 55% at 50% 35%,
+    rgba(245, 175, 25, 0.06) 0%,
+    rgba(245, 175, 25, 0.02) 50%,
+    transparent 100%
+  );
+}
 
+.dark .hero-spotlight {
+  /* Dark mode: stronger warm gold spotlight */
+  background: radial-gradient(ellipse 70% 55% at 50% 35%,
+    rgba(245, 175, 25, 0.12) 0%,
+    rgba(245, 175, 25, 0.04) 50%,
+    transparent 100%
+  );
+}
+
+/* ── Orb shared base ── */
 @keyframes orbFloat1 {
   0%   { transform: translate(0, 0) scale(1); }
   33%  { transform: translate(60px, -40px) scale(1.08); }
@@ -202,111 +251,88 @@
   100% { transform: translate(0, 0) scale(1); }
 }
 
-@keyframes orbFloat4 {
-  0%   { transform: translate(0, 0) scale(1); }
-  40%  { transform: translate(80px, 60px) scale(0.9); }
-  80%  { transform: translate(-20px, -20px) scale(1.05); }
-  100% { transform: translate(0, 0) scale(1); }
-}
-
 .hero-orb {
   position: absolute;
   border-radius: 50%;
-  filter: blur(80px);
+  filter: blur(90px);
   will-change: transform;
   pointer-events: none;
 }
 
-/* Gold orb – top left */
+/* ── Orb 1: Gold – top left ── */
 .hero-orb-1 {
   width: 520px;
   height: 520px;
   top: -120px;
   left: -80px;
-  background: radial-gradient(circle, rgba(245, 175, 25, 0.22) 0%, rgba(245, 175, 25, 0.04) 60%, transparent 100%);
   animation: orbFloat1 22s ease-in-out infinite;
+  /* Light: barely-there warm gold tint */
+  background: radial-gradient(circle,
+    rgba(245, 175, 25, 0.07) 0%,
+    rgba(245, 175, 25, 0.02) 60%,
+    transparent 100%
+  );
 }
 
-/* Violet / indigo orb – bottom right */
+.dark .hero-orb-1 {
+  background: radial-gradient(circle,
+    rgba(245, 175, 25, 0.22) 0%,
+    rgba(245, 175, 25, 0.05) 60%,
+    transparent 100%
+  );
+}
+
+/* ── Orb 2: Violet – bottom right ── */
 .hero-orb-2 {
   width: 600px;
   height: 600px;
   bottom: -160px;
   right: -100px;
-  background: radial-gradient(circle, rgba(123, 92, 229, 0.22) 0%, rgba(123, 92, 229, 0.05) 55%, transparent 100%);
   animation: orbFloat2 27s ease-in-out infinite;
-}
-
-/* Cyan-teal orb – centre right */
-.hero-orb-3 {
-  width: 380px;
-  height: 380px;
-  top: 20%;
-  right: 10%;
-  background: radial-gradient(circle, rgba(20, 200, 220, 0.10) 0%, rgba(20, 200, 220, 0.02) 60%, transparent 100%);
-  animation: orbFloat3 19s ease-in-out infinite;
-}
-
-/* Amber orb – bottom left */
-.hero-orb-4 {
-  width: 300px;
-  height: 300px;
-  bottom: 60px;
-  left: 10%;
-  background: radial-gradient(circle, rgba(245, 140, 25, 0.12) 0%, rgba(245, 140, 25, 0.02) 60%, transparent 100%);
-  animation: orbFloat4 24s ease-in-out infinite;
-}
-
-/* ─── Hero Metallic Chromatic Ripple ─────────────────────────────────────── */
-/* Vertical gradient strips that the SVG feTurbulence+feDisplacementMap distorts */
-/* into an organic metallic wave. Very low opacity to stay non-distracting.     */
-
-.hero-metallic-ripple {
-  /* Repeating thin vertical strips — alternating dark navy / mid-slate / dark */
-  /* These become the "ribbons" that warp into the chrome wave shape */
-  background-image: repeating-linear-gradient(
-    90deg,
-    /* deep carbon */
-    #080c14        0px,
-    #080c14        3px,
-    /* slate mid */
-    #111827        3px,
-    #1a2540        7px,
-    /* subtle silver highlight */
-    #1e2d47        7px,
-    #243354        9px,
-    /* tiny gold chromatic fringe — matches brand */
-    rgba(245,175,25,0.25)  9px,
-    rgba(245,175,25,0.08)  10px,
-    /* back to dark */
-    #1a2540        10px,
-    #111827        13px,
-    #090d16        13px,
-    #080c14        16px,
-    /* slightly lighter valley */
-    #0d1525        16px,
-    #162036        20px,
-    #1a2540        22px,
-    /* thin blue-chrome fringe */
-    rgba(100,140,220,0.18) 22px,
-    rgba(100,140,220,0.04) 23px,
-    /* dark again */
-    #162036        23px,
-    #0d1525        26px,
-    #080c14        28px
+  /* Light: barely visible lavender */
+  background: radial-gradient(circle,
+    rgba(123, 92, 229, 0.05) 0%,
+    rgba(123, 92, 229, 0.01) 55%,
+    transparent 100%
   );
-  background-size: 28px 100%;
-  /* Very low base opacity — filter will stretch and blur these further */
-  opacity: 0.18;
-  /* mix-mode screen lets the dark background show through naturally */
-  mix-blend-mode: screen;
-  will-change: filter;
 }
 
+.dark .hero-orb-2 {
+  background: radial-gradient(circle,
+    rgba(123, 92, 229, 0.22) 0%,
+    rgba(123, 92, 229, 0.05) 55%,
+    transparent 100%
+  );
+}
 
-/* ─── Hero CTA Buttons — Glassmorphic ───────────────────────────────────── */
+/* ── Orb 3: Amber – center right ── */
+.hero-orb-3 {
+  width: 400px;
+  height: 400px;
+  top: 15%;
+  right: 8%;
+  animation: orbFloat3 19s ease-in-out infinite;
+  /* Light: whisper of warm amber */
+  background: radial-gradient(circle,
+    rgba(245, 140, 25, 0.05) 0%,
+    rgba(245, 140, 25, 0.01) 60%,
+    transparent 100%
+  );
+}
 
-/* Primary button: warm gold with inner glow + glass shimmer */
+.dark .hero-orb-3 {
+  background: radial-gradient(circle,
+    rgba(245, 140, 25, 0.14) 0%,
+    rgba(245, 140, 25, 0.03) 60%,
+    transparent 100%
+  );
+}
+
+/* ══════════════════════════════════════════════════════════════════════════════
+   HERO CTA BUTTONS — GLASSMORPHIC (DUAL MODE)
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+/* Primary: warm gold gradient, universal */
 .hero-btn-primary {
   position: relative;
   overflow: hidden;
@@ -336,23 +362,31 @@
   transform: scale(1.03);
 }
 
-.hero-btn-primary:active {
-  transform: scale(0.98);
-}
+.hero-btn-primary:active { transform: scale(0.98); }
 
-/* Ghost secondary button: full glassmorphism */
+/* Ghost secondary: glassmorphic, dark mode */
 .hero-btn-ghost {
   position: relative;
   overflow: hidden;
+  /* Light mode: semi-opaque white glass */
+  background: rgba(255, 255, 255, 0.55);
+  color: #0f172a;
+  border: 1px solid rgba(245, 175, 25, 0.28);
+  backdrop-filter: blur(14px) saturate(1.8);
+  -webkit-backdrop-filter: blur(14px) saturate(1.8);
+  box-shadow:
+    0 4px 16px rgba(0, 0, 0, 0.08),
+    0 1px 0 rgba(255, 255, 255, 0.80) inset;
+  transition: all 0.25s ease;
+}
+
+.dark .hero-btn-ghost {
   background: rgba(255, 255, 255, 0.05);
   color: #f8fafc;
   border: 1px solid rgba(245, 175, 25, 0.22);
-  backdrop-filter: blur(12px) saturate(1.5);
-  -webkit-backdrop-filter: blur(12px) saturate(1.5);
   box-shadow:
-    0 4px 16px rgba(0, 0, 0, 0.25),
+    0 4px 16px rgba(0, 0, 0, 0.30),
     0 1px 0 rgba(255, 255, 255, 0.06) inset;
-  transition: all 0.25s ease;
 }
 
 .hero-btn-ghost::before {
@@ -360,21 +394,28 @@
   position: absolute;
   top: 0; left: 0; right: 0;
   height: 50%;
-  background: linear-gradient(to bottom, rgba(255,255,255,0.07), transparent);
+  background: linear-gradient(to bottom, rgba(255,255,255,0.12), transparent);
   pointer-events: none;
 }
 
 .hero-btn-ghost:hover {
-  background: rgba(245, 175, 25, 0.09);
-  border-color: rgba(245, 175, 25, 0.45);
-  color: #f5af19;
+  background: rgba(245, 175, 25, 0.10);
+  border-color: rgba(245, 175, 25, 0.50);
+  color: #b8810e;
   box-shadow:
-    0 6px 24px rgba(0, 0, 0, 0.30),
-    0 0 20px rgba(245, 175, 25, 0.15),
-    0 1px 0 rgba(255, 255, 255, 0.08) inset;
+    0 6px 24px rgba(0, 0, 0, 0.12),
+    0 0 20px rgba(245, 175, 25, 0.12);
   transform: scale(1.02);
 }
 
-.hero-btn-ghost:active {
-  transform: scale(0.98);
+.dark .hero-btn-ghost:hover {
+  color: #f5af19;
+  box-shadow:
+    0 6px 24px rgba(0, 0, 0, 0.35),
+    0 0 20px rgba(245, 175, 25, 0.18);
 }
+
+.hero-btn-ghost:active { transform: scale(0.98); }
+
+
+

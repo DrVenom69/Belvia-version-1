@@ -35,6 +35,25 @@ const PRESET_PALETTES = [
   { text: '#f5af19', stroke: '#ffffff', name: 'White & Gold' }
 ];
 
+// Dynamically darkens hex color values for 3D extrusion shading
+function darkenColor(hex: string, percent: number): string {
+  let cleanHex = hex.replace('#', '');
+  if (cleanHex.length === 3) {
+    cleanHex = cleanHex.split('').map(char => char + char).join('');
+  }
+  const num = parseInt(cleanHex, 16);
+  if (isNaN(num)) return hex;
+  let r = (num >> 16);
+  let g = ((num >> 8) & 0x00ff);
+  let b = (num & 0x0000ff);
+  
+  r = Math.max(0, Math.min(255, Math.floor(r * (1 - percent))));
+  g = Math.max(0, Math.min(255, Math.floor(g * (1 - percent))));
+  b = Math.max(0, Math.min(255, Math.floor(b * (1 - percent))));
+  
+  return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`;
+}
+
 export default function NameKeychainBuilder({ onAddToCart }: NameKeychainBuilderProps) {
   const [name, setName] = useState<string>('BELVIA');
   const [selectedFont, setSelectedFont] = useState<string>('Syne');
@@ -46,8 +65,8 @@ export default function NameKeychainBuilder({ onAddToCart }: NameKeychainBuilder
   const [isAutoSpin, setIsAutoSpin] = useState<boolean>(false);
   const [selectedMaterial, setSelectedMaterial] = useState<string>('PLA (Matte)');
 
-  // 3D Mouse tilt state
-  const [rotation, setRotation] = useState({ x: 0, y: 0 });
+  // 3D Mouse tilt state (default rest tilt of rotateX(20deg) rotateY(-25deg))
+  const [rotation, setRotation] = useState({ x: 20, y: -25 });
   const previewContainerRef = useRef<HTMLDivElement>(null);
 
   // Dynamic specs
@@ -81,14 +100,14 @@ export default function NameKeychainBuilder({ onAddToCart }: NameKeychainBuilder
     const x = (e.clientX - rect.left) / rect.width - 0.5; // -0.5 to 0.5
     const y = (e.clientY - rect.top) / rect.height - 0.5; // -0.5 to 0.5
     setRotation({
-      x: -y * 35, // Rotate X (up/down tilt)
-      y: x * 40   // Rotate Y (left/right tilt)
+      x: 20 - y * 30, // Rotate X (centered around 20deg default, range 5deg to 35deg)
+      y: -25 + x * 40 // Rotate Y (centered around -25deg default, range -45deg to -5deg)
     });
   };
 
   const handlePointerLeave = () => {
     if (!isAutoSpin) {
-      setRotation({ x: 0, y: 0 });
+      setRotation({ x: 20, y: -25 });
     }
   };
 
@@ -152,61 +171,78 @@ export default function NameKeychainBuilder({ onAddToCart }: NameKeychainBuilder
   };
 
   // Dynamic rendering helper for the theme layouts
-  const renderThemeBackplate = () => {
+  const renderThemeBackplate = (overrideColor?: string, isSideWall: boolean = false) => {
+    const color = overrideColor || strokeColor;
     const textWidth = Math.max(120, name.length * 20 + 30);
     
     switch (theme) {
       case 'floral':
         return (
           <g>
-            <rect x="0" y="20" width={textWidth} height="70" rx="25" fill={strokeColor} filter="url(#inset-shadow)" />
-            <circle cx="20" cy="55" r="12" fill={strokeColor} />
+            <rect x="0" y="20" width={textWidth} height="70" rx="25" fill={color} filter={isSideWall ? undefined : "url(#inset-shadow)"} />
+            <circle cx="20" cy="55" r="12" fill={color} />
             <circle cx="20" cy="55" r="5" fill="#080c14" />
-            <path d="M 40,20 C 50,5 60,5 70,20 C 60,30 50,30 40,20 Z" fill="#10b981" opacity="0.85" />
-            <path d={`M ${textWidth - 50},20 C ${textWidth - 40},5 ${textWidth - 30},5 ${textWidth - 20},20 C ${textWidth - 30},30 ${textWidth - 40},30 ${textWidth - 50},20 Z`} fill="#10b981" opacity="0.85" />
-            <circle cx="55" cy="12" r="5" fill="#ef4444" />
-            <circle cx={textWidth - 35} cy="12" r="5" fill="#ef4444" />
+            {!isSideWall && (
+              <>
+                <path d="M 40,20 C 50,5 60,5 70,20 C 60,30 50,30 40,20 Z" fill="#10b981" opacity="0.85" />
+                <path d={`M ${textWidth - 50},20 C ${textWidth - 40},5 ${textWidth - 30},5 ${textWidth - 20},20 C ${textWidth - 30},30 ${textWidth - 40},30 ${textWidth - 50},20 Z`} fill="#10b981" opacity="0.85" />
+                <circle cx="55" cy="12" r="5" fill="#ef4444" />
+                <circle cx={textWidth - 35} cy="12" r="5" fill="#ef4444" />
+              </>
+            )}
           </g>
         );
       case 'dogtag':
         return (
           <g>
-            <rect x="5" y="15" width={textWidth - 10} height="74" rx="10" fill={strokeColor} stroke="#ffffff" strokeWidth="2" opacity="0.9" />
-            <rect x="10" y="20" width={textWidth - 20} height="64" rx="8" fill="none" stroke="#000000" strokeWidth="1.5" strokeDasharray="4 2" opacity="0.5" />
-            <circle cx="25" cy="52" r="6" fill="#080c14" />
-            <circle cx="18" cy="28" r="2.5" fill="#ffffff" opacity="0.8" />
-            <circle cx={textWidth - 18} cy="28" r="2.5" fill="#ffffff" opacity="0.8" />
-            <circle cx="18" cy="76" r="2.5" fill="#ffffff" opacity="0.8" />
-            <circle cx={textWidth - 18} cy="76" r="2.5" fill="#ffffff" opacity="0.8" />
+            <rect x="5" y="15" width={textWidth - 10} height="74" rx="10" fill={color} stroke={isSideWall ? color : "#ffffff"} strokeWidth="2" opacity="0.9" />
+            {!isSideWall && (
+              <>
+                <rect x="10" y="20" width={textWidth - 20} height="64" rx="8" fill="none" stroke="#000000" strokeWidth="1.5" strokeDasharray="4 2" opacity="0.5" />
+                <circle cx="25" cy="52" r="6" fill="#080c14" />
+                <circle cx="18" cy="28" r="2.5" fill="#ffffff" opacity="0.8" />
+                <circle cx={textWidth - 18} cy="28" r="2.5" fill="#ffffff" opacity="0.8" />
+                <circle cx="18" cy="76" r="2.5" fill="#ffffff" opacity="0.8" />
+                <circle cx={textWidth - 18} cy="76" r="2.5" fill="#ffffff" opacity="0.8" />
+              </>
+            )}
           </g>
         );
       case 'numberplate':
         return (
           <g>
-            <rect x="5" y="15" width={textWidth - 10} height="74" rx="6" fill={strokeColor} stroke="#ffffff" strokeWidth="2.5" />
-            <rect x="15" y="25" width="22" height="54" fill="#006a4e" rx="2" />
-            <circle cx="26" cy="52" r="6.5" fill="#f42a41" />
-            <text x={textWidth / 2 + 10} y="32" fill={textColor} fontSize="10" fontFamily="Syne" fontWeight="900" textAnchor="middle" letterSpacing="2">
-              DHAKA METRO
-            </text>
-            <line x1="45" y1="36" x2={textWidth - 15} y2="36" stroke={textColor} strokeWidth="1" opacity="0.4" />
+            <rect x="5" y="15" width={textWidth - 10} height="74" rx="6" fill={color} stroke={isSideWall ? color : "#ffffff"} strokeWidth="2.5" />
+            {!isSideWall && (
+              <>
+                <rect x="15" y="25" width="22" height="54" fill="#006a4e" rx="2" />
+                <circle cx="26" cy="52" r="6.5" fill="#f42a41" />
+                <text x={textWidth / 2 + 10} y="32" fill={textColor} fontSize="10" fontFamily="Syne" fontWeight="900" textAnchor="middle" letterSpacing="2">
+                  DHAKA METRO
+                </text>
+                <line x1="45" y1="36" x2={textWidth - 15} y2="36" stroke={textColor} strokeWidth="1" opacity="0.4" />
+              </>
+            )}
           </g>
         );
       case 'football':
         return (
           <g>
-            <path d={`M 10,15 L ${textWidth - 10},15 L ${textWidth - 5},50 L ${textWidth / 2},90 L 5,50 Z`} fill={strokeColor} stroke="#ffffff" strokeWidth="2" />
-            <circle cx={textWidth / 2} cy="28" r="10" fill="#080c14" />
-            <path d={`M ${textWidth / 2 - 20},50 Q ${textWidth / 2},35 ${textWidth / 2 + 20},50`} stroke="#ffffff" strokeWidth="1" fill="none" opacity="0.25" />
-            <path d={`M ${textWidth / 2 - 20},50 Q ${textWidth / 2},65 ${textWidth / 2 + 20},50`} stroke="#ffffff" strokeWidth="1" fill="none" opacity="0.25" />
+            <path d={`M 10,15 L ${textWidth - 10},15 L ${textWidth - 5},50 L ${textWidth / 2},90 L 5,50 Z`} fill={color} stroke={isSideWall ? color : "#ffffff"} strokeWidth="2" />
+            {!isSideWall && (
+              <>
+                <circle cx={textWidth / 2} cy="28" r="10" fill="#080c14" />
+                <path d={`M ${textWidth / 2 - 20},50 Q ${textWidth / 2},35 ${textWidth / 2 + 20},50`} stroke="#ffffff" strokeWidth="1" fill="none" opacity="0.25" />
+                <path d={`M ${textWidth / 2 - 20},50 Q ${textWidth / 2},65 ${textWidth / 2 + 20},50`} stroke="#ffffff" strokeWidth="1" fill="none" opacity="0.25" />
+              </>
+            )}
           </g>
         );
       case 'standard':
       default:
         return (
           <g>
-            <rect x="0" y="20" width={textWidth} height="65" rx="20" fill={strokeColor} />
-            <circle cx="20" cy="52" r="12" fill={strokeColor} />
+            <rect x="0" y="20" width={textWidth} height="65" rx="20" fill={color} />
+            <circle cx="20" cy="52" r="12" fill={color} />
             <circle cx="20" cy="52" r="5" fill="#080c14" />
           </g>
         );
@@ -226,6 +262,39 @@ export default function NameKeychainBuilder({ onAddToCart }: NameKeychainBuilder
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch max-w-6xl mx-auto p-4 sm:p-6 text-left">
       
+      {/* Hidden SVG for Cart Thumbnail Capture */}
+      <svg
+        id="keychain-svg-rendered"
+        width="280"
+        height="110"
+        viewBox="0 0 280 110"
+        fill="none"
+        className="hidden"
+      >
+        <defs>
+          <filter id="inset-shadow">
+            <feOffset dx="0" dy="1"/>
+            <feGaussianBlur stdDeviation="1" result="offset-blur"/>
+            <feComposite operator="out" in="SourceGraphic" in2="offset-blur" result="inverse"/>
+            <feFlood floodColor="black" floodOpacity="0.4" result="color"/>
+            <feComposite operator="in" in="color" in2="inverse" result="shadow"/>
+            <feComposite operator="over" in="shadow" in2="SourceGraphic"/>
+          </filter>
+        </defs>
+        {renderThemeBackplate(strokeColor, false)}
+        <text
+          x={getThemeTranslationX()}
+          y={getThemeTranslationY()}
+          fill={textColor}
+          fontSize="22"
+          fontFamily={selectedFont}
+          fontWeight="800"
+          textAnchor="start"
+        >
+          {name || 'NAME'}
+        </text>
+      </svg>
+
       {/* Left Side: 3D Preview Stage */}
       <div className="lg:col-span-6 flex flex-col justify-between bg-[#070b13] border border-bg-elevated rounded-2xl p-6 relative overflow-hidden shadow-2xl min-h-[420px]">
         <div className="absolute inset-0 bg-grid-ambient opacity-15 pointer-events-none" />
@@ -253,45 +322,118 @@ export default function NameKeychainBuilder({ onAddToCart }: NameKeychainBuilder
           ref={previewContainerRef}
         >
           <div 
-            className={`relative transition-transform duration-75 ${isAutoSpin ? 'animate-[spin_8s_linear_infinite]' : ''}`}
+            className={`relative transition-transform duration-75 ${isAutoSpin ? 'animate-[spin3d_10s_linear_infinite]' : ''}`}
             style={{
               transformStyle: 'preserve-3d',
-              transform: isAutoSpin ? undefined : `rotateX(${rotation.x}deg) rotateY(${rotation.y}deg)`
+              transform: isAutoSpin ? undefined : `rotateX(${rotation.x}deg) rotateY(${rotation.y}deg)`,
+              width: '280px',
+              height: '110px'
             }}
           >
-            {/* Stacked Backing Extrusions (10 layers) */}
-            {[...Array(9)].map((_, i) => (
-              <div
-                key={i}
-                className="absolute inset-0 pointer-events-none select-none"
-                style={{
-                  transform: `translateZ(${i * 0.8}px)`,
-                  filter: `brightness(${75 - i * 5}%)`
-                }}
-              >
-                <svg width="280" height="110" viewBox="0 0 280 110" fill="none">
-                  {renderThemeBackplate()}
-                </svg>
-              </div>
-            ))}
+            {/* Base Drop Shadow (Z: -20px) */}
+            <div
+              className="absolute inset-0 pointer-events-none select-none"
+              style={{
+                transform: 'translateZ(-20px)',
+                filter: 'blur(8px) brightness(0) opacity(0.35)',
+              }}
+            >
+              <svg width="280" height="110" viewBox="0 0 280 110" fill="none">
+                {renderThemeBackplate(strokeColor, true)}
+              </svg>
+            </div>
 
-            {/* Main Faceplate (Front Layer) */}
-            <div style={{ transform: 'translateZ(8px)' }}>
-              <svg id="keychain-svg-rendered" width="280" height="110" viewBox="0 0 280 110" fill="none">
+            {/* Stacked Backplate Side Walls (Z: 0px to 5px) - 12 layers */}
+            {[...Array(12)].map((_, i) => {
+              const zOffset = i * 0.45;
+              // Smooth gradient darkening from 45% (bottom) to 5% (top)
+              const darkenPercent = 0.45 - (i * 0.035);
+              const layerColor = darkenColor(strokeColor, darkenPercent);
+              return (
+                <div
+                  key={`bp-wall-${i}`}
+                  className="absolute inset-0 pointer-events-none select-none"
+                  style={{
+                    transform: `translateZ(${zOffset}px)`,
+                  }}
+                >
+                  <svg width="280" height="110" viewBox="0 0 280 110" fill="none">
+                    {renderThemeBackplate(layerColor, true)}
+                  </svg>
+                </div>
+              );
+            })}
+
+            {/* Backplate Face (Z: 5.4px) with Specular highlight */}
+            <div
+              className="absolute inset-0 pointer-events-none select-none"
+              style={{
+                transform: 'translateZ(5.4px)',
+              }}
+            >
+              <svg width="280" height="110" viewBox="0 0 280 110" fill="none">
                 <defs>
-                  <filter id="inset-shadow">
-                    <feOffset dx="0" dy="1"/>
-                    <feGaussianBlur stdDeviation="1" result="offset-blur"/>
-                    <feComposite operator="out" in="SourceGraphic" in2="offset-blur" result="inverse"/>
-                    <feFlood floodColor="black" floodOpacity="0.4" result="color"/>
-                    <feComposite operator="in" in="color" in2="inverse" result="shadow"/>
-                    <feComposite operator="over" in="shadow" in2="SourceGraphic"/>
-                  </filter>
+                  <linearGradient id="backplate-highlight" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stopColor="#ffffff" stopOpacity="0.25" />
+                    <stop offset="50%" stopColor="#ffffff" stopOpacity="0.0" />
+                    <stop offset="100%" stopColor="#000000" stopOpacity="0.2" />
+                  </linearGradient>
+                </defs>
+                {renderThemeBackplate(strokeColor, false)}
+                {/* Highlight overlay */}
+                <g style={{ mixBlendMode: 'overlay' }}>
+                  {renderThemeBackplate('url(#backplate-highlight)', true)}
+                </g>
+              </svg>
+            </div>
+
+            {/* Stacked Text Side Walls (Z: 6.0px to 9.0px) - 8 layers */}
+            {[...Array(8)].map((_, i) => {
+              const zOffset = 6.0 + i * 0.43;
+              // Smooth gradient darkening from 40% (bottom) to 5% (top)
+              const darkenPercent = 0.40 - (i * 0.05);
+              const layerColor = darkenColor(textColor, darkenPercent);
+              return (
+                <div
+                  key={`text-wall-${i}`}
+                  className="absolute inset-0 pointer-events-none select-none"
+                  style={{
+                    transform: `translateZ(${zOffset}px)`,
+                  }}
+                >
+                  <svg width="280" height="110" viewBox="0 0 280 110" fill="none">
+                    <text
+                      x={getThemeTranslationX()}
+                      y={getThemeTranslationY()}
+                      fill={layerColor}
+                      fontSize="22"
+                      fontFamily={selectedFont}
+                      fontWeight="800"
+                      textAnchor="start"
+                    >
+                      {name || 'NAME'}
+                    </text>
+                  </svg>
+                </div>
+              );
+            })}
+
+            {/* Text Face (Z: 9.5px) with highlight gradient */}
+            <div
+              className="absolute inset-0 pointer-events-none select-none"
+              style={{
+                transform: 'translateZ(9.5px)',
+              }}
+            >
+              <svg width="280" height="110" viewBox="0 0 280 110" fill="none">
+                <defs>
+                  <linearGradient id="text-highlight" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stopColor="#ffffff" stopOpacity="0.4" />
+                    <stop offset="100%" stopColor="#000000" stopOpacity="0.25" />
+                  </linearGradient>
                 </defs>
                 
-                {renderThemeBackplate()}
-                
-                {/* Dynamic Custom Text Layer */}
+                {/* Base text */}
                 <text
                   x={getThemeTranslationX()}
                   y={getThemeTranslationY()}
@@ -303,8 +445,23 @@ export default function NameKeychainBuilder({ onAddToCart }: NameKeychainBuilder
                 >
                   {name || 'NAME'}
                 </text>
+
+                {/* highlight overlay */}
+                <text
+                  x={getThemeTranslationX()}
+                  y={getThemeTranslationY()}
+                  fill="url(#text-highlight)"
+                  fontSize="22"
+                  fontFamily={selectedFont}
+                  fontWeight="800"
+                  textAnchor="start"
+                  style={{ mixBlendMode: 'overlay' }}
+                >
+                  {name || 'NAME'}
+                </text>
               </svg>
             </div>
+
           </div>
         </div>
 

@@ -139,14 +139,16 @@ export interface KeychainTheme {
 
 ## 3. Live 3D Preview Engine
 
-### 3.1 Phase 1: SVG Multi-Layer Stacking (MVP)
+### 3.1 Phase 1: High-Fidelity 3D Layered Extrusion (MVP)
 A GPU-efficient 3D tilt engine rendered using stacked CSS layers.
-* **CSS Perspective & Transformations**: The preview container enforces `perspective: 1000px` and `transform-style: preserve-3d`. Moving the pointer inside the viewport container maps mouse coordinates to `rotateX` (up to `±20deg`) and `rotateY` (up to `±25deg`).
-* **Auto-Rotate Animation**: A slow constant `rotateY` animation (0 to 360 degrees) can be toggled by the user.
-* **Extrusion via SVG Stacking**: The model is constructed of **10 nested layout layers** spaced on the Z-axis:
-  * **Text Layer (Front - Z: 6px)**: Text rendered in `textColor`.
-  * **Outer Backing Layers (Z: 0px to 5px)**: Stacked backing SVG borders in `strokeColor`, progressively darkened by a CSS brightness filter (e.g. `brightness(80%)` down to `brightness(40%)`) as the stack goes deeper.
-  * **Base Layer (Z: -2px)**: Darkened drop-shadow layer with `filter: blur(4px); opacity: 0.35` that shifts relative to the tilt angle.
+* **Default 3D Perspective Angle**: The model uses a default non-zero 3D tilt of `rotateX(20deg) rotateY(-25deg)` at rest. This guarantees that as soon as the page loads, the customer immediately sees the 3D depth, side walls, and print thickness. Hovering or moving the pointer dynamically shifts this angle up to `rotateX(±30deg)` and `rotateY(±35deg)`.
+* **Double-Extrusion Stacking**: The model separates the backplate thickness and text thickness into two independent 3D extrusion stacks, creating a realistic layered product:
+  * **Base Drop Shadow (Z: -20px)**: A blurred shadow mask offset in Z-space, shifting dynamically relative to the tilt rotation.
+  * **Backplate Side Walls (Z: 0px to 5px)**: Stack of 12 layers spaced `0.45px` apart. Each layer is programmatically colored using a custom hex darkening formula (from dark to bright) to render smooth, solid side walls.
+  * **Backplate Face (Z: 5.5px)**: The front plate face with a subtle specular gradient highlight simulating plastic PLA filament reflectivity.
+  * **Text Side Walls (Z: 6.0px to 9.0px)**: Stack of 8 layers spaced `0.43px` apart, rendering the customized text in programmatically darkened shades of the text color to construct solid, three-dimensional letters.
+  * **Text Face (Z: 9.5px)**: The top lettering face with a bright highlight gradient for high contrast and readability.
+* **Specular Overlays**: SVG gradient fills (`linearGradient` and `radialGradient`) simulate light reflection on plastic surfaces, providing a realistic product render instead of a flat graphic mockup.
 
 ### 3.2 Phase 2: WebGL Extrusion Upgrade (Future Roadmap)
 While stacked SVGs provide high-performance rendering for modern mobile/desktop browsers, future versions can replace the preview container with a Three.js / WebGL canvas.

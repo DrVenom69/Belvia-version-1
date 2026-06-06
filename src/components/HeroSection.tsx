@@ -22,60 +22,56 @@ export default function HeroSection({ onStartShopping, onGoToCustom, onCategoryC
 
       {/* ── Drifting ambient orbs ── */}
       <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden" aria-hidden="true">
-        {/* Orb 1 – warm gold, top-left */}
         <div className="hero-orb hero-orb-1" />
-        {/* Orb 2 – violet, bottom-right */}
         <div className="hero-orb hero-orb-2" />
-        {/* Orb 3 – cyan accent, centre-right */}
         <div className="hero-orb hero-orb-3" />
-        {/* Orb 4 – amber, bottom-left */}
         <div className="hero-orb hero-orb-4" />
       </div>
 
-      {/* ── Mesh grid overlay ── */}
-      <div className="absolute inset-0 z-0 pointer-events-none hero-grid" aria-hidden="true" />
+      {/* ── Radial sonar rings overlay ── */}
+      <div className="absolute inset-0 z-0 pointer-events-none hero-sonar" aria-hidden="true" />
 
-      {/* ── Glassmorphic hero text panel ── */}
-      <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center mb-10 pt-6">
-        <div className="hero-glass-panel inline-block w-full max-w-3xl px-8 py-10 rounded-3xl text-center space-y-6">
+      {/* ── Typography block — text directly on background, no panel ── */}
+      <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center mb-10 pt-6 space-y-6">
 
-          {/* Main heading */}
-          <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-text-primary leading-[1.1] uppercase">
-            Imagine It.<br />
-            We Print It.<br />
-            <span className="relative inline-block">
-              <span className="text-accent font-black">You Love It.</span>
-              <span
-                aria-hidden="true"
-                className="absolute -bottom-1 left-0 h-[3px] w-full rounded-full bg-gradient-to-r from-accent to-accent/20"
-              />
-            </span>
-          </h1>
+        {/* Main heading */}
+        <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-text-primary leading-[1.1] uppercase">
+          Imagine It.<br />
+          We Print It.<br />
+          <span className="relative inline-block">
+            <span className="text-accent font-black">You Love It.</span>
+            <span
+              aria-hidden="true"
+              className="absolute -bottom-1 left-0 h-[3px] w-full rounded-full bg-gradient-to-r from-accent to-accent/20"
+            />
+          </span>
+        </h1>
 
-          {/* Sub-copy */}
-          <p className="text-text-secondary text-sm sm:text-base leading-relaxed max-w-xl mx-auto font-sans">
-            Bangladesh's First 3D Printing Marketplace. Shop unique 3D printed products or bring your own ideas to life. Custom manufacturing, ready prints, and 1–2 day delivery inside Dhaka.
-          </p>
+        {/* Sub-copy */}
+        <p className="text-text-secondary text-sm sm:text-base leading-relaxed max-w-xl mx-auto font-sans">
+          Bangladesh's First 3D Printing Marketplace. Shop unique 3D printed products or bring your own ideas to life. Custom manufacturing, ready prints, and 1–2 day delivery inside Dhaka.
+        </p>
 
-          {/* CTA buttons */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-            <button
-              id="hero-shop-btn"
-              onClick={onStartShopping}
-              className="group flex items-center gap-2 px-7 py-3 rounded-xl bg-accent hover:bg-accent-hover text-text-on-accent font-display font-bold text-sm transition-all shadow-lg hover:shadow-accent/30 hover:scale-[1.04] active:scale-[0.98] cursor-pointer"
-            >
-              Shop Now
-              <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-            </button>
+        {/* CTA buttons — glassmorphic only here */}
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+          {/* Primary: solid accent with glow */}
+          <button
+            id="hero-shop-btn"
+            onClick={onStartShopping}
+            className="group flex items-center gap-2 px-7 py-3 rounded-xl font-display font-bold text-sm cursor-pointer hero-btn-primary"
+          >
+            Shop Now
+            <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+          </button>
 
-            <button
-              id="hero-custom-btn"
-              onClick={onGoToCustom}
-              className="flex items-center gap-2 px-7 py-3 rounded-xl text-text-primary hover:text-accent font-display font-semibold text-sm transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer hero-btn-ghost"
-            >
-              Custom Print Studio
-            </button>
-          </div>
+          {/* Secondary: glassmorphic ghost */}
+          <button
+            id="hero-custom-btn"
+            onClick={onGoToCustom}
+            className="flex items-center gap-2 px-7 py-3 rounded-xl font-display font-semibold text-sm cursor-pointer hero-btn-ghost"
+          >
+            Custom Print Studio
+          </button>
         </div>
       </div>
 

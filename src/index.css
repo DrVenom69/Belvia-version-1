@@ -257,41 +257,98 @@
   animation: orbFloat4 24s ease-in-out infinite;
 }
 
-/* ─── Hero Mesh Grid Overlay ─────────────────────────────────────────────── */
+/* ─── Hero Sonar Rings Overlay ──────────────────────────────────────────── */
+/* Concentric radial rings from centre — ultra-thin gold at low opacity */
 
-.hero-grid {
+@keyframes sonarPulse {
+  0%   { opacity: 0.6; }
+  50%  { opacity: 0.25; }
+  100% { opacity: 0.6; }
+}
+
+.hero-sonar {
   background-image:
-    linear-gradient(to right, rgba(245, 175, 25, 0.04) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(245, 175, 25, 0.04) 1px, transparent 1px);
-  background-size: 48px 48px;
-  mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 100%);
-  -webkit-mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 100%);
+    /* Ring 1 — innermost */
+    radial-gradient(ellipse 18% 25% at 50% 42%, transparent 99%, rgba(245, 175, 25, 0.07) 100%),
+    radial-gradient(ellipse 30% 42% at 50% 42%, transparent 99%, rgba(245, 175, 25, 0.055) 100%),
+    radial-gradient(ellipse 44% 60% at 50% 42%, transparent 99%, rgba(245, 175, 25, 0.04) 100%),
+    radial-gradient(ellipse 58% 78% at 50% 42%, transparent 99%, rgba(245, 175, 25, 0.03) 100%),
+    radial-gradient(ellipse 72% 96% at 50% 42%, transparent 99%, rgba(245, 175, 25, 0.02) 100%),
+    radial-gradient(ellipse 88% 115% at 50% 42%, transparent 99%, rgba(245, 175, 25, 0.015) 100%);
+  animation: sonarPulse 8s ease-in-out infinite;
 }
 
-/* ─── Glassmorphic Hero Panel ────────────────────────────────────────────── */
+/* ─── Hero CTA Buttons — Glassmorphic ───────────────────────────────────── */
 
-.hero-glass-panel {
-  background: rgba(8, 12, 20, 0.45);
-  backdrop-filter: blur(24px) saturate(1.4);
-  -webkit-backdrop-filter: blur(24px) saturate(1.4);
-  border: 1px solid rgba(245, 175, 25, 0.14);
+/* Primary button: warm gold with inner glow + glass shimmer */
+.hero-btn-primary {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #f5af19 0%, #e09e12 100%);
+  color: #080c14;
   box-shadow:
-    0 8px 32px rgba(0, 0, 0, 0.55),
-    0 0 0 0.5px rgba(255, 255, 255, 0.04) inset,
-    0 1px 0 0 rgba(245, 175, 25, 0.10) inset;
-}
-
-/* Ghost CTA inside glass panel */
-.hero-btn-ghost {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(245, 175, 25, 0.18);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+    0 0 0 1px rgba(245, 175, 25, 0.5),
+    0 4px 20px rgba(245, 175, 25, 0.30),
+    0 1px 0 rgba(255, 255, 255, 0.20) inset;
   transition: all 0.25s ease;
 }
 
+.hero-btn-primary::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.18) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.hero-btn-primary:hover {
+  background: linear-gradient(135deg, #f8bc2e 0%, #f5af19 100%);
+  box-shadow:
+    0 0 0 1px rgba(245, 175, 25, 0.7),
+    0 6px 28px rgba(245, 175, 25, 0.45),
+    0 1px 0 rgba(255, 255, 255, 0.25) inset;
+  transform: scale(1.03);
+}
+
+.hero-btn-primary:active {
+  transform: scale(0.98);
+}
+
+/* Ghost secondary button: full glassmorphism */
+.hero-btn-ghost {
+  position: relative;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.05);
+  color: #f8fafc;
+  border: 1px solid rgba(245, 175, 25, 0.22);
+  backdrop-filter: blur(12px) saturate(1.5);
+  -webkit-backdrop-filter: blur(12px) saturate(1.5);
+  box-shadow:
+    0 4px 16px rgba(0, 0, 0, 0.25),
+    0 1px 0 rgba(255, 255, 255, 0.06) inset;
+  transition: all 0.25s ease;
+}
+
+.hero-btn-ghost::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 50%;
+  background: linear-gradient(to bottom, rgba(255,255,255,0.07), transparent);
+  pointer-events: none;
+}
+
 .hero-btn-ghost:hover {
-  background: rgba(245, 175, 25, 0.08);
-  border-color: rgba(245, 175, 25, 0.40);
-  box-shadow: 0 0 16px rgba(245, 175, 25, 0.12);
+  background: rgba(245, 175, 25, 0.09);
+  border-color: rgba(245, 175, 25, 0.45);
+  color: #f5af19;
+  box-shadow:
+    0 6px 24px rgba(0, 0, 0, 0.30),
+    0 0 20px rgba(245, 175, 25, 0.15),
+    0 1px 0 rgba(255, 255, 255, 0.08) inset;
+  transform: scale(1.02);
+}
+
+.hero-btn-ghost:active {
+  transform: scale(0.98);
 }

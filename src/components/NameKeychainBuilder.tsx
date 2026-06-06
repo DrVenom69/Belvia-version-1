@@ -333,17 +333,17 @@ export default function NameKeychainBuilder({ onAddToCart }: NameKeychainBuilder
       </svg>
 
       {/* Left Side: 3D Preview Stage */}
-      <div className="lg:col-span-6 flex flex-col justify-between bg-[#070b13] border border-bg-elevated rounded-2xl p-6 relative overflow-hidden shadow-2xl min-h-[420px]">
+      <div className="lg:col-span-6 flex flex-col justify-between bg-bg-surface border border-border-premium rounded-2xl p-6 relative overflow-hidden shadow-2xl min-h-[420px]">
         <div className="absolute inset-0 bg-grid-ambient opacity-15 pointer-events-none" />
         
         <div className="flex items-center justify-between z-10">
-          <span className="text-[9px] font-mono text-gray-500 uppercase tracking-widest">
+          <span className="text-[9px] font-mono text-text-secondary uppercase tracking-widest">
             Live print telemetry preview
           </span>
           <button
             onClick={() => setIsAutoSpin(!isAutoSpin)}
             className={`px-3 py-1 rounded-lg border text-[10px] font-mono transition cursor-pointer ${
-              isAutoSpin ? 'bg-accent/20 border-accent text-accent' : 'border-gray-800 text-gray-400 hover:text-white'
+              isAutoSpin ? 'bg-accent/20 border-accent text-accent' : 'border-border-premium text-text-secondary hover:text-text-primary hover:bg-bg-elevated/45'
             }`}
           >
             Auto-Spin: {isAutoSpin ? 'ON' : 'OFF'}
@@ -503,32 +503,32 @@ export default function NameKeychainBuilder({ onAddToCart }: NameKeychainBuilder
         </div>
 
         {/* Sizing & Material Metrics bottom bar */}
-        <div className="border-t border-gray-850 pt-4 grid grid-cols-3 gap-3 font-mono text-center z-10">
-          <div className="bg-bg-base border border-gray-850 p-2.5 rounded-xl">
-            <span className="block text-[8px] text-gray-500 uppercase tracking-widest">Dimensions</span>
-            <span className="text-[10px] font-bold text-gray-200">{specs.dimensions}</span>
+        <div className="border-t border-border-premium pt-4 grid grid-cols-3 gap-3 font-mono text-center z-10">
+          <div className="bg-bg-base border border-border-premium p-2.5 rounded-xl">
+            <span className="block text-[8px] text-text-secondary uppercase tracking-widest">Dimensions</span>
+            <span className="text-[10px] font-bold text-text-primary">{specs.dimensions}</span>
           </div>
-          <div className="bg-bg-base border border-gray-850 p-2.5 rounded-xl">
-            <span className="block text-[8px] text-gray-500 uppercase tracking-widest">Est Weight</span>
+          <div className="bg-bg-base border border-border-premium p-2.5 rounded-xl">
+            <span className="block text-[8px] text-text-secondary uppercase tracking-widest">Est Weight</span>
             <span className="text-[10px] font-bold text-accent">{specs.weightGrams}g</span>
           </div>
-          <div className="bg-bg-base border border-gray-850 p-2.5 rounded-xl">
-            <span className="block text-[8px] text-gray-500 uppercase tracking-widest">Print Duration</span>
-            <span className="text-[10px] font-bold text-gray-200">{specs.printTimeMinutes} min</span>
+          <div className="bg-bg-base border border-border-premium p-2.5 rounded-xl">
+            <span className="block text-[8px] text-text-secondary uppercase tracking-widest">Print Duration</span>
+            <span className="text-[10px] font-bold text-text-primary">{specs.printTimeMinutes} min</span>
           </div>
         </div>
 
       </div>
 
       {/* Right Side: Configurator Controls Panel */}
-      <div className="lg:col-span-6 bg-[#070b13] border border-bg-elevated rounded-2xl p-6 flex flex-col justify-between shadow-2xl relative">
+      <div className="lg:col-span-6 bg-bg-surface border border-border-premium rounded-2xl p-6 flex flex-col justify-between shadow-2xl relative">
         
         <div className="space-y-6">
-          <h3 className="font-display font-extrabold text-lg text-white">Configure Custom Name Keychain</h3>
+          <h3 className="font-display font-extrabold text-lg text-text-primary">Configure Custom Name Keychain</h3>
           
           {/* Name input */}
           <div>
-            <label className="block text-[10px] font-mono text-gray-500 uppercase tracking-widest mb-1.5">
+            <label className="block text-[10px] font-mono text-text-secondary uppercase tracking-widest mb-1.5">
               Custom Text Name (Eng / বাংলা):
             </label>
             <input
@@ -536,16 +536,16 @@ export default function NameKeychainBuilder({ onAddToCart }: NameKeychainBuilder
               value={name}
               onChange={(e) => setName(e.target.value.substring(0, 15))}
               placeholder="ENTER NAME"
-              className="w-full bg-bg-base text-white border border-bg-elevated rounded-xl py-2.5 px-3 text-sm font-semibold focus:border-accent"
+              className="w-full bg-bg-base text-text-primary border border-border-premium rounded-xl py-2.5 px-3 text-sm font-semibold focus:border-accent"
             />
-            <span className="block text-[9px] text-gray-500 mt-1 font-mono text-right">
+            <span className="block text-[9px] text-text-secondary mt-1 font-mono text-right">
               {name.length}/15 characters (Alphanumeric and spaces allowed)
             </span>
           </div>
 
           {/* Font selector */}
           <div>
-            <label className="block text-[10px] font-mono text-gray-500 uppercase tracking-widest mb-1.5">
+            <label className="block text-[10px] font-mono text-text-secondary uppercase tracking-widest mb-1.5">
               Typographic Font style:
             </label>
             <div className="grid grid-cols-2 gap-2">
@@ -555,8 +555,8 @@ export default function NameKeychainBuilder({ onAddToCart }: NameKeychainBuilder
                   onClick={() => setSelectedFont(f.id)}
                   className={`p-2.5 rounded-xl border text-xs text-left transition cursor-pointer ${
                     selectedFont === f.id
-                      ? 'bg-accent/15 border-accent text-white font-bold'
-                      : 'bg-bg-base/40 border-bg-elevated text-gray-400 hover:text-white hover:bg-slate-850'
+                      ? 'bg-accent/15 border-accent text-text-primary font-bold'
+                      : 'bg-bg-base/40 border-border-premium text-text-secondary hover:text-text-primary hover:bg-bg-elevated/40'
                   }`}
                 >
                   <span style={{ fontFamily: f.id }}>{f.name}</span>
@@ -567,7 +567,7 @@ export default function NameKeychainBuilder({ onAddToCart }: NameKeychainBuilder
 
           {/* Themes list */}
           <div>
-            <label className="block text-[10px] font-mono text-gray-500 uppercase tracking-widest mb-1.5">
+            <label className="block text-[10px] font-mono text-text-secondary uppercase tracking-widest mb-1.5">
               Themed Collection Shape:
             </label>
             <div className="space-y-2">
@@ -577,13 +577,13 @@ export default function NameKeychainBuilder({ onAddToCart }: NameKeychainBuilder
                   onClick={() => setTheme(t.id as any)}
                   className={`w-full p-2.5 rounded-xl border text-xs text-left transition flex justify-between items-center cursor-pointer ${
                     theme === t.id
-                      ? 'bg-accent/15 border-accent text-white font-bold'
-                      : 'bg-bg-base/40 border-bg-elevated text-gray-400 hover:text-white hover:bg-slate-850'
+                      ? 'bg-accent/15 border-accent text-text-primary font-bold'
+                      : 'bg-bg-base/40 border-border-premium text-text-secondary hover:text-text-primary hover:bg-bg-elevated/40'
                   }`}
                 >
                   <div>
                     <span className="block font-bold">{t.name}</span>
-                    <span className="block text-[10px] text-gray-500 font-normal">{t.desc}</span>
+                    <span className="block text-[10px] text-text-secondary font-normal">{t.desc}</span>
                   </div>
                 </button>
               ))}
@@ -593,7 +593,7 @@ export default function NameKeychainBuilder({ onAddToCart }: NameKeychainBuilder
           {/* Colors picker */}
           <div>
             <div className="flex justify-between items-center mb-1.5">
-              <label className="block text-[10px] font-mono text-gray-500 uppercase tracking-widest">
+              <label className="block text-[10px] font-mono text-text-secondary uppercase tracking-widest">
                 Custom Colors & Preset Swatches:
               </label>
               <button
@@ -614,7 +614,7 @@ export default function NameKeychainBuilder({ onAddToCart }: NameKeychainBuilder
                     setTextColor(palette.text);
                     setStrokeColor(palette.stroke);
                   }}
-                  className="w-7 h-7 rounded-full border border-bg-elevated flex overflow-hidden cursor-pointer"
+                  className="w-7 h-7 rounded-full border border-border-premium flex overflow-hidden cursor-pointer"
                   title={palette.name}
                 >
                   <div className="w-1/2 h-full" style={{ backgroundColor: palette.text }} />
@@ -624,11 +624,11 @@ export default function NameKeychainBuilder({ onAddToCart }: NameKeychainBuilder
             </div>
 
             {/* Exact hex pickers */}
-            <div className="grid grid-cols-2 gap-4 font-mono text-[10px] text-gray-400">
-              <div className="bg-bg-base border border-bg-elevated p-2.5 rounded-xl flex items-center justify-between">
+            <div className="grid grid-cols-2 gap-4 font-mono text-[10px] text-text-secondary">
+              <div className="bg-bg-base border border-border-premium p-2.5 rounded-xl flex items-center justify-between">
                 <div>
                   <span>Letters Color</span>
-                  <span className="block text-white font-bold">{textColor}</span>
+                  <span className="block text-text-primary font-bold">{textColor}</span>
                 </div>
                 <input
                   type="color"
@@ -637,10 +637,10 @@ export default function NameKeychainBuilder({ onAddToCart }: NameKeychainBuilder
                   className="w-6 h-6 border-0 cursor-pointer bg-transparent rounded"
                 />
               </div>
-              <div className="bg-bg-base border border-bg-elevated p-2.5 rounded-xl flex items-center justify-between">
+              <div className="bg-bg-base border border-border-premium p-2.5 rounded-xl flex items-center justify-between">
                 <div>
                   <span>Backplate Color</span>
-                  <span className="block text-white font-bold">{strokeColor}</span>
+                  <span className="block text-text-primary font-bold">{strokeColor}</span>
                 </div>
                 <input
                   type="color"
@@ -655,18 +655,18 @@ export default function NameKeychainBuilder({ onAddToCart }: NameKeychainBuilder
           {/* Sizes selector and material choice */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-[10px] font-mono text-gray-500 uppercase tracking-widest mb-1.5">
+              <label className="block text-[10px] font-mono text-text-secondary uppercase tracking-widest mb-1.5">
                 Keychain Size:
               </label>
-              <div className="flex bg-bg-base border border-bg-elevated rounded-xl p-1 justify-between">
+              <div className="flex bg-bg-base border border-border-premium rounded-xl p-1 justify-between">
                 {(['Small', 'Medium', 'Large'] as const).map((s) => (
                   <button
                     key={s}
                     onClick={() => setSize(s)}
                     className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex-1 text-center cursor-pointer ${
                       size === s
-                        ? 'bg-accent text-white shadow'
-                        : 'text-gray-400 hover:text-white'
+                        ? 'bg-accent text-text-on-accent shadow'
+                        : 'text-text-secondary hover:text-text-primary'
                     }`}
                   >
                     {s[0]}
@@ -676,13 +676,13 @@ export default function NameKeychainBuilder({ onAddToCart }: NameKeychainBuilder
             </div>
 
             <div>
-              <label className="block text-[10px] font-mono text-gray-500 uppercase tracking-widest mb-1.5">
+              <label className="block text-[10px] font-mono text-text-secondary uppercase tracking-widest mb-1.5">
                 Resin Material:
               </label>
               <select
                 value={selectedMaterial}
                 onChange={(e) => setSelectedMaterial(e.target.value)}
-                className="w-full bg-bg-base text-gray-300 border border-bg-elevated rounded-xl py-2 px-3 text-xs focus:border-accent"
+                className="w-full bg-bg-base text-text-primary border border-border-premium rounded-xl py-2 px-3 text-xs focus:border-accent"
               >
                 <option value="PLA (Matte)">PLA (Matte)</option>
                 <option value="PLA (Silk Pearl)">PLA (Silk Pearl)</option>
@@ -692,9 +692,7 @@ export default function NameKeychainBuilder({ onAddToCart }: NameKeychainBuilder
             </div>
           </div>
 
-        </div>
-
-        <div className="border-t border-gray-850 pt-5 mt-6 space-y-4">
+              <div className="border-t border-border-premium pt-5 mt-6 space-y-4">
           {/* Validation guards rendering */}
           {!validation.isValid && (
             <div className="p-3 bg-red-955/20 border border-red-500/20 rounded-xl flex items-start space-x-2 text-red-400 text-xs">
@@ -704,7 +702,7 @@ export default function NameKeychainBuilder({ onAddToCart }: NameKeychainBuilder
           )}
 
           {validation.isValid && validation.contrastWarning && (
-            <div className="p-3 bg-yellow-955/20 border border-yellow-500/20 rounded-xl flex items-start space-x-2 text-yellow-400 text-xs">
+            <div className="p-3 bg-yellow-955/20 border border-yellow-500/20 rounded-xl flex items-start space-x-2 text-yellow-650 dark:text-yellow-405 text-xs">
               <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
               <span>Low contrast: Text may not be readable when printed. Consider selecting high-contrast colors.</span>
             </div>
@@ -713,23 +711,23 @@ export default function NameKeychainBuilder({ onAddToCart }: NameKeychainBuilder
           {/* Cost, Qty, Submit block */}
           <div className="flex items-center justify-between">
             <div>
-              <span className="block text-[8px] font-mono text-gray-500 uppercase tracking-widest">Total Price</span>
+              <span className="block text-[8px] font-mono text-text-secondary uppercase tracking-widest">Total Price</span>
               <span className="text-2xl font-bold text-accent">${(specs.price * quantity).toFixed(2)}</span>
             </div>
 
             <div className="flex items-center space-x-3.5">
               {/* Quantity adjuster */}
-              <div className="flex items-center bg-bg-base border border-bg-elevated rounded-xl p-1 justify-between max-w-[110px]">
+              <div className="flex items-center bg-bg-base border border-border-premium rounded-xl p-1 justify-between max-w-[110px]">
                 <button
                   onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                  className="w-6 h-6 flex items-center justify-center text-gray-400 hover:text-white hover:bg-gray-850 rounded cursor-pointer"
+                  className="w-6 h-6 flex items-center justify-center text-text-secondary hover:text-text-primary hover:bg-bg-elevated rounded cursor-pointer"
                 >
                   -
                 </button>
-                <span className="font-mono text-white text-xs font-bold w-6 text-center">{quantity}</span>
+                <span className="font-mono text-text-primary text-xs font-bold w-6 text-center">{quantity}</span>
                 <button
                   onClick={() => setQuantity(quantity + 1)}
-                  className="w-6 h-6 flex items-center justify-center text-gray-400 hover:text-white hover:bg-gray-850 rounded cursor-pointer"
+                  className="w-6 h-6 flex items-center justify-center text-text-secondary hover:text-text-primary hover:bg-bg-elevated rounded cursor-pointer"
                 >
                   +
                 </button>
@@ -738,13 +736,13 @@ export default function NameKeychainBuilder({ onAddToCart }: NameKeychainBuilder
               <button
                 onClick={handleAddClick}
                 disabled={!validation.isValid}
-                className="px-5 py-3 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-accent to-accent-secondary hover:from-accent-hover hover:to-accent-secondary-lt shadow transition flex items-center space-x-2 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                className="px-5 py-3 rounded-xl text-xs font-bold text-text-on-accent bg-gradient-to-r from-accent to-accent-secondary hover:from-accent-hover hover:to-accent-secondary-lt shadow transition flex items-center space-x-2 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
               >
                 <ShoppingCart className="w-3.5 h-3.5" />
                 <span>Queue print</span>
               </button>
             </div>
-          </div>
+          </div>    </div>
 
         </div>
 

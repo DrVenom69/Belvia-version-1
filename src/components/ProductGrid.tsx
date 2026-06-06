@@ -122,14 +122,14 @@ export default function ProductGrid({
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
         
         {/* Model Type Switcher and Search Row - Styled exactly like MakerWorld */}
-        <div className="bg-[#070b13] border border-gray-850 rounded-2xl p-5 mb-8 shadow-2xl flex flex-col md:flex-row items-center justify-between gap-5">
-          <div className="flex items-center space-x-2.5 bg-bg-base p-1 border border-gray-850 rounded-xl w-full md:w-auto">
+        <div className="bg-bg-surface border border-border-premium rounded-2xl p-5 mb-8 shadow-2xl flex flex-col md:flex-row items-center justify-between gap-5">
+          <div className="flex items-center space-x-2.5 bg-bg-base p-1 border border-border-premium rounded-xl w-full md:w-auto">
             <button
               onClick={() => setModelTypeTab('3d-models')}
               className={`flex items-center space-x-1.5 px-4.5 py-2 rounded-lg text-xs font-bold font-mono tracking-wide transition-all cursor-pointer ${
                 modelTypeTab === '3d-models'
                   ? 'bg-accent text-text-on-accent shadow-md font-extrabold'
-                  : 'text-gray-400 hover:text-white'
+                  : 'text-text-secondary hover:text-text-primary hover:bg-bg-elevated/40'
               }`}
             >
               <Layers className="w-3.5 h-3.5" />
@@ -140,7 +140,7 @@ export default function ProductGrid({
               className={`flex items-center space-x-1.5 px-4.5 py-2 rounded-lg text-xs font-bold font-mono tracking-wide transition-all cursor-pointer ${
                 modelTypeTab === 'laser-cut'
                   ? 'bg-accent text-text-on-accent shadow-md font-extrabold'
-                  : 'text-gray-400 hover:text-white'
+                  : 'text-text-secondary hover:text-text-primary hover:bg-bg-elevated/40'
               }`}
             >
               <Zap className="w-3.5 h-3.5" />
@@ -150,25 +150,25 @@ export default function ProductGrid({
 
           {/* Core Unified Search Bar */}
           <div className="relative w-full md:max-w-md">
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-gray-500" />
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-text-secondary" />
             <input
               id="shop-search"
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search 3D models, filament types, or tags..."
-              className="w-full bg-bg-base text-gray-200 pl-10.5 pr-4 py-2 text-xs font-mono tracking-wide rounded-xl border border-gray-850 focus:border-accent focus:ring-1 focus:ring-accent/20 transition"
+              className="w-full bg-bg-base text-text-primary pl-10.5 pr-4 py-2 text-xs font-mono tracking-wide rounded-xl border border-border-premium focus:border-accent focus:ring-1 focus:ring-accent/20 transition"
             />
           </div>
 
           {/* Sorters */}
           <div className="flex items-center space-x-3 text-xs w-full md:w-auto justify-end">
-            <span className="text-gray-500 font-mono">SORT:</span>
+            <span className="text-text-secondary font-mono">SORT:</span>
             <select
               id="shop-sort"
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
-              className="bg-bg-base text-gray-300 text-xs font-mono py-2 px-3.5 rounded-xl border border-gray-855 focus:border-accent cursor-pointer"
+              className="bg-bg-base text-text-primary text-xs font-mono py-2 px-3.5 rounded-xl border border-border-premium focus:border-accent cursor-pointer"
             >
               <option value="default">Trending</option>
               <option value="price-asc">Price (Asc)</option>
@@ -179,15 +179,15 @@ export default function ProductGrid({
         </div>
 
         {/* Categories Header Banner - MakerWorld Inspired */}
-        <div className="bg-gradient-to-r from-[#10b981]/5 via-slate-900/40 to-indigo-500/5 border border-gray-850 rounded-2xl p-6.5 text-left mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div className="bg-gradient-to-r from-[#10b981]/10 via-bg-surface/90 to-indigo-500/10 border border-border-premium rounded-2xl p-6.5 text-left mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 shadow-sm">
           <div>
             <span className="text-[9px] font-mono font-bold text-accent tracking-wider bg-accent/10 px-2 py-0.5 rounded border border-accent/20">
               3D PRINTED ART MODELS
             </span>
-            <h2 className="font-display font-black text-xl sm:text-2xl text-white tracking-tight mt-1.5">
+            <h2 className="font-display font-black text-xl sm:text-2xl text-text-primary tracking-tight mt-1.5">
               Explore the "{selectedCategory === 'All' ? 'Slices' : selectedCategory}" Category
             </h2>
-            <p className="text-gray-450 text-xs mt-1 max-w-2xl leading-relaxed">
+            <p className="text-text-secondary text-xs mt-1 max-w-2xl leading-relaxed">
               Explore custom 3D printing models design collections. Sourced matching mechanical filament densities, certified wall line tolerances and precise FDM bed alignment configs.
             </p>
           </div>
@@ -195,7 +195,7 @@ export default function ProductGrid({
           {products.length === 0 && (
             <button
               onClick={resetCatalog}
-              className="px-4 py-2 mt-2 rounded-xl bg-gray-900 border border-bg-elevated hover:border-gray-700 text-gray-300 flex items-center space-x-2 text-xs transition cursor-pointer animate-pulse"
+              className="px-4 py-2 mt-2 rounded-xl bg-bg-surface border border-border-premium hover:border-gray-500 text-text-primary flex items-center space-x-2 text-xs transition cursor-pointer animate-pulse"
             >
               <RotateCw className="w-3.5 h-3.5" />
               <span>Restore Catalog</span>
@@ -208,8 +208,8 @@ export default function ProductGrid({
           
           {/* LEFT SIDEBAR PANEL: Categories Hierarchy */}
           <div className="lg:col-span-1 space-y-4 text-left">
-            <div className="bg-[#070b13] border border-gray-850 rounded-2xl p-5 shadow-xl">
-              <h3 className="font-display font-black text-xs text-gray-300 uppercase tracking-widest mb-4 border-b border-gray-850 pb-2">
+            <div className="bg-bg-surface border border-border-premium rounded-2xl p-5 shadow-xl">
+              <h3 className="font-display font-black text-xs text-text-primary uppercase tracking-widest mb-4 border-b border-border-premium pb-2">
                 Filter Categories
               </h3>
               
@@ -232,21 +232,21 @@ export default function ProductGrid({
                         className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-mono text-[11px] font-bold tracking-tight transition-all duration-150 cursor-pointer border ${
                           isSelectedGroup
                             ? 'bg-accent/10 text-accent border-accent/20'
-                            : 'text-gray-400 hover:text-white hover:bg-bg-surface/40 border-transparent'
+                            : 'text-text-secondary hover:text-text-primary hover:bg-bg-surface/40 border-transparent'
                         }`}
                       >
                         <div className="flex items-center space-x-2">
-                          <span className={`w-1.5 h-1.5 rounded-full ${isSelectedGroup ? 'bg-accent' : 'bg-gray-800'}`} />
+                          <span className={`w-1.5 h-1.5 rounded-full ${isSelectedGroup ? 'bg-accent' : 'bg-text-secondary/30'}`} />
                           <span>{catGroup.name.toUpperCase()}</span>
                         </div>
-                        <span className="text-[9px] text-gray-600 bg-bg-surface px-1.5 py-0.5 rounded font-mono font-semibold">
+                        <span className="text-[9px] text-text-secondary bg-bg-base px-1.5 py-0.5 rounded font-mono font-semibold border border-border-premium">
                           {catGroup.count}
                         </span>
                       </button>
                       
                       {/* Nested subcategories */}
                       {isSelectedGroup && catGroup.subcategories && (
-                        <div className="pl-4 space-y-1 mt-1 border-l border-gray-850 ml-3.5 pb-2 animate-in fade-in duration-200">
+                        <div className="pl-4 space-y-1 mt-1 border-l border-border-premium ml-3.5 pb-2 animate-in fade-in duration-200">
                           {catGroup.subcategories.map((sub) => {
                             const isSubActive = selectedCategory === sub.mappedCategory;
                             return (
@@ -256,7 +256,7 @@ export default function ProductGrid({
                                 className={`w-full text-left px-2.5 py-1.5 rounded text-[10px] font-mono transition-colors cursor-pointer block ${
                                   isSubActive
                                     ? 'text-accent font-bold bg-accent/5 border-l border-accent'
-                                    : 'text-gray-400 hover:text-gray-200 hover:bg-bg-surface/10'
+                                    : 'text-text-secondary hover:text-text-primary hover:bg-bg-surface/20'
                                 }`}
                               >
                                 {sub.name.toUpperCase()}
@@ -275,10 +275,10 @@ export default function ProductGrid({
           {/* RIGHT PRODUCTS PANEL */}
           <div className="lg:col-span-3">
             {filteredProducts.length === 0 ? (
-              <div className="text-center py-20 bg-[#070b13]/40 border border-bg-elevated rounded-2xl max-w-lg mx-auto">
-                <Search className="w-10 h-10 text-gray-650 mx-auto mb-4" />
-                <h3 className="font-display font-bold text-lg text-white">No Models Found</h3>
-                <p className="text-gray-455 text-xs mt-2 max-w-sm mx-auto leading-relaxed">
+              <div className="text-center py-20 bg-bg-surface/40 border border-border-premium rounded-2xl max-w-lg mx-auto">
+                <Search className="w-10 h-10 text-text-secondary mx-auto mb-4" />
+                <h3 className="font-display font-bold text-lg text-text-primary">No Models Found</h3>
+                <p className="text-text-secondary text-xs mt-2 max-w-sm mx-auto leading-relaxed">
                   No matching models exist in this category right now. Reset filters to see all ready-made prints.
                 </p>
                 <button
@@ -310,7 +310,7 @@ export default function ProductGrid({
                     <div
                       id={`product-card-${p.id}`}
                       key={p.id}
-                      className="group rounded-2xl bg-bg-surface/75 border border-gray-810 hover:border-accent/40 hover:shadow-accent/5 transition-all duration-300 relative flex flex-col h-full overflow-hidden text-left"
+                      className="group rounded-2xl bg-bg-surface/75 border border-border-premium hover:border-accent/40 hover:shadow-accent/5 transition-all duration-300 relative flex flex-col h-full overflow-hidden text-left shadow-xs"
                     >
                       {/* Image Showcase */}
                       <div className="aspect-square w-full bg-bg-base relative overflow-hidden">
@@ -335,7 +335,7 @@ export default function ProductGrid({
                               e.stopPropagation();
                               onToggleWishlist(p);
                             }}
-                            className="absolute top-3 right-3 p-2 rounded-lg bg-bg-base/95 text-gray-400 hover:text-red-500 border border-gray-850 backdrop-blur-xs z-20 cursor-pointer transition duration-200"
+                            className="absolute top-3 right-3 p-2 rounded-lg bg-bg-surface/95 text-text-secondary hover:text-red-500 border border-border-premium backdrop-blur-xs z-20 cursor-pointer transition duration-200"
                             title={isWishlisted ? "Saved" : "Save to Wishlist"}
                           >
                             <Heart className={`w-3.5 h-3.5 ${isWishlisted ? "fill-current text-red-500" : ""}`} />
@@ -343,7 +343,7 @@ export default function ProductGrid({
                         )}
 
                         {/* Technical Metadata tags */}
-                        <div className="absolute bottom-3 left-3 px-2 py-1 rounded-md text-[9px] font-mono text-gray-350 bg-bg-base/90 border border-gray-850 backdrop-blur-sm shadow z-10 select-none">
+                        <div className="absolute bottom-3 left-3 px-2 py-1 rounded-md text-[9px] font-mono text-text-secondary bg-bg-surface/90 border border-border-premium backdrop-blur-sm shadow z-10 select-none">
                           {p.weightGrams}g / {p.printTime}
                         </div>
                         
@@ -352,7 +352,7 @@ export default function ProductGrid({
                           <button
                             id={`card-quickview-${p.id}`}
                             onClick={() => onQuickView(p)}
-                            className="p-3.5 rounded-full bg-bg-base border border-bg-elevated text-white hover:text-accent hover:border-accent/40 hover:scale-110 transition cursor-pointer shadow-xl text-xs font-bold"
+                            className="p-3.5 rounded-full bg-bg-surface border border-border-premium text-text-primary hover:text-accent hover:border-accent/40 hover:scale-110 transition cursor-pointer shadow-xl text-xs font-bold"
                             title="Inspect slice layers"
                           >
                             <Eye className="w-4.5 h-4.5" />
@@ -365,32 +365,32 @@ export default function ProductGrid({
                         <div>
                           
                           {/* Title */}
-                          <h3 className="font-display font-extrabold text-sm text-gray-100 mt-1 line-clamp-1 group-hover:text-accent transition">
+                          <h3 className="font-display font-extrabold text-sm text-text-primary mt-1 line-clamp-1 group-hover:text-accent transition">
                             {p.title}
                           </h3>
                           
                           {/* Creator Row */}
                           <div className="flex items-center space-x-1.5 mt-1">
-                            <span className="text-[9px] font-mono text-gray-550 font-bold">by {creator}</span>
+                            <span className="text-[9px] font-mono text-text-secondary font-bold">by {creator}</span>
                           </div>
 
                           {/* Downloads Stats Section - replicating Makerworld */}
-                          <div className="flex items-center space-x-4 mt-2 mb-3.5 font-mono text-[10px] text-gray-400 border-b border-gray-850/50 pb-2.5">
+                          <div className="flex items-center space-x-4 mt-2 mb-3.5 font-mono text-[10px] text-text-secondary border-b border-border-premium/50 pb-2.5">
                             <span className="flex items-center space-x-1">
-                              <Download className="w-3.5 h-3.5 text-gray-500" />
+                              <Download className="w-3.5 h-3.5 text-text-secondary" />
                               <span>{downloads.toLocaleString()}</span>
                             </span>
                             <span className="flex items-center space-x-1">
-                              <Heart className="w-3.5 h-3.5 text-gray-500" />
+                              <Heart className="w-3.5 h-3.5 text-text-secondary" />
                               <span>{likes.toLocaleString()}</span>
                             </span>
-                            <span className="flex items-center space-x-1 bg-yellow-500/10 text-yellow-500 px-1.5 rounded text-[9px] font-semibold">
+                            <span className="flex items-center space-x-1 bg-yellow-500/10 text-yellow-650 dark:text-yellow-500 px-1.5 rounded text-[9px] font-semibold">
                               ★ {p.rating.toFixed(1)}
                             </span>
                           </div>
 
                           {/* Short Description */}
-                          <p className="text-gray-400 text-[11px] line-clamp-2 leading-relaxed">
+                          <p className="text-text-secondary text-[11px] line-clamp-2 leading-relaxed">
                             {p.description}
                           </p>
 
@@ -400,7 +400,7 @@ export default function ProductGrid({
                               {p.colors.slice(0, 5).map((c) => (
                                 <span
                                   key={c}
-                                  className="w-3 h-3 rounded-full border border-white/10"
+                                  className="w-3 h-3 rounded-full border border-border-premium"
                                   style={{ backgroundColor: getSwatchColor(c) }}
                                   title={c}
                                 />
@@ -410,10 +410,10 @@ export default function ProductGrid({
                         </div>
 
                         {/* Order Footer Button */}
-                        <div className="mt-4.5 pt-3.5 border-t border-gray-850/60 flex items-center justify-between">
+                        <div className="mt-4.5 pt-3.5 border-t border-border-premium/60 flex items-center justify-between">
                           <div>
-                            <span className="block text-[8px] font-mono text-gray-500 uppercase tracking-widest">START PRICE</span>
-                            <span className="text-base font-mono font-bold text-white">
+                            <span className="block text-[8px] font-mono text-text-secondary uppercase tracking-widest">START PRICE</span>
+                            <span className="text-base font-mono font-bold text-text-primary">
                               ${p.price.toFixed(2)}
                             </span>
                           </div>

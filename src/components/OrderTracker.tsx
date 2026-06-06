@@ -109,16 +109,16 @@ export default function OrderTracker() {
           <span className="font-mono text-xs font-semibold text-accent uppercase tracking-widest block mb-2">
             Additive Factory Telemetry
           </span>
-          <h2 className="font-display text-3xl sm:text-4xl font-black text-white">
+          <h2 className="font-display text-3xl sm:text-4xl font-black text-text-primary">
             Belvia Logistics Tracker
           </h2>
-          <p className="text-gray-400 text-sm mt-3 max-w-lg mx-auto">
+          <p className="text-text-secondary text-sm mt-3 max-w-lg mx-auto">
             Input your specialized Reference shipment code (e.g., `BLV-SHIP-99120`) to review machine printing slices, active bed temperature diagnostics, and air freighting milestones.
           </p>
         </div>
 
         {/* Input Card Container */}
-        <div className="bg-[#070b13] border border-bg-elevated rounded-2xl p-6 shadow-2xl mb-8">
+        <div className="bg-bg-surface border border-border-premium rounded-2xl p-6 shadow-2xl mb-8">
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -127,34 +127,34 @@ export default function OrderTracker() {
             className="flex flex-col sm:flex-row gap-3"
           >
             <div className="relative flex-grow">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-gray-500" />
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4.5 h-4.5 text-text-muted" />
               <input
                 id="shipment-search-field"
                 type="text"
                 value={searchCode}
                 onChange={(e) => setSearchCode(e.target.value)}
                 placeholder="Enter BLV-SHIP-XXXXX..."
-                className="w-full bg-bg-base text-gray-200 pl-10.5 pr-4 py-3 rounded-xl border border-bg-elevated focus:border-accent focus:ring-1 focus:ring-accent/30 text-sm font-mono tracking-wider transition"
+                className="w-full bg-bg-base text-text-primary pl-10.5 pr-4 py-3 rounded-xl border border-border-premium focus:border-accent focus:ring-1 focus:ring-accent/30 text-sm font-mono tracking-wider transition"
               />
             </div>
             <button
               id="btn-trigger-track"
               type="submit"
-              className="px-6 py-3 bg-accent-secondary hover:bg-accent-hover text-white font-bold text-xs rounded-xl cursor-pointer transition flex items-center justify-center space-x-2"
+              className="px-6 py-3 bg-accent-secondary hover:bg-accent-hover text-text-on-accent font-bold text-xs rounded-xl cursor-pointer transition flex items-center justify-center space-x-2"
             >
               <span>Track Live Delivery</span>
             </button>
           </form>
 
           {/* Quick Shortcuts */}
-          <div className="mt-5.5 pt-4.5 border-t border-gray-850 flex flex-wrap items-center gap-2 text-xs">
-            <span className="text-gray-500 font-mono">QUICK VERIFICATION SHIPMENT CODES:</span>
+          <div className="mt-5.5 pt-4.5 border-t border-border-premium flex flex-wrap items-center gap-2 text-xs">
+            <span className="text-text-muted font-mono">QUICK VERIFICATION SHIPMENT CODES:</span>
             <button
               onClick={() => {
                 setSearchCode('BLV-SHIP-99120');
                 handleSearch('BLV-SHIP-99120');
               }}
-              className="px-3 py-1 rounded bg-[#09101f] border border-bg-elevated text-accent hover:text-white hover:border-gray-700 font-mono text-[11px] transition cursor-pointer"
+              className="px-3 py-1 rounded bg-bg-elevated border border-border-premium text-accent hover:text-text-primary hover:border-accent font-mono text-[11px] transition cursor-pointer"
             >
               BLV-SHIP-99120 (Lithophane - Transit)
             </button>
@@ -163,7 +163,7 @@ export default function OrderTracker() {
                 setSearchCode('BLV-SHIP-00812');
                 handleSearch('BLV-SHIP-00812');
               }}
-              className="px-3 py-1 rounded bg-[#09101f] border border-bg-elevated text-accent hover:text-white hover:border-gray-700 font-mono text-[11px] transition cursor-pointer"
+              className="px-3 py-1 rounded bg-bg-elevated border border-border-premium text-accent hover:text-text-primary hover:border-accent font-mono text-[11px] transition cursor-pointer"
             >
               BLV-SHIP-00812 (Dragon - Delivery)
             </button>
@@ -172,7 +172,7 @@ export default function OrderTracker() {
                 setSearchCode('BLV-SHIP-71510');
                 handleSearch('BLV-SHIP-71510');
               }}
-              className="px-3 py-1 rounded bg-[#09101f] border border-bg-elevated text-accent hover:text-white hover:border-gray-700 font-mono text-[11px] transition cursor-pointer"
+              className="px-3 py-1 rounded bg-bg-elevated border border-border-premium text-accent hover:text-text-primary hover:border-accent font-mono text-[11px] transition cursor-pointer"
             >
               BLV-SHIP-71510 (Organizer - Printing)
             </button>
@@ -184,22 +184,22 @@ export default function OrderTracker() {
           activeShipment ? (
             <div className="space-y-6 animate-in fade-in duration-300">
               {/* Primary Summary Block */}
-              <div className="bg-[#070b13] border border-bg-elevated rounded-2xl p-6 text-left">
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-gray-850 pb-4 mb-4 gap-4">
+              <div className="bg-bg-surface border border-border-premium rounded-2xl p-6 text-left">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-border-premium pb-4 mb-4 gap-4">
                   <div>
                     <span className="text-[10px] bg-accent/10 text-accent border border-accent/10 font-bold font-mono px-2 py-1 rounded">
                       {activeShipment.id}
                     </span>
-                    <h3 className="font-display font-black text-xl text-white mt-2">
+                    <h3 className="font-display font-black text-xl text-text-primary mt-2">
                       {activeShipment.productName}
                     </h3>
-                    <p className="text-gray-450 text-xs font-mono mt-1">
+                    <p className="text-text-secondary text-xs font-mono mt-1">
                       SPECIFICATIONS: Qty {activeShipment.qty} // {activeShipment.material} ({activeShipment.color}) // Vol-Mass: {activeShipment.weightGrams}g
                     </p>
                   </div>
                   <div className="text-right md:text-right">
-                    <span className="block text-[9px] font-mono text-gray-500 uppercase">ESTIMATED ETA</span>
-                    <span className="text-white font-bold font-sans text-base">{activeShipment.estimatedArrival}</span>
+                    <span className="block text-[9px] font-mono text-text-muted uppercase">ESTIMATED ETA</span>
+                    <span className="text-text-primary font-bold font-sans text-base">{activeShipment.estimatedArrival}</span>
                   </div>
                 </div>
 
@@ -211,44 +211,44 @@ export default function OrderTracker() {
                       <span>LIVE PRINT BED DIAGNOSTIC RADAR (BED #B4)</span>
                     </div>
                     <div className="grid grid-cols-2 md:grid-cols-5 gap-3 font-mono text-xs">
-                      <div className="bg-[#090f1cf0] p-2.5 rounded border border-gray-850">
-                        <span className="block text-[8px] text-gray-500 font-bold mb-1">NOZZLE TEMP</span>
-                        <span className="text-white font-bold flex items-center">
+                      <div className="bg-bg-elevated p-2.5 rounded border border-border-premium">
+                        <span className="block text-[8px] text-text-muted font-bold mb-1">NOZZLE TEMP</span>
+                        <span className="text-text-primary font-bold flex items-center">
                           <Flame className="w-3.5 h-3.5 text-red-500 mr-1 animate-pulse" />
                           {activeShipment.telemetry.nozzleTemp}
                         </span>
                       </div>
-                      <div className="bg-[#090f1cf0] p-2.5 rounded border border-gray-850">
-                        <span className="block text-[8px] text-gray-500 font-bold mb-1">HEATED SEET TEMP</span>
-                        <span className="text-white font-bold">{activeShipment.telemetry.bedTemp}</span>
+                      <div className="bg-bg-elevated p-2.5 rounded border border-border-premium">
+                        <span className="block text-[8px] text-text-muted font-bold mb-1">HEATED SEET TEMP</span>
+                        <span className="text-text-primary font-bold">{activeShipment.telemetry.bedTemp}</span>
                       </div>
-                      <div className="bg-[#090f1cf0] p-2.5 rounded border border-gray-850">
-                        <span className="block text-[8px] text-gray-500 font-bold mb-1">CURRENT SLICE LAYER</span>
+                      <div className="bg-bg-elevated p-2.5 rounded border border-border-premium">
+                        <span className="block text-[8px] text-text-muted font-bold mb-1">CURRENT SLICE LAYER</span>
                         <span className="text-accent font-bold text-[11px] animate-pulse">{activeShipment.telemetry.layer}</span>
                       </div>
-                      <div className="bg-[#090f1cf0] p-2.5 rounded border border-gray-850">
-                        <span className="block text-[8px] text-gray-500 font-bold mb-1">FDM SPEED</span>
-                        <span className="text-white font-bold">{activeShipment.telemetry.speed}</span>
+                      <div className="bg-bg-elevated p-2.5 rounded border border-border-premium">
+                        <span className="block text-[8px] text-text-muted font-bold mb-1">FDM SPEED</span>
+                        <span className="text-text-primary font-bold">{activeShipment.telemetry.speed}</span>
                       </div>
-                      <div className="bg-[#090f1cf0] p-2.5 rounded border border-gray-850 col-span-2 md:col-span-1">
-                        <span className="block text-[8px] text-gray-500 font-bold mb-1">FLMT MASS LEFT</span>
+                      <div className="bg-bg-elevated p-2.5 rounded border border-border-premium col-span-2 md:col-span-1">
+                        <span className="block text-[8px] text-text-muted font-bold mb-1">FLMT MASS LEFT</span>
                         <span className="text-cyan-400 font-bold">{activeShipment.telemetry.filamentLeft}</span>
                       </div>
                     </div>
-                    <div className="w-full bg-bg-surface rounded-full h-1.5 mt-4 overflow-hidden border border-gray-850">
+                    <div className="w-full bg-bg-surface rounded-full h-1.5 mt-4 overflow-hidden border border-border-premium">
                       <div className="bg-gradient-to-r from-accent to-accent-secondary h-1.5 rounded-full animate-pulse" style={{ width: '72%' }} />
                     </div>
                   </div>
                 )}
 
                 {/* Logistics Milestones Timeline */}
-                <div className="space-y-6 relative pl-6 border-l border-bg-elevated">
+                <div className="space-y-6 relative pl-6 border-l border-border-premium">
                   {activeShipment.milestones.map((ml, idx) => {
                     const isCurrent = ml.status === 'current';
                     return (
                       <div key={idx} className="relative text-left">
                         {/* Bullet Icon */}
-                        <div className="absolute -left-9.5 top-0.5 z-10 bg-[#070b13] p-1 rounded-full border">
+                        <div className="absolute -left-9.5 top-0.5 z-10 bg-bg-surface p-1 rounded-full border">
                           {isCurrent ? (
                             <Truck className="w-4 h-4 text-accent animate-bounce" />
                           ) : (
@@ -259,12 +259,12 @@ export default function OrderTracker() {
                         {/* Title text */}
                         <div className="space-y-1">
                           <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4">
-                            <h4 className={`text-sm font-bold ${isCurrent ? 'text-accent text-base' : 'text-gray-100'}`}>
+                            <h4 className={`text-sm font-bold ${isCurrent ? 'text-accent text-base' : 'text-text-primary'}`}>
                               {ml.title}
                             </h4>
-                            <span className="text-[10px] font-mono text-gray-500">{ml.time}</span>
+                            <span className="text-[10px] font-mono text-text-muted">{ml.time}</span>
                           </div>
-                          <p className="text-gray-400 text-xs">{ml.description}</p>
+                          <p className="text-text-secondary text-xs">{ml.description}</p>
                         </div>
                       </div>
                     );
@@ -274,12 +274,12 @@ export default function OrderTracker() {
             </div>
           ) : (
             /* Error tracking block */
-            <div className="bg-[#070b13] border border-bg-elevated rounded-2xl p-10 text-center max-w-md mx-auto space-y-4 animate-in fade-in duration-300">
+            <div className="bg-bg-surface border border-border-premium rounded-2xl p-10 text-center max-w-md mx-auto space-y-4 animate-in fade-in duration-300">
               <div className="w-12 h-12 bg-red-950/45 border border-red-900/60 rounded-full flex items-center justify-center mx-auto">
                 <ShieldAlert className="w-6 h-6 text-red-500 animate-pulse" />
               </div>
-              <h3 className="font-display font-black text-lg text-white">Tracking Reference Not Found</h3>
-              <p className="text-gray-400 text-xs max-w-xs mx-auto">
+              <h3 className="font-display font-black text-lg text-text-primary">Tracking Reference Not Found</h3>
+              <p className="text-text-secondary text-xs max-w-xs mx-auto">
                 The G-Code tracking coordinate reference code `{searchCode}` could not be resolved across our logistics queues. Try selecting one of our verified default codes above!
               </p>
             </div>

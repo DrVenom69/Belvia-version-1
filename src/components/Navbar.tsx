@@ -62,7 +62,7 @@ export default function Navbar({
                   className={`flex items-center px-4 py-2 rounded-xl text-xs font-display font-semibold uppercase tracking-wide cursor-pointer transition-all duration-300 border ${
                     isActive
                       ? 'bg-accent/10 text-accent border-accent/30 shadow-md shadow-accent/5'
-                      : 'text-gray-400 hover:text-white hover:bg-white/5 border-transparent'
+                      : 'text-text-secondary hover:text-text-primary hover:bg-bg-elevated/40 border-transparent'
                   }`}
                   title={link.name}
                 >
@@ -79,7 +79,7 @@ export default function Navbar({
             <button
               id="theme-toggle-btn"
               onClick={toggleTheme}
-              className="p-1.5 rounded-full text-gray-400 hover:text-accent bg-white/5 hover:bg-white/10 cursor-pointer transition duration-300 group"
+              className="p-1.5 rounded-full text-text-secondary hover:text-accent bg-bg-surface hover:bg-bg-elevated border border-border-premium cursor-pointer transition duration-300 group"
               title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
             >
               {theme === 'dark' ? (
@@ -93,7 +93,7 @@ export default function Navbar({
             <button
               id="cart-trigger-btn"
               onClick={() => setIsCartOpen(true)}
-              className="relative text-gray-400 hover:text-accent transition cursor-pointer group p-1"
+              className="relative text-text-secondary hover:text-accent transition cursor-pointer group p-1"
             >
               <ShoppingBag className="w-6 h-6 sm:w-5 sm:h-5 group-hover:scale-105 transition-transform" />
               {totalItems > 0 && (
@@ -107,8 +107,8 @@ export default function Navbar({
             <button
               id="account-trigger-btn"
               onClick={() => setActiveTab('tracker')}
-              className={`relative p-2 rounded-full transition cursor-pointer group ${
-                activeTab === 'tracker' ? 'text-white bg-accent/20' : 'text-gray-400 hover:text-white bg-white/5 hover:bg-white/10'
+              className={`relative p-2 rounded-full transition cursor-pointer group border ${
+                activeTab === 'tracker' ? 'text-text-primary bg-accent/20 border-accent/30' : 'text-text-secondary hover:text-text-primary bg-bg-surface hover:bg-bg-elevated border-border-premium'
               }`}
               title="My Account"
             >
@@ -129,7 +129,7 @@ export default function Navbar({
               key={link.id}
               onClick={() => setActiveTab(link.id)}
               className={`flex flex-col items-center justify-center flex-1 py-1 text-center transition-colors duration-200 cursor-pointer ${
-                isActive ? 'text-accent' : 'text-gray-400 hover:text-white'
+                isActive ? 'text-accent' : 'text-text-secondary hover:text-text-primary'
               }`}
             >
               <Icon className="w-5 h-5" />

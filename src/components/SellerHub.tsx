@@ -274,15 +274,15 @@ Colors suited: Burnt Orange with Matte Slate eyes or Chalk White body.`);
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
         
         {/* Module title header */}
-        <div className="border-b border-bg-elevated pb-8 mb-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div className="border-b border-border-premium pb-8 mb-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div>
             <span className="text-xs font-mono font-bold text-accent uppercase tracking-widest block mb-1">
               Seller Workstation Hub
             </span>
-            <h1 className="font-display text-3xl md:text-4xl font-extrabold text-white">
+            <h1 className="font-display text-3xl md:text-4xl font-extrabold text-text-primary">
               Belvia Inventory Manager
             </h1>
-            <p className="text-gray-400 text-sm mt-1.5 max-w-xl">
+            <p className="text-text-secondary text-sm mt-1.5 max-w-xl">
               Fulfill your scale demands. Manage ready-made products, paste raw web descriptions to parse via our serverless Gemini AI Extraction Agent, or load massive spreadsheets instantly.
             </p>
           </div>
@@ -291,7 +291,7 @@ Colors suited: Burnt Orange with Matte Slate eyes or Chalk White body.`);
             <button
               id="export-stock-btn"
               onClick={handleExportStockTable}
-              className="px-4.5 py-3 rounded-xl bg-gray-900 border border-bg-elevated hover:border-gray-700 text-gray-200 hover:text-white transition flex items-center space-x-2 text-xs font-semibold cursor-pointer shadow-sm"
+              className="px-4.5 py-3 rounded-xl bg-bg-surface border border-border-premium hover:border-gray-500 text-text-primary hover:bg-bg-elevated transition flex items-center space-x-2 text-xs font-semibold cursor-pointer shadow-sm"
               title="Download full catalog as JSON"
             >
               <Download className="w-4 h-4 text-accent" />
@@ -301,7 +301,7 @@ Colors suited: Burnt Orange with Matte Slate eyes or Chalk White body.`);
         </div>
 
         {/* Workspace Subtabs */}
-        <div className="flex bg-[#070b13] border border-bg-elevated rounded-xl p-1 mb-8 max-w-3xl">
+        <div className="flex bg-bg-surface border border-border-premium rounded-xl p-1 mb-8 max-w-3xl">
           {[
             { id: 'ai', name: 'MakerWorld AI Agent', icon: Sparkles },
             { id: 'excel', name: 'CSV Spreadsheets', icon: FileSpreadsheet },
@@ -317,7 +317,7 @@ Colors suited: Burnt Orange with Matte Slate eyes or Chalk White body.`);
                 className={`flex-1 flex items-center justify-center space-x-2 py-2.5 px-1.5 rounded-lg text-xs font-medium cursor-pointer transition ${
                   activeSubTab === tab.id
                     ? 'bg-accent-secondary text-white font-bold'
-                    : 'text-gray-400 hover:text-gray-300'
+                    : 'text-text-secondary hover:text-text-primary hover:bg-bg-elevated/45'
                 }`}
               >
                 <Icon className="w-4 h-4" />
@@ -333,13 +333,13 @@ Colors suited: Burnt Orange with Matte Slate eyes or Chalk White body.`);
             
             {/* Input Paste */}
             <div className="lg:col-span-6 space-y-4">
-              <div className="bg-[#070b13] border border-bg-elevated rounded-2xl p-6 space-y-4">
+              <div className="bg-bg-surface border border-border-premium rounded-2xl p-6 space-y-4">
                 <div className="flex items-center space-x-2 text-accent font-bold text-sm">
                   <BrainCircuit className="w-5 h-5 animate-pulse text-accent" />
                   <span>Gemini MakerWorld AI Catalog Agent</span>
                 </div>
                 
-                <p className="text-gray-400 text-xs leading-relaxed">
+                <p className="text-text-secondary text-xs leading-relaxed">
                   Avoid typing out details! Simply go to any page on MakerWorld.com, highlight and copy the model details (including printing specs, instructions, dimensions or infill lists), and paste it directly below. Our AI model will extract clean structured properties.
                 </p>
 
@@ -349,11 +349,11 @@ Colors suited: Burnt Orange with Matte Slate eyes or Chalk White body.`);
                   onChange={(e) => setMakerworldPaste(e.target.value)}
                   rows={8}
                   placeholder="Paste MakerWorld page summary specs or text notes here..."
-                  className="w-full bg-bg-base text-gray-200 border border-bg-elevated rounded-xl py-3 px-3.5 text-xs focus:border-accent font-mono resize-none leading-relaxed"
+                  className="w-full bg-bg-base text-text-primary border border-border-premium rounded-xl py-3 px-3.5 text-xs focus:border-accent font-mono resize-none leading-relaxed"
                 />
 
                 <div className="flex justify-between items-center pt-2.5">
-                  <span className="text-[10px] text-gray-500 font-mono">MODEL AGENT: gemini-3.5-flash</span>
+                  <span className="text-[10px] text-text-secondary font-mono">MODEL AGENT: gemini-3.5-flash</span>
                   
                   <button
                     id="btn-ai-extract"
@@ -378,60 +378,60 @@ Colors suited: Burnt Orange with Matte Slate eyes or Chalk White body.`);
             {/* Analysis Output Result and Review Panel */}
             <div className="lg:col-span-6">
               {parsedAiProduct ? (
-                <div className="bg-[#070b13] border border-accent/30 p-6 rounded-2xl space-y-5 shadow-2xl relative">
+                <div className="bg-bg-surface border border-border-premium p-6 rounded-2xl space-y-5 shadow-2xl relative">
                   
                   {/* Neon tag */}
                   <div className="absolute top-4 right-4 text-[10px] font-mono text-accent font-bold bg-accent/10 border border-accent/20 px-2 py-0.5 rounded animate-pulse">
                     PARSING SUCCESS
                   </div>
 
-                  <h3 className="font-display font-extrabold text-base text-gray-100">Review AI Extracted Catalog Product</h3>
+                  <h3 className="font-display font-extrabold text-base text-text-primary">Review AI Extracted Catalog Product</h3>
                   
-                  <div className="bg-bg-base rounded-xl border border-gray-850 p-4.5 space-y-3.5 font-mono text-xs">
+                  <div className="bg-bg-base rounded-xl border border-border-premium p-4.5 space-y-3.5 font-mono text-xs">
                     
-                    <div className="border-b border-gray-850 pb-2 flex justify-between">
-                      <span className="text-gray-500">ID:</span>
-                      <span className="text-gray-400 text-right font-bold">[Auto Assign Code]</span>
+                    <div className="border-b border-border-premium pb-2 flex justify-between">
+                      <span className="text-text-secondary">ID:</span>
+                      <span className="text-text-secondary text-right font-bold">[Auto Assign Code]</span>
                     </div>
 
-                    <div className="border-b border-gray-850 pb-2 flex justify-between text-left items-start">
-                      <span className="text-gray-500 shrink-0 w-20">TITLE:</span>
-                      <span className="text-gray-200 text-right font-sans font-bold">{parsedAiProduct.title}</span>
+                    <div className="border-b border-border-premium pb-2 flex justify-between text-left items-start">
+                      <span className="text-text-secondary shrink-0 w-20">TITLE:</span>
+                      <span className="text-text-primary text-right font-sans font-bold">{parsedAiProduct.title}</span>
                     </div>
 
-                    <div className="border-b border-gray-850 pb-2 flex justify-between items-start">
-                      <span className="text-gray-500 shrink-0 w-20">DESCRIPTION:</span>
-                      <span className="text-gray-400 text-right font-sans text-[11px] leading-normal">{parsedAiProduct.description}</span>
+                    <div className="border-b border-border-premium pb-2 flex justify-between items-start">
+                      <span className="text-text-secondary shrink-0 w-20">DESCRIPTION:</span>
+                      <span className="text-text-secondary text-right font-sans text-[11px] leading-normal">{parsedAiProduct.description}</span>
                     </div>
 
-                    <div className="border-b border-gray-850 pb-2 flex justify-between">
-                      <span className="text-gray-500">SUGGESTED CAT:</span>
+                    <div className="border-b border-border-premium pb-2 flex justify-between">
+                      <span className="text-text-secondary">SUGGESTED CAT:</span>
                       <span className="text-accent font-bold">{parsedAiProduct.category}</span>
                     </div>
 
-                    <div className="border-b border-gray-850 pb-2 flex justify-between">
-                      <span className="text-gray-500">SUGGESTED MSRP:</span>
+                    <div className="border-b border-border-premium pb-2 flex justify-between">
+                      <span className="text-text-secondary">SUGGESTED MSRP:</span>
                       <span className="text-accent font-bold">${parsedAiProduct.price?.toFixed(2)}</span>
                     </div>
 
-                    <div className="border-b border-gray-850 pb-2 flex justify-between items-start">
-                      <span className="text-gray-500 shrink-0">COLORS MATCH:</span>
-                      <span className="text-gray-400 text-right text-[11px]">{parsedAiProduct.colors?.join(', ')}</span>
+                    <div className="border-b border-border-premium pb-2 flex justify-between items-start">
+                      <span className="text-text-secondary shrink-0">COLORS MATCH:</span>
+                      <span className="text-text-secondary text-right text-[11px]">{parsedAiProduct.colors?.join(', ')}</span>
                     </div>
 
-                    <div className="border-b border-gray-850 pb-2 flex justify-between">
-                      <span className="text-gray-500">PRINT WEIGHT:</span>
-                      <span className="text-gray-300 font-bold">{parsedAiProduct.weightGrams}g</span>
+                    <div className="border-b border-border-premium pb-2 flex justify-between">
+                      <span className="text-text-secondary">PRINT WEIGHT:</span>
+                      <span className="text-text-primary font-bold">{parsedAiProduct.weightGrams}g</span>
                     </div>
 
-                    <div className="border-b border-gray-850 pb-2 flex justify-between">
-                      <span className="text-gray-500">INFILL STYLE:</span>
-                      <span className="text-gray-300 font-bold">{parsedAiProduct.infill}</span>
+                    <div className="border-b border-border-premium pb-2 flex justify-between">
+                      <span className="text-text-secondary">INFILL STYLE:</span>
+                      <span className="text-text-primary font-bold">{parsedAiProduct.infill}</span>
                     </div>
 
                     <div className="flex justify-between">
-                      <span className="text-gray-500">DIMENSIONAL METRIC:</span>
-                      <span className="text-gray-300 font-bold">{parsedAiProduct.dimensions}</span>
+                      <span className="text-text-secondary">DIMENSIONAL METRIC:</span>
+                      <span className="text-text-primary font-bold">{parsedAiProduct.dimensions}</span>
                     </div>
 
                   </div>
@@ -446,7 +446,7 @@ Colors suited: Burnt Orange with Matte Slate eyes or Chalk White body.`);
                       <button
                         id="btn-ai-cancel"
                         onClick={() => setParsedAiProduct(null)}
-                        className="py-3 px-4 rounded-xl border border-bg-elevated text-gray-400 text-xs font-semibold hover:bg-gray-900 cursor-pointer text-center"
+                        className="py-3 px-4 rounded-xl border border-border-premium text-text-secondary text-xs font-semibold hover:bg-bg-elevated cursor-pointer text-center"
                       >
                         Decline Slices
                       </button>
@@ -462,8 +462,8 @@ Colors suited: Burnt Orange with Matte Slate eyes or Chalk White body.`);
 
                 </div>
               ) : (
-                <div className="border-2 border-dashed border-bg-elevated bg-[#070c17]/30 rounded-2xl py-16 px-6 text-center text-gray-500 font-mono uppercase text-xs">
-                  <Layers className="w-10 h-10 text-gray-700 mx-auto mb-4 animate-pulse" />
+                <div className="border-2 border-dashed border-border-premium bg-bg-surface/30 rounded-2xl py-16 px-6 text-center text-text-secondary font-mono uppercase text-xs">
+                  <Layers className="w-10 h-10 text-text-secondary/40 mx-auto mb-4 animate-pulse" />
                   <span>AI SPEC EXTRACTIONS SHEET DUMP WINDOW</span>
                 </div>
               )}
@@ -475,16 +475,16 @@ Colors suited: Burnt Orange with Matte Slate eyes or Chalk White body.`);
         {/* --- EXCEL CSV SPREADSHEET IMPORTER SECTION --- */}
         {activeSubTab === 'excel' && (
           <div id="csv-importer-submodule" className="space-y-6">
-            <div className="bg-[#070b13] border border-bg-elevated rounded-2xl p-6">
+            <div className="bg-bg-surface border border-border-premium rounded-2xl p-6">
               
               <div className="flex items-center space-x-2 text-accent font-bold text-sm mb-4">
                 <FileSpreadsheet className="w-5 h-5 text-accent" />
                 <span>Spreadsheet / Batch Catalog CSV Parser</span>
               </div>
 
-              <p className="text-gray-400 text-xs leading-relaxed mb-6">
+              <p className="text-text-secondary text-xs leading-relaxed mb-6">
                 Belvia supports high-speed csv or json batch uploads. You can paste spreadsheet csv data in compliance with the following headers directly in the box below to parse and insert hundreds of catalog products instantly:
-                <span className="block font-mono bg-bg-base p-2 border border-bg-elevated rounded mt-2 text-accent overflow-x-auto text-[10px]">
+                <span className="block font-mono bg-bg-base p-2 border border-border-premium rounded mt-2 text-accent overflow-x-auto text-[10px]">
                   id,title,category,price,weightGrams,printTime,colors,materials,description
                 </span>
               </p>
@@ -494,12 +494,12 @@ Colors suited: Burnt Orange with Matte Slate eyes or Chalk White body.`);
                 value={spreadsheetText}
                 onChange={(e) => setSpreadsheetText(e.target.value)}
                 rows={10}
-                placeholder='CSV raw comma separated rows...'
-                className="w-full bg-bg-base text-gray-200 border border-bg-elevated rounded-xl py-3 px-3.5 text-xs focus:border-accent font-mono resize-none leading-relaxed"
+                placeholder="CSV raw comma separated rows..."
+                className="w-full bg-bg-base text-text-primary border border-border-premium rounded-xl py-3 px-3.5 text-xs focus:border-accent font-mono resize-none leading-relaxed"
               />
 
               <div className="flex justify-between items-center pt-4">
-                <span className="text-[10px] text-gray-500 font-mono">PARSING MODEL: RFC 4180 Standard Comma Spec</span>
+                <span className="text-[10px] text-text-secondary font-mono">PARSING MODEL: RFC 4180 Standard Comma Spec</span>
                 
                 <button
                   id="btn-csv-parse"
@@ -520,9 +520,9 @@ Colors suited: Burnt Orange with Matte Slate eyes or Chalk White body.`);
 
             {/* If Spreadsheet contains parsed rows, display them for validation */}
             {isSpreadsheetParsed && parsedSpreadsheetProducts.length > 0 && (
-              <div className="bg-[#070b13] border border-accent/20 p-6 rounded-2xl space-y-4">
+              <div className="bg-bg-surface border border-border-premium p-6 rounded-2xl space-y-4">
                 <div className="flex items-center justify-between">
-                  <h3 className="font-display font-bold text-sm text-gray-200 uppercase tracking-widest font-mono">
+                  <h3 className="font-display font-bold text-sm text-text-primary uppercase tracking-widest font-mono">
                     VALIDATING {parsedSpreadsheetProducts.length} IMPORTED SPREADSHEEET ROWS:
                   </h3>
                   <button
@@ -534,10 +534,10 @@ Colors suited: Burnt Orange with Matte Slate eyes or Chalk White body.`);
                   </button>
                 </div>
 
-                <div className="overflow-x-auto max-h-60 border border-gray-805 rounded-xl bg-bg-base scrollbar-thin">
+                <div className="overflow-x-auto max-h-60 border border-border-premium rounded-xl bg-bg-base scrollbar-thin">
                   <table className="w-full text-left border-collapse font-mono text-[10.5px]">
                     <thead>
-                      <tr className="bg-gray-900 border-b border-bg-elevated text-gray-400 uppercase tracking-wider">
+                      <tr className="bg-bg-surface border-b border-border-premium text-text-secondary uppercase tracking-wider">
                         <th className="p-3">ID</th>
                         <th className="p-3">Title</th>
                         <th className="p-3">Category</th>
@@ -546,11 +546,11 @@ Colors suited: Burnt Orange with Matte Slate eyes or Chalk White body.`);
                         <th className="p-3">Print hours</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-850 text-gray-300">
+                    <tbody className="divide-y divide-border-premium text-text-secondary">
                       {parsedSpreadsheetProducts.map((p, idx) => (
-                        <tr key={idx} className="hover:bg-gray-900/50">
+                        <tr key={idx} className="hover:bg-bg-elevated/40">
                           <td className="p-3 text-accent font-bold">{p.id}</td>
-                          <td className="p-3 text-gray-100 font-sans">{p.title}</td>
+                          <td className="p-3 text-text-primary font-sans">{p.title}</td>
                           <td className="p-3">{p.category}</td>
                           <td className="p-3 text-accent">${p.price.toFixed(2)}</td>
                           <td className="p-3">{p.weightGrams}g</td>
@@ -568,8 +568,8 @@ Colors suited: Burnt Orange with Matte Slate eyes or Chalk White body.`);
 
         {/* --- MANUAL UPLOAD CREATION FORM SECTION --- */}
         {activeSubTab === 'manual' && (
-          <div id="manual-creator-submodule" className="bg-[#070b13] border border-bg-elevated rounded-2xl p-6 sm:p-8">
-            <h3 className="font-display font-extrabold text-base text-white mb-6">Create Custom ready-made Catalog item</h3>
+          <div id="manual-creator-submodule" className="bg-bg-surface border border-border-premium rounded-2xl p-6 sm:p-8 shadow-xl">
+            <h3 className="font-display font-extrabold text-base text-text-primary mb-6">Create Custom ready-made Catalog item</h3>
             
             <form onSubmit={handleManualSave} className="grid grid-cols-1 lg:grid-cols-12 gap-8">
               
@@ -578,7 +578,7 @@ Colors suited: Burnt Orange with Matte Slate eyes or Chalk White body.`);
                 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-[10px] font-mono text-gray-500 uppercase tracking-widest mb-1">
+                    <label className="block text-[10px] font-mono text-text-secondary uppercase tracking-widest mb-1">
                       Product Name / Title:
                     </label>
                     <input
@@ -587,12 +587,12 @@ Colors suited: Burnt Orange with Matte Slate eyes or Chalk White body.`);
                       value={newTitle}
                       onChange={(e) => setNewTitle(e.target.value)}
                       placeholder="e.g. Geometric Pen Stand"
-                      className="w-full bg-bg-base text-gray-300 border border-bg-elevated rounded-xl py-2.5 px-3.5 text-xs focus:border-accent"
+                      className="w-full bg-bg-base text-text-primary border border-border-premium rounded-xl py-2.5 px-3.5 text-xs focus:border-accent"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-[10px] font-mono text-gray-500 uppercase tracking-widest mb-1">
+                    <label className="block text-[10px] font-mono text-text-secondary uppercase tracking-widest mb-1">
                       MSRP Selling Price ($ USD):
                     </label>
                     <input
@@ -601,20 +601,20 @@ Colors suited: Burnt Orange with Matte Slate eyes or Chalk White body.`);
                       required
                       value={newPrice}
                       onChange={(e) => setNewPrice(e.target.value)}
-                      className="w-full bg-bg-base text-gray-300 border border-bg-elevated rounded-xl py-2.5 px-3.5 text-xs focus:border-accent font-mono font-bold"
+                      className="w-full bg-bg-base text-text-primary border border-border-premium rounded-xl py-2.5 px-3.5 text-xs focus:border-accent font-mono font-bold"
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-[10px] font-mono text-gray-500 uppercase tracking-widest mb-1">
+                    <label className="block text-[10px] font-mono text-text-secondary uppercase tracking-widest mb-1">
                       Manufacturing Category:
                     </label>
                     <select
                       value={newCategory}
                       onChange={(e) => setNewCategory(e.target.value)}
-                      className="w-full bg-bg-base text-gray-300 border border-bg-elevated rounded-xl py-2.5 px-3 text-xs focus:border-accent cursor-pointer"
+                      className="w-full bg-bg-base text-text-primary border border-border-premium rounded-xl py-2.5 px-3 text-xs focus:border-accent cursor-pointer"
                     >
                       <option value="Keychains">Keychains</option>
                       <option value="Home Decor">Home Decor</option>
@@ -628,84 +628,84 @@ Colors suited: Burnt Orange with Matte Slate eyes or Chalk White body.`);
                   </div>
 
                   <div>
-                    <label className="block text-[10px] font-mono text-gray-500 uppercase tracking-widest mb-1">
+                    <label className="block text-[10px] font-mono text-text-secondary uppercase tracking-widest mb-1">
                       Infill Pattern Grid:
                     </label>
                     <input
                       type="text"
                       value={newInfill}
                       onChange={(e) => setNewInfill(e.target.value)}
-                      className="w-full bg-bg-base text-gray-300 border border-bg-elevated rounded-xl py-2.5 px-3.5 text-xs focus:border-accent"
+                      className="w-full bg-bg-base text-text-primary border border-border-premium rounded-xl py-2.5 px-3.5 text-xs focus:border-accent"
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div>
-                    <label className="block text-[10px] font-mono text-gray-500 uppercase tracking-widest mb-1">
+                    <label className="block text-[10px] font-mono text-text-secondary uppercase tracking-widest mb-1">
                       Printing Hours:
                     </label>
                     <input
                       type="text"
                       value={newPrintTime}
                       onChange={(e) => setNewPrintTime(e.target.value)}
-                      className="w-full bg-bg-base text-gray-300 border border-bg-elevated rounded-xl py-2.5 px-3.5 text-xs focus:border-accent font-mono"
+                      className="w-full bg-bg-base text-text-primary border border-border-premium rounded-xl py-2.5 px-3.5 text-xs focus:border-accent font-mono"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-[10px] font-mono text-gray-500 uppercase tracking-widest mb-1">
+                    <label className="block text-[10px] font-mono text-text-secondary uppercase tracking-widest mb-1">
                       Item Weight (Grams):
                     </label>
                     <input
                       type="number"
                       value={newWeight}
                       onChange={(e) => setNewWeight(e.target.value)}
-                      className="w-full bg-bg-base text-gray-300 border border-bg-elevated rounded-xl py-2.5 px-3.5 text-xs focus:border-accent font-mono"
+                      className="w-full bg-bg-base text-text-primary border border-border-premium rounded-xl py-2.5 px-3.5 text-xs focus:border-accent font-mono"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-[10px] font-mono text-gray-500 uppercase tracking-widest mb-1">
+                    <label className="block text-[10px] font-mono text-text-secondary uppercase tracking-widest mb-1">
                       Dimensions:
                     </label>
                     <input
                       type="text"
                       value={newDimensions}
                       onChange={(e) => setNewDimensions(e.target.value)}
-                      className="w-full bg-bg-base text-gray-300 border border-bg-elevated rounded-xl py-2.5 px-3.5 text-xs focus:border-accent font-mono"
+                      className="w-full bg-bg-base text-text-primary border border-border-premium rounded-xl py-2.5 px-3.5 text-xs focus:border-accent font-mono"
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-[10px] font-mono text-gray-500 uppercase tracking-widest mb-1">
+                    <label className="block text-[10px] font-mono text-text-secondary uppercase tracking-widest mb-1">
                       Available Color Swatches (Split with comma):
                     </label>
                     <input
                       type="text"
                       value={newColors}
                       onChange={(e) => setNewColors(e.target.value)}
-                      className="w-full bg-bg-base text-gray-300 border border-bg-elevated rounded-xl py-2.5 px-3.5 text-xs focus:border-accent font-sans"
+                      className="w-full bg-bg-base text-text-primary border border-border-premium rounded-xl py-2.5 px-3.5 text-xs focus:border-accent font-sans"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-[10px] font-mono text-gray-500 uppercase tracking-widest mb-1">
+                    <label className="block text-[10px] font-mono text-text-secondary uppercase tracking-widest mb-1">
                       Recommended Materials (Comma separated):
                     </label>
                     <input
                       type="text"
                       value={newMaterials}
                       onChange={(e) => setNewMaterials(e.target.value)}
-                      className="w-full bg-bg-base text-gray-300 border border-bg-elevated rounded-xl py-2.5 px-3.5 text-xs focus:border-accent font-sans"
+                      className="w-full bg-bg-base text-text-primary border border-border-premium rounded-xl py-2.5 px-3.5 text-xs focus:border-accent font-sans"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-[10px] font-mono text-gray-500 uppercase tracking-widest mb-1">
+                  <label className="block text-[10px] font-mono text-text-secondary uppercase tracking-widest mb-1">
                     Persuasive Model Description:
                   </label>
                   <textarea
@@ -713,7 +713,7 @@ Colors suited: Burnt Orange with Matte Slate eyes or Chalk White body.`);
                     onChange={(e) => setNewDesc(e.target.value)}
                     rows={3}
                     placeholder="Sourced directly from certified STL file parameters. Fully waterproof and solid design..."
-                    className="w-full bg-bg-base text-gray-300 border border-bg-elevated rounded-xl py-2 px-3 text-xs focus:border-accent resize-none font-sans"
+                    className="w-full bg-bg-base text-text-primary border border-border-premium rounded-xl py-2 px-3 text-xs focus:border-accent resize-none font-sans"
                   />
                 </div>
 
@@ -722,7 +722,7 @@ Colors suited: Burnt Orange with Matte Slate eyes or Chalk White body.`);
               {/* Right Drag Drop Image Section */}
               <div className="lg:col-span-5 flex flex-col justify-between">
                 <div>
-                  <label className="block text-[10px] font-mono text-gray-500 uppercase tracking-widest mb-2">
+                  <label className="block text-[10px] font-mono text-text-secondary uppercase tracking-widest mb-2">
                     Product Image Showcase Target Area:
                   </label>
                   
@@ -731,18 +731,18 @@ Colors suited: Burnt Orange with Matte Slate eyes or Chalk White body.`);
                     onDragOver={handleManualDrag}
                     onDrop={handleImageDrop}
                     onClick={() => {}}
-                    className="border-2 border-dashed border-bg-elevated bg-[#070c17]/30 rounded-2xl py-12 px-6 text-center select-none cursor-pointer relative overflow-hidden group hover:border-gray-700 transition"
+                    className="border-2 border-dashed border-border-premium bg-bg-surface/30 rounded-2xl py-12 px-6 text-center select-none cursor-pointer relative overflow-hidden group hover:border-gray-700 transition"
                   >
                     {uploadProgress ? (
                       <div className="space-y-2">
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-accent mx-auto" />
-                        <p className="text-xs text-gray-400 font-mono">Parsing File Texture Layers...</p>
+                        <p className="text-xs text-text-secondary font-mono">Parsing File Texture Layers...</p>
                       </div>
                     ) : (
                       <div className="space-y-3 relative z-10">
                         <Upload className="w-8 h-8 text-accent mx-auto group-hover:scale-105 transition" />
-                        <p className="text-gray-300 text-xs font-semibold">Drag &amp; Drop display image or photo here</p>
-                        <p className="text-[10px] text-gray-500 font-mono">PNG, JPG, SVG EXTREMELY HIGH INTENSITY</p>
+                        <p className="text-text-primary text-xs font-semibold">Drag &amp; Drop display image or photo here</p>
+                        <p className="text-[10px] text-text-secondary font-mono">PNG, JPG, SVG EXTREMELY HIGH INTENSITY</p>
                       </div>
                     )}
 
@@ -755,14 +755,14 @@ Colors suited: Burnt Orange with Matte Slate eyes or Chalk White body.`);
                   </div>
 
                   <div className="mt-4">
-                    <label className="block text-[10px] font-mono text-gray-500 uppercase tracking-widest mb-1">
+                    <label className="block text-[10px] font-mono text-text-secondary uppercase tracking-widest mb-1">
                       Direct Photo Image Link URL (Fallback):
                     </label>
                     <input
                       type="text"
                       value={manualImage}
                       onChange={(e) => setManualImage(e.target.value)}
-                      className="w-full bg-bg-base text-gray-500 border border-bg-elevated rounded-xl py-2 px-3 text-xs font-mono"
+                      className="w-full bg-bg-base text-text-secondary border border-border-premium rounded-xl py-2 px-3 text-xs font-mono"
                     />
                   </div>
                 </div>
@@ -789,12 +789,12 @@ Colors suited: Burnt Orange with Matte Slate eyes or Chalk White body.`);
 
         {/* --- ACTIVE INVENTORY TAB TABLE --- */}
         {activeSubTab === 'inventory' && (
-          <div id="stock-list-submodule" className="bg-[#070b13] border border-bg-elevated rounded-2xl p-6 overflow-hidden shadow-2xl space-y-4">
+          <div id="stock-list-submodule" className="bg-bg-surface border border-border-premium rounded-2xl p-6 overflow-hidden shadow-2xl space-y-4">
             
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-gray-850 pb-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border-premium pb-4">
               <div className="text-left font-mono">
-                <h3 className="font-display font-extrabold text-base text-gray-100 uppercase tracking-wide">STOCK REGISTER BOOK</h3>
-                <p className="text-[10px] text-gray-400 mt-1">TOTAL RECORD COUNT: <span className="text-accent font-bold">{products.length}</span> ACTIVE ITEMS</p>
+                <h3 className="font-display font-extrabold text-base text-text-primary uppercase tracking-wide">STOCK REGISTER BOOK</h3>
+                <p className="text-[10px] text-text-secondary mt-1">TOTAL RECORD COUNT: <span className="text-accent font-bold">{products.length}</span> ACTIVE ITEMS</p>
               </div>
 
               {/* Reset to Seed Button */}
@@ -808,10 +808,10 @@ Colors suited: Burnt Orange with Matte Slate eyes or Chalk White body.`);
             </div>
 
             {/* Catalog list table */}
-            <div className="overflow-x-auto border border-gray-850 rounded-xl bg-bg-base scrollbar-thin">
+            <div className="overflow-x-auto border border-border-premium rounded-xl bg-bg-base scrollbar-thin">
               <table className="w-full text-left border-collapse text-xs font-mono">
                 <thead>
-                  <tr className="bg-gray-900 border-b border-bg-elevated text-gray-400 uppercase tracking-wider text-[10.5px]">
+                  <tr className="bg-bg-surface border-b border-border-premium text-text-secondary uppercase tracking-wider text-[10.5px]">
                     <th className="p-4">SKU / ID</th>
                     <th className="p-4">Title</th>
                     <th className="p-4">Category</th>
@@ -820,18 +820,18 @@ Colors suited: Burnt Orange with Matte Slate eyes or Chalk White body.`);
                     <th className="p-4">Action</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-850 text-gray-300">
+                <tbody className="divide-y divide-border-premium text-text-secondary">
                   {products.map((item) => (
-                    <tr key={item.id} className="hover:bg-gray-900/50">
+                    <tr key={item.id} className="hover:bg-bg-elevated/40">
                       <td className="p-4 font-bold text-accent">{item.id}</td>
-                      <td className="p-4 font-sans font-bold text-gray-100">{item.title}</td>
+                      <td className="p-4 font-sans font-bold text-text-primary">{item.title}</td>
                       <td className="p-4">
-                        <span className="px-2 py-0.5 rounded text-[10px] bg-bg-surface border border-bg-elevated text-accent font-semibold uppercase font-mono">
+                        <span className="px-2 py-0.5 rounded text-[10px] bg-bg-surface border border-border-premium text-accent font-semibold uppercase font-mono">
                           {item.category}
                         </span>
                       </td>
                       <td className="p-4 text-accent font-bold">${item.price.toFixed(2)}</td>
-                      <td className="p-4 text-gray-400">
+                      <td className="p-4 text-text-secondary">
                         {item.weightGrams}g • {item.printTime} // {item.infill}
                       </td>
                       <td className="p-4">
@@ -848,7 +848,7 @@ Colors suited: Burnt Orange with Matte Slate eyes or Chalk White body.`);
                   ))}
                   {products.length === 0 && (
                     <tr>
-                      <td colSpan={6} className="p-10 text-center text-gray-500">
+                      <td colSpan={6} className="p-10 text-center text-text-secondary">
                         No product inventory loaded. Fill custom creation rows.
                       </td>
                     </tr>

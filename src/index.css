@@ -24,6 +24,7 @@
   --color-text-primary: var(--text-primary);
   --color-text-secondary: var(--text-secondary);
   --color-text-on-accent: var(--text-on-accent);
+  --color-border-premium: var(--border-premium);
 }
 
 :root {
@@ -39,8 +40,9 @@
 
   --text-primary: #0f172a;
   --text-secondary: #475569;
-  --text-on-accent: #ffffff;
+  --text-on-accent: #080c14;
 
+  --border-premium: rgba(15, 23, 42, 0.08);
   --glass-bg: rgba(255, 255, 255, 0.45);
   --glass-border: rgba(245, 175, 25, 0.12);
   --card-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05);
@@ -61,6 +63,7 @@
   --text-secondary: #94a3b8;
   --text-on-accent: #080c14;
 
+  --border-premium: rgba(255, 255, 255, 0.08);
   --glass-bg: rgba(13, 19, 34, 0.55);
   --glass-border: rgba(245, 175, 25, 0.12);
   --card-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);

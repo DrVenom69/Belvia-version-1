@@ -116,16 +116,16 @@ export default function ClientPortfolio() {
           <span className="font-mono text-xs font-semibold text-accent uppercase tracking-widest block mb-2">
             Additive Engineering Blueprints
           </span>
-          <h2 className="font-display text-3xl sm:text-4xl font-extrabold text-white">
+          <h2 className="font-display text-3xl sm:text-4xl font-extrabold text-text-primary">
             Client Print Portfolio
           </h2>
-          <p className="text-gray-400 text-sm mt-3 leading-relaxed">
+          <p className="text-text-secondary text-sm mt-3 leading-relaxed">
             Review detailed production logs of custom model orders we have sliced, curated, and discharged to physical clients. Inspect the structural settings that deliver flawless finishes.
           </p>
         </div>
 
         {/* Categories Tab selector */}
-        <div className="flex border-b border-gray-805 mb-8 overflow-x-auto scrollbar-thin">
+        <div className="flex border-b border-border-premium mb-8 overflow-x-auto scrollbar-thin">
           {categories.map((cat) => (
             <button
               id={`portfolio-cat-${cat.replace(/\s+/g, '-').toLowerCase()}`}
@@ -134,7 +134,7 @@ export default function ClientPortfolio() {
               className={`pb-3 px-6 text-xs font-semibold font-mono tracking-wider transition cursor-pointer shrink-0 border-b-2 ${
                 selectedTag === cat
                   ? 'border-accent text-accent'
-                  : 'border-transparent text-gray-500 hover:text-gray-300'
+                  : 'border-transparent text-text-secondary hover:text-text-primary'
               }`}
             >
               {cat.toUpperCase()}
@@ -148,7 +148,7 @@ export default function ClientPortfolio() {
             <div
               id={`portfolio-card-${item.id}`}
               key={item.id}
-              className="bg-bg-surface/75 border border-bg-elevated rounded-2xl overflow-hidden hover:border-gray-700 hover:shadow-2xl hover:shadow-accent/5 transition duration-300 flex flex-col md:flex-row h-full"
+              className="bg-bg-surface/75 border border-border-premium rounded-2xl overflow-hidden hover:border-accent hover:shadow-2xl hover:shadow-accent/5 transition duration-300 flex flex-col md:flex-row h-full"
             >
               {/* Photo */}
               <div className="w-full md:w-[45%] h-56 md:h-auto bg-bg-surface shrink-0 relative">
@@ -160,7 +160,7 @@ export default function ClientPortfolio() {
                 />
                 
                 {/* Visual tech sticker badge */}
-                <span className="absolute bottom-3 left-3 bg-bg-base/90 text-accent font-mono text-[9px] font-bold tracking-widest uppercase border border-bg-elevated rounded px-2 py-0.5">
+                <span className="absolute bottom-3 left-3 bg-bg-base/90 text-accent font-mono text-[9px] font-bold tracking-widest uppercase border border-border-premium rounded px-2 py-0.5">
                   {item.category}
                 </span>
               </div>
@@ -170,17 +170,17 @@ export default function ClientPortfolio() {
                 <div className="space-y-3">
                   <div>
                     {/* Trust client profile */}
-                    <div className="flex items-center justify-between text-[11px] font-mono text-gray-500">
+                    <div className="flex items-center justify-between text-[11px] font-mono text-text-muted">
                       <span>CLIENT DELIVERED</span>
                       <span className="text-accent font-bold">{item.clientHandle}</span>
                     </div>
-                    <h3 className="font-display font-black text-base text-white mt-1 leading-snug">
+                    <h3 className="font-display font-black text-base text-text-primary mt-1 leading-snug">
                       {item.title}
                     </h3>
                   </div>
 
                   {/* Testimonial citation block */}
-                  <div className="p-3.5 rounded-xl bg-bg-base border border-gray-850 relative italic text-[11px] text-gray-300 leading-relaxed text-left">
+                  <div className="p-3.5 rounded-xl bg-bg-base border border-border-premium relative italic text-[11px] text-text-secondary leading-relaxed text-left">
                     "{item.testimonial}"
                     <div className="flex items-center space-x-1 mt-2.5 text-yellow-500">
                       {[...Array(item.rating)].map((_, i) => (
@@ -190,28 +190,28 @@ export default function ClientPortfolio() {
                   </div>
 
                   {/* Additive Manufacturing Technical Parameters */}
-                  <div className="p-3 rounded-xl bg-[#090f1cf0] text-[10px] font-mono border border-gray-880 text-gray-400 space-y-1 text-left">
+                  <div className="p-3 rounded-xl bg-bg-elevated text-[10px] font-mono border border-border-premium text-text-muted space-y-1 text-left">
                     <span className="block font-bold text-[9px] text-accent mb-1.5 uppercase tracking-wider flex items-center">
                       <Cpu className="w-3.5 h-3.5 text-accent mr-1.5 animate-pulse" />
                       G-Code Micro Parameters
                     </span>
                     <div className="flex justify-between">
                       <span>FILAMENT POLYMER:</span>
-                      <span className="text-gray-200">{item.material}</span>
+                      <span className="text-text-primary">{item.material}</span>
                     </div>
                     <div className="flex justify-between">
                       <span>LAYER ALTITUDE:</span>
-                      <span className="text-gray-200">{item.layerHeight}</span>
+                      <span className="text-text-primary">{item.layerHeight}</span>
                     </div>
                     <div className="flex justify-between">
                       <span>INFILL STRENGTH GRID:</span>
-                      <span className="text-gray-200">{item.infill}</span>
+                      <span className="text-text-primary">{item.infill}</span>
                     </div>
                     <div className="flex justify-between">
                       <span>ADDITIVE UNIT BED:</span>
-                      <span className="text-gray-200">{item.printerUsed}</span>
+                      <span className="text-text-primary">{item.printerUsed}</span>
                     </div>
-                    <div className="flex justify-between pt-1 border-t border-gray-850 text-gray-300">
+                    <div className="flex justify-between pt-1 border-t border-border-premium text-text-secondary">
                       <span>FABRICATION RECORD:</span>
                       <span className="text-accent font-bold">{item.printDuration}</span>
                     </div>

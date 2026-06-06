@@ -127,9 +127,9 @@ export default function ReviewStories({ onSelectProduct }: ReviewStoriesProps) {
   const currentSlide = activeStoryIdx !== null ? STORY_SLIDES[activeStoryIdx] : null;
 
   return (
-    <div id="homescreen-stories-strip" className="py-6 border-b border-gray-805/60 bg-bg-base/20 text-left">
+    <div id="homescreen-stories-strip" className="py-6 border-b border-border-premium bg-bg-base/20 text-left">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <span className="font-mono text-[9px] font-bold text-gray-500 uppercase tracking-widest block mb-3.5">
+        <span className="font-mono text-[9px] font-bold text-text-secondary uppercase tracking-widest block mb-3.5">
           ⭐ Verified Maker Review Stories
         </span>
         
@@ -157,11 +157,11 @@ export default function ReviewStories({ onSelectProduct }: ReviewStoriesProps) {
                 </div>
                 
                 {/* Live star badge inside circle */}
-                <span className="absolute bottom-0 right-0 w-4.5 h-4.5 rounded-full bg-orange-500 border border-[#040710] flex items-center justify-center shadow">
-                  <Star className="w-2.5 h-2.5 text-white fill-current" />
+                <span className="absolute bottom-0 right-0 w-4.5 h-4.5 rounded-full bg-orange-500 border border-bg-base flex items-center justify-center shadow">
+                  <Star className="w-2.5 h-2.5 text-text-on-accent fill-current" />
                 </span>
               </div>
-              <span className="text-[10px] font-mono font-medium text-gray-400 group-hover:text-white transition">
+              <span className="text-[10px] font-mono font-medium text-text-secondary group-hover:text-text-primary transition">
                 @{slide.clientHandle}
               </span>
             </button>
@@ -176,7 +176,7 @@ export default function ReviewStories({ onSelectProduct }: ReviewStoriesProps) {
           {/* Main Story Core Container */}
           <div
             id="story-modal-box"
-            className="w-full max-w-sm aspect-[9/16] bg-bg-surface rounded-3xl border border-bg-elevated shadow-2xl relative overflow-hidden flex flex-col justify-between"
+            className="w-full max-w-sm aspect-[9/16] bg-bg-surface rounded-3xl border border-border-premium shadow-2xl relative overflow-hidden flex flex-col justify-between"
             onMouseDown={() => setIsPaused(true)}
             onMouseUp={() => setIsPaused(false)}
             onTouchStart={() => setIsPaused(true)}
@@ -217,7 +217,7 @@ export default function ReviewStories({ onSelectProduct }: ReviewStoriesProps) {
                   </div>
                   <div className="text-left">
                     <span className="font-mono text-xs font-bold block leading-tight">@{currentSlide.clientHandle}</span>
-                    <span className="text-[9px] text-gray-400 font-mono flex items-center">
+                    <span className="text-[9px] text-text-secondary font-mono flex items-center">
                       <ShieldCheck className="w-3 h-3 text-accent mr-1 shrink-0" />
                       VERIFIED MAKER BUYER
                     </span>

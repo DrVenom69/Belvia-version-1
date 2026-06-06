@@ -152,11 +152,11 @@ export default function SupportChat() {
           className="w-85 sm:w-96 h-[480px] bg-bg-base border border-bg-elevated rounded-2xl flex flex-col justify-between shadow-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-6 duration-200"
         >
           {/* Window Header */}
-          <div className="bg-[#0b1220] px-4 py-3.5 border-b border-bg-elevated flex items-center justify-between">
+          <div className="bg-bg-elevated px-4 py-3.5 border-b border-border-premium flex items-center justify-between">
             <div className="flex items-center space-x-2.5">
               <div className="w-3 h-3 rounded-full bg-green-500 animate-pulse" />
               <div>
-                <h4 className="text-sm font-bold text-gray-100 flex items-center">
+                <h4 className="text-sm font-bold text-text-primary flex items-center">
                   Belvia AI Care Desk
                   <Sparkles className="w-3.5 h-3.5 text-accent ml-1.5 animate-pulse" />
                 </h4>
@@ -166,7 +166,7 @@ export default function SupportChat() {
             <button
               id="btn-chat-close"
               onClick={handleToggle}
-              className="p-1 px-2.5 bg-gray-950 hover:bg-gray-900 border border-bg-elevated text-gray-400 hover:text-white rounded-lg text-xs font-mono cursor-pointer transition"
+              className="p-1 px-2.5 bg-bg-base hover:bg-bg-surface border border-border-premium text-text-secondary hover:text-text-primary rounded-lg text-xs font-mono cursor-pointer transition"
             >
               [X]
             </button>
@@ -180,19 +180,19 @@ export default function SupportChat() {
                 <div key={m.id} className={`flex ${isBot ? 'justify-start' : 'justify-end'} text-xs`}>
                   <div className={`flex items-start space-x-2 max-w-[85%] ${isBot ? '' : 'flex-row-reverse space-x-reverse'}`}>
                     <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 border shadow-inner ${
-                      isBot ? 'bg-accent-secondary/15 border-accent-secondary/30 text-accent' : 'bg-slate-800 border-slate-700 text-slate-305'
+                      isBot ? 'bg-accent-secondary/15 border-accent-secondary/30 text-accent' : 'bg-bg-elevated border-border-premium text-text-secondary'
                     }`}>
                       {isBot ? <Bot className="w-4 h-4" /> : <User className="w-4 h-4" />}
                     </div>
                     <div className="space-y-1">
                       <div className={`p-3 rounded-2xl leading-relaxed font-sans whitespace-pre-wrap ${
                         isBot 
-                          ? 'bg-[#080d17]/90 text-gray-300 border border-gray-850 rounded-tl-none' 
-                          : 'bg-accent-secondary text-white rounded-tr-none shadow-md shadow-accent-secondary/10'
+                          ? 'bg-bg-elevated text-text-secondary border border-border-premium rounded-tl-none' 
+                          : 'bg-accent-secondary text-text-on-accent rounded-tr-none shadow-md shadow-accent-secondary/10'
                       }`}>
                         {m.text}
                       </div>
-                      <span className={`block text-[8px] font-mono text-gray-500 ${isBot ? 'text-left' : 'text-right'}`}>
+                      <span className={`block text-[8px] font-mono text-text-muted ${isBot ? 'text-left' : 'text-right'}`}>
                         {m.timestamp}
                       </span>
                     </div>
@@ -207,7 +207,7 @@ export default function SupportChat() {
                   <div className="w-8 h-8 rounded-full bg-accent-secondary/15 border border-accent-secondary/30 text-accent flex items-center justify-center shrink-0">
                     <Bot className="w-4 h-4 animate-bounce" />
                   </div>
-                  <div className="p-3.5 bg-[#080d17]/90 border border-gray-850 rounded-2xl rounded-tl-none flex items-center space-x-1.5">
+                  <div className="p-3.5 bg-bg-elevated border border-border-premium rounded-2xl rounded-tl-none flex items-center space-x-1.5">
                     <span className="w-2 h-2 rounded-full bg-accent animate-bounce [animation-delay:-0.3s]" />
                     <span className="w-2 h-2 rounded-full bg-accent animate-bounce [animation-delay:-0.15s]" />
                     <span className="w-2 h-2 rounded-full bg-accent animate-bounce" />
@@ -220,30 +220,30 @@ export default function SupportChat() {
 
           {/* Quick help button tags */}
           {messages.length < 5 && (
-            <div className="p-3 pb-1 border-t border-bg-elevated bg-[#070c14]/40 text-left">
-              <span className="text-[9px] font-mono text-gray-500 uppercase font-bold tracking-wider block mb-1.5">Quick Inquiry Guides:</span>
+            <div className="p-3 pb-1 border-t border-border-premium bg-bg-surface/40 text-left">
+              <span className="text-[9px] font-mono text-text-muted uppercase font-bold tracking-wider block mb-1.5">Quick Inquiry Guides:</span>
               <div className="flex flex-wrap gap-1.5">
                 <button
                   onClick={() => handleQuickQuestion("Inquire about custom prints")}
-                  className="px-2 py-1 rounded bg-bg-base border border-bg-elevated hover:border-accent text-gray-400 hover:text-white text-[10px] font-medium cursor-pointer transition text-left"
+                  className="px-2 py-1 rounded bg-bg-base border border-border-premium hover:border-accent text-text-secondary hover:text-text-primary text-[10px] font-medium cursor-pointer transition text-left"
                 >
                   ⚙️ STL Print Studio
                 </button>
                 <button
                   onClick={() => handleQuickQuestion("Track my order updates")}
-                  className="px-2 py-1 rounded bg-bg-base border border-bg-elevated hover:border-accent text-gray-400 hover:text-white text-[10px] font-medium cursor-pointer transition text-left"
+                  className="px-2 py-1 rounded bg-bg-base border border-border-premium hover:border-accent text-text-secondary hover:text-text-primary text-[10px] font-medium cursor-pointer transition text-left"
                 >
                   📦 Track Order Status
                 </button>
                 <button
                   onClick={() => handleQuickQuestion("What are the pre-order conditions?")}
-                  className="px-2 py-1 rounded bg-bg-base border border-bg-elevated hover:border-accent text-gray-400 hover:text-white text-[10px] font-medium cursor-pointer transition text-left"
+                  className="px-2 py-1 rounded bg-bg-base border border-border-premium hover:border-accent text-text-secondary hover:text-text-primary text-[10px] font-medium cursor-pointer transition text-left"
                 >
                   🌍 Pre-order Import Goods
                 </button>
                 <button
                   onClick={() => handleQuickQuestion("Which filament material is best for water containers?")}
-                  className="px-2 py-1 rounded bg-bg-base border border-bg-elevated hover:border-accent text-gray-400 hover:text-white text-[10px] font-medium cursor-pointer transition text-left"
+                  className="px-2 py-1 rounded bg-bg-base border border-border-premium hover:border-accent text-text-secondary hover:text-text-primary text-[10px] font-medium cursor-pointer transition text-left"
                 >
                   🧬 Filaments Spec Guide
                 </button>
@@ -257,7 +257,7 @@ export default function SupportChat() {
               e.preventDefault();
               handleSendMessage(inputText);
             }}
-            className="p-3 bg-[#070c14] border-t border-bg-elevated flex items-center space-x-2"
+            className="p-3 bg-bg-surface border-t border-border-premium flex items-center space-x-2"
           >
             <input
               id="chat-user-input"
@@ -265,7 +265,7 @@ export default function SupportChat() {
               value={inputText}
               onChange={(e) => setInputText(e.target.value)}
               placeholder="Ask about materials, tracking number..."
-              className="flex-grow bg-bg-base text-gray-300 text-xs px-3.5 py-2.5 rounded-xl border border-bg-elevated focus:border-accent focus:outline-none"
+              className="flex-grow bg-bg-base text-text-primary text-xs px-3.5 py-2.5 rounded-xl border border-border-premium focus:border-accent focus:outline-none"
             />
             <button
               id="chat-send-btn"

@@ -66,36 +66,36 @@ export default function BulkOrders({ onAddBulkOrder }: BulkOrdersProps) {
           <span className="text-xs font-mono font-black text-accent uppercase tracking-widest bg-accent/10 border border-accent/20 px-3.5 py-1.5 rounded-full shadow-sm">
             Bulk Print Farm Operations
           </span>
-          <h2 className="font-display text-3xl sm:text-4xl font-extrabold text-white tracking-tight mt-4">
+          <h2 className="font-display text-3xl sm:text-4xl font-extrabold text-text-primary tracking-tight mt-4">
             B2B Bulk Production &amp; Merchandise
           </h2>
-          <p className="text-gray-400 text-sm mt-3 leading-relaxed">
+          <p className="text-text-secondary text-sm mt-3 leading-relaxed">
             Need 100 customized keychains with corporate branding or 1000 promotional desktop artifacts? Belvia operates a state-of-the-art print farm running 24/7. Get dedicated volume SLA pricing sheets instantly.
           </p>
         </div>
 
         {successId ? (
           /* Confirmation details */
-          <div className="max-w-xl mx-auto bg-[#070b13] border border-accent/30 p-8 rounded-2xl shadow-2xl text-center space-y-6">
+          <div className="max-w-xl mx-auto bg-bg-surface border border-border-premium p-8 rounded-2xl shadow-2xl text-center space-y-6">
             <div className="w-16 h-16 rounded-full bg-accent/15 border border-accent/30 flex items-center justify-center mx-auto">
               <ShieldCheck className="w-9 h-9 text-accent animate-pulse" />
             </div>
             
             <div className="space-y-1">
-              <h3 className="font-display font-black text-xl text-white">Bulk Request Logged</h3>
-              <p className="text-gray-400 text-xs">A print farm manager is validating your CAD designs. Job reservation ticket:</p>
-              <div className="inline-block px-4 py-1.5 rounded bg-gray-900 border border-bg-elevated text-sm font-mono font-bold text-accent mt-2">
+              <h3 className="font-display font-black text-xl text-text-primary">Bulk Request Logged</h3>
+              <p className="text-text-secondary text-xs">A print farm manager is validating your CAD designs. Job reservation ticket:</p>
+              <div className="inline-block px-4 py-1.5 rounded bg-bg-elevated border border-border-premium text-sm font-mono font-bold text-accent mt-2">
                 {successId}
               </div>
             </div>
 
-            <p className="text-gray-400 text-xs leading-relaxed">
+            <p className="text-text-secondary text-xs leading-relaxed">
               We have scheduled your corporate design draft to run on a test plate. An invoice and volume quotation detailing lead times will land in your mailbox shortly.
             </p>
 
             <button
               onClick={() => setSuccessId(null)}
-              className="px-6 py-2.5 rounded-xl bg-accent-secondary hover:bg-accent-hover text-white font-semibold text-xs cursor-pointer transition shadow"
+              className="px-6 py-2.5 rounded-xl bg-accent-secondary hover:bg-accent-hover text-text-on-accent font-semibold text-xs cursor-pointer transition shadow"
             >
               Request Additional Bulk Batches
             </button>
@@ -105,32 +105,32 @@ export default function BulkOrders({ onAddBulkOrder }: BulkOrdersProps) {
             
             {/* Left box: Pricing tiers and promotional grids */}
             <div className="lg:col-span-6 space-y-6">
-              <h3 className="font-display font-black text-xl text-white text-left pl-1">Additive Manufacturing Scale Tiers</h3>
+              <h3 className="font-display font-black text-xl text-text-primary text-left pl-1">Additive Manufacturing Scale Tiers</h3>
               
               <div className="space-y-4">
                 {BULK_TIERS.map((tier) => (
-                  <div key={tier.name} className="bg-[#070b13]/60 border border-bg-elevated/80 rounded-2xl p-5 text-left flex flex-col justify-between hover:border-gray-700 transition">
+                  <div key={tier.name} className="bg-bg-surface/60 border border-border-premium rounded-2xl p-5 text-left flex flex-col justify-between hover:border-accent transition">
                     <div className="flex justify-between items-start">
                       <div>
-                        <h4 className="font-display font-bold text-base text-gray-100">{tier.name}</h4>
+                        <h4 className="font-display font-bold text-base text-text-primary">{tier.name}</h4>
                         <span className="inline-block mt-1 font-mono text-[10px] text-accent font-semibold bg-accent/10 px-2 py-0.5 rounded">
                           {tier.qty}
                         </span>
                       </div>
                       <span className="text-xs font-mono font-bold text-accent">{tier.discount}</span>
                     </div>
-                    <p className="text-gray-400 text-xs mt-3 leading-relaxed">{tier.desc}</p>
+                    <p className="text-text-secondary text-xs mt-3 leading-relaxed">{tier.desc}</p>
                   </div>
                 ))}
               </div>
 
               {/* Service commitment list */}
-              <div className="bg-[#070b13]/40 border border-gray-850 p-6 rounded-2xl text-left font-sans space-y-3">
-                <h4 className="font-display font-bold text-sm text-gray-200 flex items-center space-x-2">
+              <div className="bg-bg-surface/40 border border-border-premium p-6 rounded-2xl text-left font-sans space-y-3">
+                <h4 className="font-display font-bold text-sm text-text-primary flex items-center space-x-2">
                   <Landmark className="w-5 h-5 text-accent" />
                   <span>Belvia Corporate Farm SLA Warranties:</span>
                 </h4>
-                <p className="text-xs text-gray-400 leading-relaxed">
+                <p className="text-xs text-text-secondary leading-relaxed">
                   All bulk orders undergo rigorous dimensional testing. We inspect 3 sample models under digital macro mics for stress-points and infill integrity before routing the entire batch to our printing farm.
                 </p>
               </div>
@@ -139,14 +139,14 @@ export default function BulkOrders({ onAddBulkOrder }: BulkOrdersProps) {
 
             {/* Right box: Quote Request Form */}
             <div className="lg:col-span-6">
-              <div className="bg-[#070b13] border border-bg-elevated p-6 sm:p-7 rounded-2xl text-left shadow-2xl">
-                <h3 className="font-display font-extrabold text-lg text-white mb-6">Bulk Request Form</h3>
+              <div className="bg-bg-surface border border-border-premium p-6 sm:p-7 rounded-2xl text-left shadow-2xl">
+                <h3 className="font-display font-extrabold text-lg text-text-primary mb-6">Bulk Request Form</h3>
                 
                 <form onSubmit={handleSubmit} className="space-y-4">
                   
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-[10px] font-mono text-gray-500 uppercase tracking-widest mb-1">
+                      <label className="block text-[10px] font-mono text-text-muted uppercase tracking-widest mb-1">
                         Company Name:
                       </label>
                       <input
@@ -155,12 +155,12 @@ export default function BulkOrders({ onAddBulkOrder }: BulkOrdersProps) {
                         value={companyName}
                         onChange={(e) => setCompanyName(e.target.value)}
                         placeholder="Belvia Inc"
-                        className="w-full bg-bg-base text-gray-300 border border-bg-elevated rounded-xl py-2.5 px-3 text-xs focus:border-accent"
+                        className="w-full bg-bg-base text-text-primary border border-border-premium rounded-xl py-2.5 px-3 text-xs focus:border-accent"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-[10px] font-mono text-gray-500 uppercase tracking-widest mb-1">
+                      <label className="block text-[10px] font-mono text-text-muted uppercase tracking-widest mb-1">
                         Corporate Contact Representative:
                       </label>
                       <input
@@ -169,14 +169,14 @@ export default function BulkOrders({ onAddBulkOrder }: BulkOrdersProps) {
                         value={contactName}
                         onChange={(e) => setContactName(e.target.value)}
                         placeholder="Iffat Ahmed"
-                        className="w-full bg-bg-base text-gray-300 border border-bg-elevated rounded-xl py-2.5 px-3 text-xs focus:border-accent"
+                        className="w-full bg-bg-base text-text-primary border border-border-premium rounded-xl py-2.5 px-3 text-xs focus:border-accent"
                       />
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-[10px] font-mono text-gray-500 uppercase tracking-widest mb-1">
+                      <label className="block text-[10px] font-mono text-text-muted uppercase tracking-widest mb-1">
                         Corporate Email:
                       </label>
                       <input
@@ -185,12 +185,12 @@ export default function BulkOrders({ onAddBulkOrder }: BulkOrdersProps) {
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         placeholder="iffat.ahmed@belvia.com"
-                        className="w-full bg-bg-base text-gray-300 border border-bg-elevated rounded-xl py-2.5 px-3 text-xs focus:border-accent"
+                        className="w-full bg-bg-base text-text-primary border border-border-premium rounded-xl py-2.5 px-3 text-xs focus:border-accent"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-[10px] font-mono text-gray-500 uppercase tracking-widest mb-1">
+                      <label className="block text-[10px] font-mono text-text-muted uppercase tracking-widest mb-1">
                         Phone Number (Optional):
                       </label>
                       <input
@@ -198,20 +198,20 @@ export default function BulkOrders({ onAddBulkOrder }: BulkOrdersProps) {
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
                         placeholder="+880 12345 6789"
-                        className="w-full bg-bg-base text-gray-300 border border-bg-elevated rounded-xl py-2.5 px-3 text-xs focus:border-accent"
+                        className="w-full bg-bg-base text-text-primary border border-border-premium rounded-xl py-2.5 px-3 text-xs focus:border-accent"
                       />
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-[10px] font-mono text-gray-500 uppercase tracking-widest mb-1">
+                      <label className="block text-[10px] font-mono text-text-muted uppercase tracking-widest mb-1">
                         Bulk Design Type:
                       </label>
                       <select
                         value={category}
                         onChange={(e) => setCategory(e.target.value)}
-                        className="w-full bg-bg-base text-gray-300 border border-bg-elevated rounded-xl py-2.5 px-3 text-xs focus:border-accent cursor-pointer"
+                        className="w-full bg-bg-base text-text-primary border border-border-premium rounded-xl py-2.5 px-3 text-xs focus:border-accent cursor-pointer"
                       >
                         <option value="Custom Keychains Batch">Custom Logo Keychains</option>
                         <option value="Event Awards & Merch">Event Awards / Desk Trophies</option>
@@ -222,7 +222,7 @@ export default function BulkOrders({ onAddBulkOrder }: BulkOrdersProps) {
                     </div>
 
                     <div>
-                      <label className="block text-[10px] font-mono text-gray-500 uppercase tracking-widest mb-1">
+                      <label className="block text-[10px] font-mono text-text-muted uppercase tracking-widest mb-1">
                         Target Volume (QTY minimum 50):
                       </label>
                       <input
@@ -231,14 +231,14 @@ export default function BulkOrders({ onAddBulkOrder }: BulkOrdersProps) {
                         required
                         value={quantity}
                         onChange={(e) => setQuantity(parseInt(e.target.value) || 50)}
-                        className="w-full bg-bg-base text-gray-300 border border-bg-elevated rounded-xl py-2.5 px-3 text-xs focus:border-accent font-mono font-bold"
+                        className="w-full bg-bg-base text-text-primary border border-border-premium rounded-xl py-2.5 px-3 text-xs focus:border-accent font-mono font-bold"
                       />
                     </div>
                   </div>
 
                   {/* Logo name */}
                   <div>
-                    <label className="block text-[10px] font-mono text-gray-500 uppercase tracking-widest mb-1">
+                    <label className="block text-[10px] font-mono text-text-muted uppercase tracking-widest mb-1">
                       Embossed Logo Graphic / STL Mockup Name:
                     </label>
                     <input
@@ -246,13 +246,13 @@ export default function BulkOrders({ onAddBulkOrder }: BulkOrdersProps) {
                       value={logoFile}
                       onChange={(e) => setLogoFile(e.target.value)}
                       placeholder="corporate-logo-emboss.svg / brand-layout.stl"
-                      className="w-full bg-bg-base text-gray-300 border border-bg-elevated rounded-xl py-2.5 px-3 text-xs focus:border-accent"
+                      className="w-full bg-bg-base text-text-primary border border-border-premium rounded-xl py-2.5 px-3 text-xs focus:border-accent"
                     />
                   </div>
 
                   {/* Specification text */}
                   <div>
-                    <label className="block text-[10px] font-mono text-gray-500 uppercase tracking-widest mb-1">
+                    <label className="block text-[10px] font-mono text-text-muted uppercase tracking-widest mb-1">
                       Filament Specifications &amp; Post-process finishing needs:
                     </label>
                     <textarea
@@ -261,16 +261,16 @@ export default function BulkOrders({ onAddBulkOrder }: BulkOrdersProps) {
                       onChange={(e) => setDetails(e.target.value)}
                       rows={3}
                       placeholder="Please dual-layer color emboss the logos using Matte Slate and Burnt Orange, high infill is required..."
-                      className="w-full bg-bg-base text-gray-300 border border-bg-elevated rounded-xl py-2.5 px-3 text-xs focus:border-accent resize-none"
+                      className="w-full bg-bg-base text-text-primary border border-border-premium rounded-xl py-2.5 px-3 text-xs focus:border-accent resize-none"
                     />
                   </div>
 
                   <button
                     id="submit-bulk-btn"
                     type="submit"
-                    className="w-full py-3 px-5 rounded-xl text-xs font-semibold text-white bg-gradient-to-r from-accent to-accent-secondary hover:from-accent-hover hover:to-accent-secondary-lt transition-all shadow-md flex items-center justify-center space-x-2 cursor-pointer"
+                    className="w-full py-3 px-5 rounded-xl text-xs font-semibold text-text-on-accent bg-gradient-to-r from-accent to-accent-secondary hover:from-accent-hover hover:to-accent-secondary-lt transition-all shadow-md flex items-center justify-center space-x-2 cursor-pointer"
                   >
-                    <Send className="w-4 h-4 text-white" />
+                    <Send className="w-4 h-4 text-text-on-accent" />
                     <span>Submit Additive Corporate Request</span>
                   </button>
 

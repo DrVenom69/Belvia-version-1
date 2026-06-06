@@ -153,3 +153,145 @@
   from { transform: translateX(-50%); }
   to   { transform: translateX(0); }
 }
+
+/* ─── Hero Aurora Animated Background ──────────────────────────────────────── */
+
+@keyframes auroraShift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.hero-aurora {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    #080c14 0%,
+    #0d1525 15%,
+    #100d1e 30%,
+    #080c14 45%,
+    #0e1a10 60%,
+    #0d1025 75%,
+    #080c14 100%
+  );
+  background-size: 400% 400%;
+  animation: auroraShift 18s ease infinite;
+  opacity: 1;
+}
+
+/* ─── Drifting Glow Orbs ──────────────────────────────────────────────────── */
+
+@keyframes orbFloat1 {
+  0%   { transform: translate(0, 0) scale(1); }
+  33%  { transform: translate(60px, -40px) scale(1.08); }
+  66%  { transform: translate(-30px, 30px) scale(0.95); }
+  100% { transform: translate(0, 0) scale(1); }
+}
+
+@keyframes orbFloat2 {
+  0%   { transform: translate(0, 0) scale(1); }
+  33%  { transform: translate(-70px, 50px) scale(1.1); }
+  66%  { transform: translate(40px, -60px) scale(0.92); }
+  100% { transform: translate(0, 0) scale(1); }
+}
+
+@keyframes orbFloat3 {
+  0%   { transform: translate(0, 0) scale(1); }
+  50%  { transform: translate(-50px, -30px) scale(1.12); }
+  100% { transform: translate(0, 0) scale(1); }
+}
+
+@keyframes orbFloat4 {
+  0%   { transform: translate(0, 0) scale(1); }
+  40%  { transform: translate(80px, 60px) scale(0.9); }
+  80%  { transform: translate(-20px, -20px) scale(1.05); }
+  100% { transform: translate(0, 0) scale(1); }
+}
+
+.hero-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  will-change: transform;
+  pointer-events: none;
+}
+
+/* Gold orb – top left */
+.hero-orb-1 {
+  width: 520px;
+  height: 520px;
+  top: -120px;
+  left: -80px;
+  background: radial-gradient(circle, rgba(245, 175, 25, 0.22) 0%, rgba(245, 175, 25, 0.04) 60%, transparent 100%);
+  animation: orbFloat1 22s ease-in-out infinite;
+}
+
+/* Violet / indigo orb – bottom right */
+.hero-orb-2 {
+  width: 600px;
+  height: 600px;
+  bottom: -160px;
+  right: -100px;
+  background: radial-gradient(circle, rgba(123, 92, 229, 0.22) 0%, rgba(123, 92, 229, 0.05) 55%, transparent 100%);
+  animation: orbFloat2 27s ease-in-out infinite;
+}
+
+/* Cyan-teal orb – centre right */
+.hero-orb-3 {
+  width: 380px;
+  height: 380px;
+  top: 20%;
+  right: 10%;
+  background: radial-gradient(circle, rgba(20, 200, 220, 0.10) 0%, rgba(20, 200, 220, 0.02) 60%, transparent 100%);
+  animation: orbFloat3 19s ease-in-out infinite;
+}
+
+/* Amber orb – bottom left */
+.hero-orb-4 {
+  width: 300px;
+  height: 300px;
+  bottom: 60px;
+  left: 10%;
+  background: radial-gradient(circle, rgba(245, 140, 25, 0.12) 0%, rgba(245, 140, 25, 0.02) 60%, transparent 100%);
+  animation: orbFloat4 24s ease-in-out infinite;
+}
+
+/* ─── Hero Mesh Grid Overlay ─────────────────────────────────────────────── */
+
+.hero-grid {
+  background-image:
+    linear-gradient(to right, rgba(245, 175, 25, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(245, 175, 25, 0.04) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 100%);
+  -webkit-mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 100%);
+}
+
+/* ─── Glassmorphic Hero Panel ────────────────────────────────────────────── */
+
+.hero-glass-panel {
+  background: rgba(8, 12, 20, 0.45);
+  backdrop-filter: blur(24px) saturate(1.4);
+  -webkit-backdrop-filter: blur(24px) saturate(1.4);
+  border: 1px solid rgba(245, 175, 25, 0.14);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.55),
+    0 0 0 0.5px rgba(255, 255, 255, 0.04) inset,
+    0 1px 0 0 rgba(245, 175, 25, 0.10) inset;
+}
+
+/* Ghost CTA inside glass panel */
+.hero-btn-ghost {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(245, 175, 25, 0.18);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: all 0.25s ease;
+}
+
+.hero-btn-ghost:hover {
+  background: rgba(245, 175, 25, 0.08);
+  border-color: rgba(245, 175, 25, 0.40);
+  box-shadow: 0 0 16px rgba(245, 175, 25, 0.12);
+}

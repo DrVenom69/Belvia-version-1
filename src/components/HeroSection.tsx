@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowRight, Cpu, Sparkles } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import HeroCarousel from './HeroCarousel';
 
 interface HeroSectionProps {
@@ -12,53 +12,70 @@ export default function HeroSection({ onStartShopping, onGoToCustom, onCategoryC
   return (
     <section
       id="belvia-hero"
-      className="relative overflow-hidden pt-16 pb-2 bg-bg-base border-b border-bg-elevated/40"
+      className="relative overflow-hidden pt-16 pb-2 border-b border-bg-elevated/40"
+      style={{ background: '#080c14' }}
     >
-      {/* ── Ambient background glows ── */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-accent/5 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute top-1/2 left-1/4 w-64 h-64 bg-accent/4 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute top-1/2 right-1/4 w-64 h-64 bg-accent-secondary/3 rounded-full blur-3xl pointer-events-none" />
+      {/* ── Aurora animated gradient layer ── */}
+      <div className="absolute inset-0 z-0 pointer-events-none" aria-hidden="true">
+        <div className="hero-aurora" />
+      </div>
 
-      {/* ── Typography block ── */}
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10 space-y-6 mb-10">
+      {/* ── Drifting ambient orbs ── */}
+      <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden" aria-hidden="true">
+        {/* Orb 1 – warm gold, top-left */}
+        <div className="hero-orb hero-orb-1" />
+        {/* Orb 2 – violet, bottom-right */}
+        <div className="hero-orb hero-orb-2" />
+        {/* Orb 3 – cyan accent, centre-right */}
+        <div className="hero-orb hero-orb-3" />
+        {/* Orb 4 – amber, bottom-left */}
+        <div className="hero-orb hero-orb-4" />
+      </div>
 
-        {/* Main heading */}
-        <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-text-primary leading-[1.08] uppercase">
-          Imagine It.<br />
-          We Print It.<br />
-          <span className="relative inline-block">
-            <span className="text-accent font-black">You Love It.</span>
-            {/* underline accent */}
-            <span
-              aria-hidden="true"
-              className="absolute -bottom-1 left-0 h-[3px] w-full rounded-full bg-gradient-to-r from-accent to-accent/20"
-            />
-          </span>
-        </h1>
+      {/* ── Mesh grid overlay ── */}
+      <div className="absolute inset-0 z-0 pointer-events-none hero-grid" aria-hidden="true" />
 
-        {/* Sub-copy */}
-        <p className="text-text-secondary text-sm sm:text-base leading-relaxed max-w-xl mx-auto font-sans">
-          Bangladesh's First 3D Printing Marketplace. Shop unique 3D printed products or bring your own ideas to life. Custom manufacturing, ready prints, and 1–2 day delivery inside Dhaka.
-        </p>
+      {/* ── Glassmorphic hero text panel ── */}
+      <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center mb-10 pt-6">
+        <div className="hero-glass-panel inline-block w-full max-w-3xl px-8 py-10 rounded-3xl text-center space-y-6">
 
-        {/* CTA buttons */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-          <button
-            id="hero-shop-btn"
-            onClick={onStartShopping}
-            className="group flex items-center gap-2 px-7 py-3 rounded-xl bg-accent hover:bg-accent-hover text-text-on-accent font-display font-bold text-sm transition-all shadow-lg hover:shadow-accent/20 hover:scale-[1.03] active:scale-[0.98] cursor-pointer"
-          >
-            Shop Now
-            <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-          </button>
+          {/* Main heading */}
+          <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-text-primary leading-[1.1] uppercase">
+            Imagine It.<br />
+            We Print It.<br />
+            <span className="relative inline-block">
+              <span className="text-accent font-black">You Love It.</span>
+              <span
+                aria-hidden="true"
+                className="absolute -bottom-1 left-0 h-[3px] w-full rounded-full bg-gradient-to-r from-accent to-accent/20"
+              />
+            </span>
+          </h1>
 
-          <button
-            id="hero-custom-btn"
-            onClick={onGoToCustom}
-            className="flex items-center gap-2 px-7 py-3 rounded-xl bg-bg-surface/60 border border-bg-elevated hover:border-accent/40 text-text-primary hover:text-accent font-display font-semibold text-sm transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer backdrop-blur-sm"
-          >
-            Custom Print Studio
-          </button>
+          {/* Sub-copy */}
+          <p className="text-text-secondary text-sm sm:text-base leading-relaxed max-w-xl mx-auto font-sans">
+            Bangladesh's First 3D Printing Marketplace. Shop unique 3D printed products or bring your own ideas to life. Custom manufacturing, ready prints, and 1–2 day delivery inside Dhaka.
+          </p>
+
+          {/* CTA buttons */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+            <button
+              id="hero-shop-btn"
+              onClick={onStartShopping}
+              className="group flex items-center gap-2 px-7 py-3 rounded-xl bg-accent hover:bg-accent-hover text-text-on-accent font-display font-bold text-sm transition-all shadow-lg hover:shadow-accent/30 hover:scale-[1.04] active:scale-[0.98] cursor-pointer"
+            >
+              Shop Now
+              <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+            </button>
+
+            <button
+              id="hero-custom-btn"
+              onClick={onGoToCustom}
+              className="flex items-center gap-2 px-7 py-3 rounded-xl text-text-primary hover:text-accent font-display font-semibold text-sm transition-all hover:scale-[1.02] active:scale-[0.98] cursor-pointer hero-btn-ghost"
+            >
+              Custom Print Studio
+            </button>
+          </div>
         </div>
       </div>
 
@@ -75,7 +92,6 @@ export default function HeroSection({ onStartShopping, onGoToCustom, onCategoryC
       <div className="relative z-10">
         <HeroCarousel
           onCategoryClick={(cat) => {
-            // Navigate to the main store; App will handle the tab switch
             if (onCategoryClick) {
               onCategoryClick(cat);
             } else {
@@ -86,7 +102,7 @@ export default function HeroSection({ onStartShopping, onGoToCustom, onCategoryC
       </div>
 
       {/* ── Bottom fade-to-base ── */}
-      <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-bg-base to-transparent pointer-events-none z-20" />
+      <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-[#080c14] to-transparent pointer-events-none z-20" />
     </section>
   );
 }

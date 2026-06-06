@@ -257,26 +257,52 @@
   animation: orbFloat4 24s ease-in-out infinite;
 }
 
-/* ─── Hero Sonar Rings Overlay ──────────────────────────────────────────── */
-/* Concentric radial rings from centre — ultra-thin gold at low opacity */
+/* ─── Hero Metallic Chromatic Ripple ─────────────────────────────────────── */
+/* Vertical gradient strips that the SVG feTurbulence+feDisplacementMap distorts */
+/* into an organic metallic wave. Very low opacity to stay non-distracting.     */
 
-@keyframes sonarPulse {
-  0%   { opacity: 0.6; }
-  50%  { opacity: 0.25; }
-  100% { opacity: 0.6; }
+.hero-metallic-ripple {
+  /* Repeating thin vertical strips — alternating dark navy / mid-slate / dark */
+  /* These become the "ribbons" that warp into the chrome wave shape */
+  background-image: repeating-linear-gradient(
+    90deg,
+    /* deep carbon */
+    #080c14        0px,
+    #080c14        3px,
+    /* slate mid */
+    #111827        3px,
+    #1a2540        7px,
+    /* subtle silver highlight */
+    #1e2d47        7px,
+    #243354        9px,
+    /* tiny gold chromatic fringe — matches brand */
+    rgba(245,175,25,0.25)  9px,
+    rgba(245,175,25,0.08)  10px,
+    /* back to dark */
+    #1a2540        10px,
+    #111827        13px,
+    #090d16        13px,
+    #080c14        16px,
+    /* slightly lighter valley */
+    #0d1525        16px,
+    #162036        20px,
+    #1a2540        22px,
+    /* thin blue-chrome fringe */
+    rgba(100,140,220,0.18) 22px,
+    rgba(100,140,220,0.04) 23px,
+    /* dark again */
+    #162036        23px,
+    #0d1525        26px,
+    #080c14        28px
+  );
+  background-size: 28px 100%;
+  /* Very low base opacity — filter will stretch and blur these further */
+  opacity: 0.18;
+  /* mix-mode screen lets the dark background show through naturally */
+  mix-blend-mode: screen;
+  will-change: filter;
 }
 
-.hero-sonar {
-  background-image:
-    /* Ring 1 — innermost */
-    radial-gradient(ellipse 18% 25% at 50% 42%, transparent 99%, rgba(245, 175, 25, 0.07) 100%),
-    radial-gradient(ellipse 30% 42% at 50% 42%, transparent 99%, rgba(245, 175, 25, 0.055) 100%),
-    radial-gradient(ellipse 44% 60% at 50% 42%, transparent 99%, rgba(245, 175, 25, 0.04) 100%),
-    radial-gradient(ellipse 58% 78% at 50% 42%, transparent 99%, rgba(245, 175, 25, 0.03) 100%),
-    radial-gradient(ellipse 72% 96% at 50% 42%, transparent 99%, rgba(245, 175, 25, 0.02) 100%),
-    radial-gradient(ellipse 88% 115% at 50% 42%, transparent 99%, rgba(245, 175, 25, 0.015) 100%);
-  animation: sonarPulse 8s ease-in-out infinite;
-}
 
 /* ─── Hero CTA Buttons — Glassmorphic ───────────────────────────────────── */
 

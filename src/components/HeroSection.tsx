@@ -15,12 +15,54 @@ export default function HeroSection({ onStartShopping, onGoToCustom, onCategoryC
       className="relative overflow-hidden pt-16 pb-2 border-b border-bg-elevated/40"
       style={{ background: '#080c14' }}
     >
+      {/* ── Hidden SVG filter definitions ── */}
+      <svg width="0" height="0" className="absolute" aria-hidden="true">
+        <defs>
+          <filter id="metallic-wave" x="-10%" y="-10%" width="120%" height="120%" colorInterpolationFilters="sRGB">
+            {/* Turbulence creates the organic wave displacement */}
+            <feTurbulence
+              id="hero-turbulence"
+              type="fractalNoise"
+              baseFrequency="0.012 0.055"
+              numOctaves="3"
+              seed="5"
+              result="noise"
+            >
+              {/* Animate the frequency over time for living ripple */}
+              <animate
+                attributeName="baseFrequency"
+                values="0.012 0.055; 0.018 0.07; 0.010 0.048; 0.015 0.062; 0.012 0.055"
+                dur="20s"
+                repeatCount="indefinite"
+              />
+            </feTurbulence>
+            {/* Displace the gradient strips using the noise */}
+            <feDisplacementMap
+              in="SourceGraphic"
+              in2="noise"
+              scale="160"
+              xChannelSelector="R"
+              yChannelSelector="G"
+              result="distorted"
+            />
+          </filter>
+        </defs>
+      </svg>
+
       {/* ── Aurora animated gradient layer ── */}
       <div className="absolute inset-0 z-0 pointer-events-none" aria-hidden="true">
         <div className="hero-aurora" />
       </div>
 
-      {/* ── Drifting ambient orbs ── */}
+      {/* ── Metallic chromatic ripple layer ── */}
+      {/* Vertical metallic strips + SVG distortion at very low opacity */}
+      <div
+        className="absolute inset-0 z-0 pointer-events-none hero-metallic-ripple"
+        aria-hidden="true"
+        style={{ filter: 'url(#metallic-wave)' }}
+      />
+
+      {/* ── Drifting ambient orbs (on top of ripple) ── */}
       <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden" aria-hidden="true">
         <div className="hero-orb hero-orb-1" />
         <div className="hero-orb hero-orb-2" />
@@ -28,10 +70,7 @@ export default function HeroSection({ onStartShopping, onGoToCustom, onCategoryC
         <div className="hero-orb hero-orb-4" />
       </div>
 
-      {/* ── Radial sonar rings overlay ── */}
-      <div className="absolute inset-0 z-0 pointer-events-none hero-sonar" aria-hidden="true" />
-
-      {/* ── Typography block — text directly on background, no panel ── */}
+      {/* ── Typography block ── */}
       <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center mb-10 pt-6 space-y-6">
 
         {/* Main heading */}
@@ -54,7 +93,6 @@ export default function HeroSection({ onStartShopping, onGoToCustom, onCategoryC
 
         {/* CTA buttons — glassmorphic only here */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-          {/* Primary: solid accent with glow */}
           <button
             id="hero-shop-btn"
             onClick={onStartShopping}
@@ -64,7 +102,6 @@ export default function HeroSection({ onStartShopping, onGoToCustom, onCategoryC
             <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
           </button>
 
-          {/* Secondary: glassmorphic ghost */}
           <button
             id="hero-custom-btn"
             onClick={onGoToCustom}

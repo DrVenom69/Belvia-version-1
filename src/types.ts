@@ -16,6 +16,7 @@ export interface Product {
   description: string;
   category: 'Keychains' | 'Home Decor' | 'Desk Accessories' | 'Gaming Accessories' | 'Figures & Collectibles' | 'Business Merchandise' | 'Custom Orders' | 'Functional Prints' | '3D Printers & Spares' | 'Exotic Filaments' | 'Premium Hardware' | 'Imported Goods' | 'A1 Mini Mods' | 'Hotends';
   price: number;
+  basePrice?: number;
   colors: string[];
   materials: string[]; // PLA, PETG, ABS, TPU
   rating: number;
@@ -61,6 +62,16 @@ export interface BulkOrderRequest {
   createdAt: string;
 }
 
+export interface KeychainConfig {
+  name: string;
+  font: string;
+  textColor: string;
+  strokeColor: string;
+  size: 'Small' | 'Medium' | 'Large';
+  theme: 'standard' | 'floral' | 'dogtag' | 'numberplate' | 'football';
+  customizationVersion: number;
+}
+
 export interface CartItem {
   product: Product;
   selectedColor: string;
@@ -68,4 +79,9 @@ export interface CartItem {
   quantity: number;
   isPreOrder?: boolean;
   depositAmount?: number;
+  customization?: KeychainConfig;
+  customPreviewUrl?: string;
+  calculatedPrice?: number;
+  calculatedWeight?: number;
+  calculatedDimensions?: string;
 }

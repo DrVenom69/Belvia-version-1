@@ -1,10 +1,15 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
+/* ── Premium font stack ──────────────────────────────────────────────────────
+   Display/Headings : Syne         — geometric, editorial, premium agency feel
+   Body             : DM Sans      — clean, modern, digital-first readability
+   Mono/Labels      : DM Mono      — technical precision, matches DM Sans perfectly
+   ──────────────────────────────────────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,300;1,9..40,400&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300;1,400&display=swap');
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Outfit", "Inter", sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  --font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Syne", "DM Sans", sans-serif;
+  --font-mono: "DM Mono", ui-monospace, SFMono-Regular, monospace;
 
   /* Bind theme tokens to responsive CSS variables */
   --color-bg-base: var(--bg-base);
@@ -61,6 +66,62 @@
   --card-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
 }
 
+/* ══════════════════════════════════════════════════════════════════════════════
+   GLOBAL TYPOGRAPHY BASELINE
+   ══════════════════════════════════════════════════════════════════════════════ */
+
+/* Base rendering — smooth, crisp on all screens */
+*, *::before, *::after {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Body baseline */
+body {
+  font-family: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  font-size: 15px;
+  line-height: 1.65;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  color: var(--text-primary);
+  background-color: var(--bg-base);
+}
+
+/* ── Headings: Syne — tight tracking, strong weight ── */
+h1, h2, h3, h4, h5, h6,
+.font-display {
+  font-family: "Syne", "DM Sans", sans-serif;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+  font-weight: 700;
+}
+
+h1 { font-size: clamp(2rem, 5vw, 3.75rem); font-weight: 800; letter-spacing: -0.04em; }
+h2 { font-size: clamp(1.5rem, 3vw, 2.25rem); font-weight: 700; letter-spacing: -0.03em; }
+h3 { font-size: clamp(1.1rem, 2vw, 1.5rem); font-weight: 700; letter-spacing: -0.02em; }
+h4 { font-size: 1rem; font-weight: 600; letter-spacing: -0.01em; }
+
+/* ── Body prose — optimal reading size and spacing ── */
+p, li, span, label, input, textarea, select {
+  font-family: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  line-height: 1.7;
+}
+
+/* ── Mono/labels — DM Mono, tighter for technical readability ── */
+code, pre, kbd, samp,
+.font-mono {
+  font-family: "DM Mono", ui-monospace, SFMono-Regular, monospace;
+  font-size: 0.875em;
+  letter-spacing: -0.01em;
+}
+
+/* Buttons — Syne for display weight CTAs, DM Sans for smaller UI */
+button {
+  font-family: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: -0.01em;
+}
+
 /* Premium radial ambient accent */
 .bg-grid-ambient {
   background-size: 40px 40px;
@@ -68,6 +129,7 @@
     linear-gradient(to right, rgba(120, 120, 120, 0.03) 1px, transparent 1px),
     linear-gradient(to bottom, rgba(120, 120, 120, 0.03) 1px, transparent 1px);
 }
+
 
 .custom-glass {
   background: var(--glass-bg);

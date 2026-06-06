@@ -59,14 +59,14 @@ export default function Navbar({
                   id={`nav-${link.id}`}
                   key={link.id}
                   onClick={() => setActiveTab(link.id)}
-                  className={`flex items-center px-4 py-2 rounded-xl text-xs font-mono font-bold uppercase tracking-wider cursor-pointer transition-all duration-300 border ${
+                  className={`flex items-center px-4 py-2 rounded-xl text-xs font-display font-semibold uppercase tracking-wide cursor-pointer transition-all duration-300 border ${
                     isActive
                       ? 'bg-accent/10 text-accent border-accent/30 shadow-md shadow-accent/5'
                       : 'text-gray-400 hover:text-white hover:bg-white/5 border-transparent'
                   }`}
                   title={link.name}
                 >
-                  <span className="font-sans">{link.name}</span>
+                  <span className="font-display tracking-wide">{link.name}</span>
                 </button>
               );
             })}
@@ -133,7 +133,7 @@ export default function Navbar({
               }`}
             >
               <Icon className="w-5 h-5" />
-              <span className="text-[9px] font-sans mt-1 tracking-wider uppercase font-medium">{link.name}</span>
+              <span className="text-[9px] font-display mt-1 tracking-wide uppercase font-semibold">{link.name}</span>
             </button>
           );
         })}

@@ -24,7 +24,7 @@ export default function CartDrawer({
 
   if (!isOpen) return null;
 
-  const totalCost = cart.reduce((acc, item) => acc + item.product.price * item.quantity, 0);
+  const totalCost = cart.reduce((acc, item) => acc + (item.calculatedPrice ?? item.product.price) * item.quantity, 0);
   const totalWeight = cart.reduce((acc, item) => acc + item.product.weightGrams * item.quantity, 0);
 
   const handleCheckout = () => {
@@ -104,7 +104,7 @@ export default function CartDrawer({
                   >
                     {/* Thumbnail of product */}
                     <div className="w-16 h-16 bg-bg-surface rounded-lg overflow-hidden shrink-0">
-                      <img referrerPolicy="no-referrer" src={item.product.images[0]} alt="Cart thumb" className="w-full h-full object-cover" />
+                      <img referrerPolicy="no-referrer" src={item.customPreviewUrl || item.product.images[0]} alt="Cart thumb" className="w-full h-full object-cover" />
                     </div>
 
                     {/* Specifications detail text */}
@@ -116,15 +116,23 @@ export default function CartDrawer({
                         
                         {/* Custom configuration attributes */}
                         <div className="flex flex-wrap gap-1 mt-1 font-mono text-[9px] text-gray-400">
-                          <span className="px-1 bg-bg-base border border-bg-elevated rounded">{item.selectedColor}</span>
-                          <span className="px-1 bg-bg-base border border-bg-elevated rounded">{item.selectedMaterial}</span>
+                          <span className="px-1 bg-bg-base border border-bg-elevated rounded">Color: {item.selectedColor}</span>
+                          <span className="px-1 bg-bg-base border border-bg-elevated rounded">Material: {item.selectedMaterial}</span>
+                          {item.customization && (
+                            <>
+                              <span className="px-1 bg-bg-base border border-bg-elevated rounded">Name: {item.customization.name}</span>
+                              <span className="px-1 bg-bg-base border border-bg-elevated rounded">Font: {item.customization.font}</span>
+                              <span className="px-1 bg-bg-base border border-bg-elevated rounded">Size: {item.customization.size}</span>
+                              <span className="px-1 bg-bg-base border border-bg-elevated rounded">Theme: {item.customization.theme}</span>
+                            </>
+                          )}
                         </div>
                       </div>
 
                       {/* Pricing, Quantity adjust bars */}
                       <div className="flex items-center justify-between mt-2 pt-2 border-t border-gray-850">
                         <span className="font-mono text-xs font-bold text-accent">
-                          ${(item.product.price * item.quantity).toFixed(2)}
+                          ${((item.calculatedPrice ?? item.product.price) * item.quantity).toFixed(2)}
                         </span>
 
                         <div className="flex items-center space-x-2.5">

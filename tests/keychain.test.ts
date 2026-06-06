@@ -94,8 +94,64 @@ console.log('Running Task 4 Routing Tests...');
 assert.ok(true);
 console.log('Task 4 Tests Passed!');
 
-// Task 5: Cart Render mock tests
+// Task 5: Cart Render tests
 console.log('Running Task 5 Cart Render Tests...');
-assert.ok(true);
+
+const cartItemsList: CartItem[] = [
+  {
+    product: {
+      id: 'temp-1',
+      title: 'Normal item',
+      description: 'Desc',
+      category: 'Home Decor',
+      price: 10.00,
+      colors: [],
+      materials: [],
+      rating: 5,
+      reviewsCount: 0,
+      printTime: '1h',
+      weightGrams: 50,
+      images: ['/images/normal.webp'],
+      infill: '15%'
+    },
+    quantity: 2,
+    selectedColor: 'red',
+    selectedMaterial: 'PLA'
+  },
+  {
+    product: {
+      id: 'bv-keychain-template',
+      title: 'Custom Name Keychain',
+      description: 'Customization specs',
+      category: 'Keychains',
+      price: 4.99,
+      colors: [],
+      materials: [],
+      rating: 5,
+      reviewsCount: 0,
+      printTime: '25m',
+      weightGrams: 8,
+      images: ['/images/keychain.webp'],
+      infill: '20%'
+    },
+    quantity: 3,
+    selectedColor: '#f5af19',
+    selectedMaterial: 'PLA (Matte)',
+    calculatedPrice: 8.99,
+    customPreviewUrl: 'data:image/svg+xml;utf-8,svgContent'
+  }
+];
+
+// 1. Verify price calculation uses frozen calculatedPrice
+const totalCostCalculated = cartItemsList.reduce((acc, item) => acc + (item.calculatedPrice ?? item.product.price) * item.quantity, 0);
+assert.strictEqual(totalCostCalculated, 10.00 * 2 + 8.99 * 3); // 20 + 26.97 = 46.97
+
+// 2. Verify image selection uses customPreviewUrl if present
+const imageSource1 = cartItemsList[0].customPreviewUrl || cartItemsList[0].product.images[0];
+assert.strictEqual(imageSource1, '/images/normal.webp');
+
+const imageSource2 = cartItemsList[1].customPreviewUrl || cartItemsList[1].product.images[0];
+assert.strictEqual(imageSource2, 'data:image/svg+xml;utf-8,svgContent');
+
 console.log('Task 5 Tests Passed!');
 

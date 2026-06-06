@@ -131,6 +131,7 @@ function Card({ item, isFull, onCardClick }: CardProps) {
 
 // ─── Column component ──────────────────────────────────────────────────────────
 interface ColProps {
+  key?: React.Key | number;
   col: Column;
   colWidth: number; // px
   onCardClick: (category: string) => void;

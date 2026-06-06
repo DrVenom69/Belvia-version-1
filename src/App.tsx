@@ -462,8 +462,8 @@ export default function App() {
                   <span className="text-[10px] font-mono font-bold tracking-widest text-accent uppercase bg-accent/10 px-2.5 py-1 rounded-md border border-accent/20 inline-block mb-2">
                     Belvia Premium Collection
                   </span>
-                  <h2 className="font-display font-black text-2xl sm:text-3xl text-white tracking-tight">Trending Slices</h2>
-                  <p className="text-gray-400 text-xs sm:text-sm mt-1">A curated shortlist of our most robust, high-performance physical models.</p>
+                  <h2 className="font-display font-black text-2xl sm:text-3xl text-white tracking-tight">Trending 3d prints</h2>
+                  <p className="text-gray-400 text-xs sm:text-sm mt-1">A curated shortlist of our most robust, high-quality prints</p>
                 </div>
                 <button
                   onClick={() => setActiveTab('ready-prints')}

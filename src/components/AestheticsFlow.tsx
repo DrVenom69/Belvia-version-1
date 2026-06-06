@@ -4,11 +4,11 @@ import { HelpCircle, Star, Quote, ChevronDown, CheckCircle, Flame, Layers2 } fro
 export default function AestheticsFlow() {
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
 
-  const STEPS = [
-    { num: '01', title: 'Intelligent Slicing', desc: 'Drop our ready-made items to your cart or upload an STL. Our automatic quoting systems compute material paths and infill density.' },
-    { num: '02', title: 'Filament Integration', desc: 'Select high-grade filaments from our catalog (Matte PLA, shock-absorbing TPU, high-impact ABS, or waterproof PETG).' },
-    { num: '03', title: 'Farm Manufacturing', desc: 'Our advanced 3D printing farm (running Bambu flagship fleets) schedules, calibrates, levels plates, and crafts your models 24/7.' },
-    { num: '04', title: 'Post-Process Finish', desc: 'Belvia engineers manually de-support, micro-sand, quality inspect, and vacuum package your print for next-day dispatch.' }
+  const WHY_CHOOSE_BELVIA = [
+    { num: '01', title: 'Fast Delivery', desc: '1–2 day delivery inside Dhaka.' },
+    { num: '02', title: 'Custom Printing', desc: 'Upload STL, 3MF, or OBJ files and get a quote.' },
+    { num: '03', title: 'Premium Quality', desc: 'Professionally tuned printers and premium materials.' },
+    { num: '04', title: 'Local Support', desc: 'Real customer support and order tracking in Bangladesh.' }
   ];
 
   const PORTFOLIO = [
@@ -33,23 +33,21 @@ export default function AestheticsFlow() {
   return (
     <div id="additional-aesthetics-wrapper" className="bg-bg-base relative">
       
-      {/* 1. HOW IT WORKS */}
-      <section id="how-its-printed" className="py-20 border-t border-bg-elevated bg-bg-base/40">
+      {/* 1. WHY CHOOSE BELVIA */}
+      <section id="why-choose-belvia" className="py-20 border-t border-bg-elevated bg-bg-base/40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
           <div className="text-center mb-16 max-w-xl mx-auto">
-            <span className="text-xs font-mono font-bold uppercase tracking-widest text-indigo-400">Additive Process</span>
-            <h2 className="font-display text-2xl sm:text-3xl font-extrabold text-white mt-1">Slicing &amp; Printer Pipelines</h2>
-            <p className="text-gray-400 text-xs mt-2 leading-relaxed">From CAD file inputs to mechanical de-supporting, discover four steps details of Belvias precise print-on-demand loops.</p>
+            <span className="text-xs font-mono font-bold uppercase tracking-widest text-indigo-400">Why Choose Belvia</span>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6.5 text-left">
-            {STEPS.map((step, idx) => (
+            {WHY_CHOOSE_BELVIA.map((item, idx) => (
               <div key={idx} className="bg-bg-surface/50 border border-gray-805 rounded-2xl p-6.5 relative overflow-hidden flex flex-col justify-between">
                 <div>
-                  <span className="block font-mono text-3xl font-black text-accent/10 mb-4">{step.num}</span>
-                  <h3 className="font-display font-bold text-sm uppercase text-gray-100 tracking-wide">{step.title}</h3>
-                  <p className="text-gray-400 text-xs mt-2.5 leading-relaxed">{step.desc}</p>
+                  <span className="block font-mono text-3xl font-black text-accent/10 mb-4">{item.num}</span>
+                  <h3 className="font-display font-bold text-sm uppercase text-gray-100 tracking-wide">{item.title}</h3>
+                  <p className="text-gray-400 text-xs mt-2.5 leading-relaxed">{item.desc}</p>
                 </div>
               </div>
             ))}

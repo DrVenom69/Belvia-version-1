@@ -31,9 +31,10 @@ export default function HeroSection({ onStartShopping, onGoToCustom, onCategoryC
 
         {/* Main heading */}
         <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-text-primary leading-[1.08] uppercase">
-          Redefining{' '}
+          Imagine It.<br />
+          We Print It.<br />
           <span className="relative inline-block">
-            <span className="text-accent font-black">Connections</span>
+            <span className="text-accent font-black">You Love It.</span>
             {/* underline accent */}
             <span
               aria-hidden="true"
@@ -44,8 +45,7 @@ export default function HeroSection({ onStartShopping, onGoToCustom, onCategoryC
 
         {/* Sub-copy */}
         <p className="text-text-secondary text-sm sm:text-base leading-relaxed max-w-xl mx-auto font-sans">
-          Belvia fuses industrial additive precision with an artisanal finish. Explore our
-          curated catalogue of trending 3D&nbsp;products or bring your own model to life.
+          Bangladesh's First 3D Printing Marketplace. Shop unique 3D printed products or bring your own ideas to life. Custom manufacturing, ready prints, and 1–2 day delivery inside Dhaka.
         </p>
 
         {/* CTA buttons */}

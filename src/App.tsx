@@ -111,7 +111,8 @@ export default function App() {
               isPreOrder: item.isPreOrder || false,
               estimatedArrival: item.estimatedArrival || 'Arriving June 26 via Air Cargo',
               depositPercentage: item.depositPercentage || 30,
-              originalImportCountry: item.originalImportCountry || 'N/A'
+              originalImportCountry: item.originalImportCountry || 'N/A',
+              makerWorldUrl: item.makerWorldUrl || ''
             };
           });
 
@@ -238,9 +239,22 @@ export default function App() {
   };
 
   // Sync state helpers
-  const updateProductsInState = (newProducts: Product[]) => {
+  const updateProductsInState = async (newProducts: Product[]) => {
     setProducts(newProducts);
     saveStoredProducts(newProducts);
+    try {
+      const response = await fetch('/api/save-products', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newProducts)
+      });
+      if (!response.ok) {
+        const errData = await response.json();
+        console.error('Failed to sync products to backend database:', errData.error || response.statusText);
+      }
+    } catch (err) {
+      console.error('Network error syncing products database:', err);
+    }
   };
 
   const handleAddProduct = (newProduct: Product) => {
@@ -254,84 +268,52 @@ export default function App() {
   };
 
   const handleImportBulkProducts = (importing: Product[]) => {
-    const updated = [...importing, ...products];
+    // Avoid importing duplicate products by matching makerWorldUrl or ID
+    const existingUrls = new Set(products.map(p => p.makerWorldUrl).filter(Boolean));
+    const existingIds = new Set(products.map(p => p.id));
+    
+    const uniqueImports = importing.filter(p => {
+      const isDupUrl = p.makerWorldUrl && existingUrls.has(p.makerWorldUrl);
+      const isDupId = existingIds.has(p.id);
+      return !isDupUrl && !isDupId;
+    });
+
+    if (uniqueImports.length === 0) {
+      alert("All products in the batch already exist in the catalog. No new items were imported.");
+      return;
+    }
+
+    const updated = [...uniqueImports, ...products];
     updateProductsInState(updated);
+    
+    if (uniqueImports.length < importing.length) {
+      alert(`Imported ${uniqueImports.length} new products. ${importing.length - uniqueImports.length} duplicates were skipped.`);
+    }
+  };
+
+  const handleUpdateProducts = (updatedProducts: Product[]) => {
+    updateProductsInState(updatedProducts);
   };
 
   const handleResetCatalog = () => {
     localStorage.removeItem('belvia_products');
     localStorage.removeItem('belvia_reviews');
     const loadProducts = async () => {
-      let initialProducts: Product[] = [];
+      // Fetch seed/default products directly from a clean copy
+      const { INITIAL_PRODUCTS, INITIAL_REVIEWS } = await import('./data');
+      setProducts(INITIAL_PRODUCTS);
+      localStorage.setItem('belvia_products', JSON.stringify(INITIAL_PRODUCTS));
+      localStorage.setItem('belvia_reviews', JSON.stringify(INITIAL_REVIEWS));
+
       try {
-        const res = await fetch('/data/products.json');
-        if (res.ok) {
-          const dbData = await res.json();
-          initialProducts = dbData.map((item: any) => {
-            let printTime = 'N/A';
-            if (typeof item.printTimeMinutes === 'number' && item.printTimeMinutes > 0) {
-              const h = Math.floor(item.printTimeMinutes / 60);
-              const m = item.printTimeMinutes % 60;
-              printTime = h > 0 ? (m > 0 ? `${h}h ${m}m` : `${h}h`) : `${m}m`;
-            }
-
-            const images = Array.isArray(item.images)
-              ? item.images.map((img: string) => {
-                  if (img.startsWith('http://') || img.startsWith('https://') || img.startsWith('/')) {
-                    return img;
-                  }
-                  return `/${img}`;
-                })
-              : [];
-
-            return {
-              id: item.id,
-              title: item.title,
-              description: item.description || '',
-              category: item.category,
-              price: typeof item.startingPrice === 'number' ? item.startingPrice : parseFloat(item.startingPrice) || 0,
-              colors: Array.isArray(item.colors) ? item.colors : [],
-              materials: Array.isArray(item.materials) ? item.materials : [],
-              rating: typeof item.rating === 'number' ? item.rating : parseFloat(item.rating) || 5.0,
-              reviewsCount: typeof item.reviewCount === 'number' ? item.reviewCount : parseInt(item.reviewCount) || 0,
-              printTime,
-              weightGrams: typeof item.weightGrams === 'number' ? item.weightGrams : parseInt(item.weightGrams) || 0,
-              images,
-              infill: item.specifications?.infill || '15% Gyroid',
-              dimensions: item.specifications?.dimensions || '',
-              isCustomizable: item.category !== 'Premium Hardware' && item.category !== 'Exotic Filaments' && item.category !== 'Hotends' && !item.isPreOrder,
-              isPreOrder: item.isPreOrder || false,
-              estimatedArrival: item.estimatedArrival || 'Arriving June 26 via Air Cargo',
-              depositPercentage: item.depositPercentage || 30,
-              originalImportCountry: item.originalImportCountry || 'N/A'
-            };
-          });
-
-          // Extract and store reviews from database items
-          const dbReviews: any[] = [];
-          dbData.forEach((item: any) => {
-            if (Array.isArray(item.reviews)) {
-              item.reviews.forEach((r: any, rIdx: number) => {
-                dbReviews.push({
-                  id: `rev-db-${item.id}-${rIdx}`,
-                  productId: item.id,
-                  author: r.userName,
-                  rating: r.rating,
-                  text: r.comment,
-                  createdAt: r.date ? new Date(r.date).toISOString() : new Date().toISOString(),
-                  isVerified: r.verified || false
-                });
-              });
-            }
-          });
-          localStorage.setItem('belvia_reviews', JSON.stringify(dbReviews));
-        }
+        await fetch('/api/save-products', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(INITIAL_PRODUCTS)
+        });
       } catch (err) {
-        console.error('Failed to reset catalog:', err);
+        console.error('Error syncing reset catalog to backend:', err);
       }
-      const finalProducts = initialProducts.length > 0 ? initialProducts : getStoredProducts();
-      setProducts(finalProducts);
-      localStorage.setItem('belvia_products', JSON.stringify(finalProducts));
     };
     loadProducts();
   };
@@ -479,11 +461,17 @@ export default function App() {
                   const isWishlisted = wishlist.some(item => item.id === p.id);
                   return (
                     <div key={p.id} className="group rounded-2xl bg-bg-surface/75 border border-bg-elevated hover:border-gray-750 transition overflow-hidden flex flex-col h-full relative">
-                      <div className="aspect-square bg-bg-surface relative overflow-hidden">
+                      <div 
+                        onClick={() => setSelectedProduct(p)}
+                        className="aspect-square bg-bg-surface relative overflow-hidden cursor-pointer"
+                      >
                         <img referrerPolicy="no-referrer" src={p.images[0]} alt={p.title} className="w-full h-full object-cover group-hover:scale-105 transition duration-500 ease-out" />
                         
                         <button
-                          onClick={() => handleToggleWishlist(p)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleToggleWishlist(p);
+                          }}
                           className="absolute top-3 right-3 p-1.5 rounded-lg bg-bg-base/95 text-gray-400 hover:text-red-500 border border-gray-850 backdrop-blur-xs z-10 cursor-pointer transition"
                           title="Save Model"
                         >
@@ -493,7 +481,12 @@ export default function App() {
                       <div className="p-4.5 flex-1 flex flex-col justify-between">
                         <div>
                           <span className="text-[9px] font-mono font-bold text-accent uppercase tracking-wider">{p.category}</span>
-                          <h3 className="font-bold text-sm text-gray-100 group-hover:text-white mt-1 line-clamp-1">{p.title}</h3>
+                          <h3 
+                            onClick={() => setSelectedProduct(p)}
+                            className="font-bold text-sm text-gray-100 group-hover:text-white mt-1 line-clamp-1 cursor-pointer hover:underline hover:text-accent transition"
+                          >
+                            {p.title}
+                          </h3>
                           <p className="text-[11px] text-gray-400 mt-1 lines-clamp-2 leading-relaxed">{p.description}</p>
                         </div>
                         <div className="mt-4 pt-3 border-t border-gray-850/80 flex items-center justify-between">
@@ -582,6 +575,7 @@ export default function App() {
               onDeleteProduct={handleDeleteProduct}
               onImportBulkProducts={handleImportBulkProducts}
               onResetCatalog={handleResetCatalog}
+              onUpdateProducts={handleUpdateProducts}
             />
           </div>
         )}

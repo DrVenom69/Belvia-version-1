@@ -1,222 +1,4520 @@
 [
   {
-    "id": "belvia-neon-keychain",
-    "title": "Minimalist Tag Keychain",
-    "category": "Keychains",
-    "startingPrice": 5.99,
-    "weightGrams": 12,
-    "filamentUsage": 8.5,
+    "id": "belvia-modular-coat-hanger",
+    "title": "Modular Coat Hanger",
+    "category": "Desk Accessories",
+    "startingPrice": 22.99,
+    "weightGrams": 1174,
+    "filamentUsage": 880.5,
     "isPreOrder": false,
-    "description": "A sleek, lightweight keychain customized with your initials. Built with high-precision layers.",
+    "description": "Imported via Bulk MakerWorld URL.",
     "images": [
-      "images/products/keychain-1.webp"
+      "images/products/belvia-modular-coat-hanger.jpg",
+      "images/products/belvia-modular-coat-hanger-2.jpg",
+      "images/products/belvia-modular-coat-hanger-3.jpg",
+      "images/products/belvia-modular-coat-hanger-4.png",
+      "images/products/belvia-modular-coat-hanger-5.jpg",
+      "images/products/belvia-modular-coat-hanger-6.png",
+      "images/products/belvia-modular-coat-hanger-7.jpg",
+      "images/products/belvia-modular-coat-hanger-8.png"
     ],
     "colors": [
-      "matte-black",
-      "belvia-gold",
-      "white"
-    ],
-    "materials": [
-      "PLA",
-      "PETG",
-      "TPU"
-    ],
-    "printTimeMinutes": 35,
-    "rating": 4.8,
-    "reviewCount": 2,
-    "reviews": [
-      {
-        "userName": "Iffat Rylan",
-        "rating": 5,
-        "comment": "Super clean text execution, love the gold accents!",
-        "verified": true,
-        "date": "2026-06-02"
-      },
-      {
-        "userName": "MKBHD",
-        "rating": 4.6,
-        "comment": "Decent matte feel, highly customizable.",
-        "verified": true,
-        "date": "2026-06-03"
-      }
-    ],
-    "makerWorldUrl": "https://makerworld.com/en/models/12345",
-    "specifications": {
-      "dimensions": "70mm x 20mm x 3.5mm",
-      "layerHeight": "0.16mm"
-    }
-  },
-  {
-    "id": "belvia-fox-decor",
-    "title": "Geometric Fox Figurine",
-    "category": "Home Decor",
-    "startingPrice": 24.99,
-    "weightGrams": 140,
-    "filamentUsage": 125.0,
-    "isPreOrder": false,
-    "description": "Elegant geometric fox statue matching the Belvia logo. Features premium matte surface finish.",
-    "images": [
-      "images/products/fox-decor.webp"
-    ],
-    "colors": [
-      "matte-black",
-      "belvia-gold",
-      "white"
+      "Matte Slate",
+      "Obsidian Black",
+      "Chalk White",
+      "Silk Pearl Gold"
     ],
     "materials": [
       "PLA"
     ],
-    "printTimeMinutes": 180,
-    "rating": 5.0,
-    "reviewCount": 1,
-    "reviews": [
-      {
-        "userName": "CraftyMaker",
-        "rating": 5,
-        "comment": "Stunning geometric lines. Looks very premium on my desk.",
-        "verified": true,
-        "date": "2026-06-01"
-      }
+    "tags": [
+      "coat hanger",
+      "coathanger",
+      "hanger",
+      "clotheshanger",
+      "valetstand",
+      "valet stand"
     ],
-    "makerWorldUrl": "https://makerworld.com/en/models/67890",
+    "printTimeMinutes": 1581,
+    "rating": 5,
+    "reviewCount": 1,
+    "reviews": [],
+    "makerWorldUrl": "https://makerworld.com/en/models/2854631-modular-coat-hanger",
     "specifications": {
-      "dimensions": "120mm x 85mm x 140mm",
-      "layerHeight": "0.20mm"
+      "dimensions": "120 × 120 × 140 mm",
+      "layerHeight": "0.16mm",
+      "infill": "15%"
     }
   },
   {
-    "id": "belvia-makerworld-product",
-    "title": "MakerWorld Product",
-    "category": "Keychains",
-    "startingPrice": 12.99,
-    "weightGrams": 24,
-    "filamentUsage": 18.2,
+    "id": "belvia-the-beer-buoy-floating-gyro-cup-holder-no-ams",
+    "title": "The Beer Buoy • Floating Gyro Cup Holder • No AMS",
+    "category": "Desk Accessories",
+    "startingPrice": 22.99,
+    "weightGrams": 344,
+    "filamentUsage": 258,
     "isPreOrder": false,
-    "description": "Scraped product details from MakerWorld source files. Made with high efficiency components.",
+    "description": "Imported via Bulk MakerWorld URL.",
     "images": [
-      "images/products/belvia-makerworld-product.webp"
+      "images/products/belvia-the-beer-buoy-floating-gyro-cup-holder-n.webp",
+      "images/products/belvia-the-beer-buoy-floating-gyro-cup-holder-n-2.webp",
+      "images/products/belvia-the-beer-buoy-floating-gyro-cup-holder-n-3.jpg",
+      "images/products/belvia-the-beer-buoy-floating-gyro-cup-holder-n-4.jpg",
+      "images/products/belvia-the-beer-buoy-floating-gyro-cup-holder-n-5.png",
+      "images/products/belvia-the-beer-buoy-floating-gyro-cup-holder-n-6.jpg",
+      "images/products/belvia-the-beer-buoy-floating-gyro-cup-holder-n-7.jpg",
+      "images/products/belvia-the-beer-buoy-floating-gyro-cup-holder-n-8.webp",
+      "images/products/belvia-the-beer-buoy-floating-gyro-cup-holder-n-9.png",
+      "images/products/belvia-the-beer-buoy-floating-gyro-cup-holder-n-10.jpg",
+      "images/products/belvia-the-beer-buoy-floating-gyro-cup-holder-n-11.jpg",
+      "images/products/belvia-the-beer-buoy-floating-gyro-cup-holder-n-12.jpg",
+      "images/products/belvia-the-beer-buoy-floating-gyro-cup-holder-n-13.png"
     ],
     "colors": [
-      "matte-black",
-      "belvia-gold",
-      "white"
+      "Matte Slate",
+      "Obsidian Black",
+      "Chalk White",
+      "Silk Pearl Gold"
     ],
     "materials": [
-      "PLA",
-      "TPU"
+      "PLA"
     ],
-    "printTimeMinutes": 50,
-    "rating": 5.0,
-    "reviewCount": 0,
+    "tags": [
+      "cup",
+      "cup holder",
+      "floating",
+      "pool accessories",
+      "can holder",
+      "pool",
+      "pool party",
+      "noams",
+      "summer",
+      "pool noodle",
+      "gimbal"
+    ],
+    "printTimeMinutes": 474,
+    "rating": 5,
+    "reviewCount": 1,
     "reviews": [],
-    "makerWorldUrl": "https://makerworld.com/en/models/12345",
+    "makerWorldUrl": "https://makerworld.com/en/models/2838834-the-beer-buoy-floating-gyro-cup-holder-no-ams",
     "specifications": {
-      "dimensions": "80mm x 30mm x 4mm",
-      "layerHeight": "0.16mm"
+      "dimensions": "120 × 120 × 140 mm",
+      "layerHeight": "0.16mm",
+      "infill": "15%"
     }
   },
   {
-    "id": "belvia-a1-scrapers",
-    "title": "Bambu Lab A1 Mini Scraper Mod",
-    "category": "A1 Mini Mods",
-    "startingPrice": 14.99,
-    "weightGrams": 45,
-    "filamentUsage": 32.5,
-    "isPreOrder": true,
-    "description": "Premium build plate scraper mod custom designed for the A1 Mini toolhead frame. Pre-Order Only.",
+    "id": "belvia-display-riser-shelf",
+    "title": "Display Riser Shelf",
+    "category": "Desk Accessories",
+    "startingPrice": 22.99,
+    "weightGrams": 218,
+    "filamentUsage": 163.5,
+    "isPreOrder": false,
+    "description": "Imported via Bulk MakerWorld URL.",
     "images": [
-      "images/products/a1-scraper.webp"
+      "images/products/belvia-display-riser-shelf.jpg",
+      "images/products/belvia-display-riser-shelf-2.png",
+      "images/products/belvia-display-riser-shelf-3.jpg",
+      "images/products/belvia-display-riser-shelf-4.jpg",
+      "images/products/belvia-display-riser-shelf-5.jpg",
+      "images/products/belvia-display-riser-shelf-6.jpg",
+      "images/products/belvia-display-riser-shelf-7.png",
+      "images/products/belvia-display-riser-shelf-8.jpg",
+      "images/products/belvia-display-riser-shelf-9.jpg",
+      "images/products/belvia-display-riser-shelf-10.png",
+      "images/products/belvia-display-riser-shelf-11.png",
+      "images/products/belvia-display-riser-shelf-12.png",
+      "images/products/belvia-display-riser-shelf-13.png"
     ],
     "colors": [
-      "matte-black",
-      "belvia-gold"
+      "Matte Slate",
+      "Obsidian Black",
+      "Chalk White",
+      "Silk Pearl Gold"
+    ],
+    "materials": [
+      "PLA"
+    ],
+    "tags": [
+      "display",
+      "riser",
+      "shelf",
+      "organizer",
+      "spice",
+      "rack",
+      "spice rack",
+      "storage",
+      "kitchen",
+      "pantry",
+      "space saver",
+      "bathroom",
+      "bedroom",
+      "livingroom",
+      "organization",
+      "organize",
+      "nightstand",
+      "bedside",
+      "frame",
+      "shot",
+      "glass",
+      "glasses",
+      "shot glass",
+      "cabinet",
+      "collection",
+      "desk",
+      "office",
+      "clutter",
+      "catch all",
+      "entryway",
+      "kitchen counter",
+      "counter",
+      "stand",
+      "shelves",
+      "holder",
+      "spice shelf",
+      "modern",
+      "seasoning",
+      "makeup",
+      "jewelry",
+      "showcase",
+      "retail",
+      "table",
+      "desktop",
+      "collectible",
+      "plant",
+      "craft",
+      "vendor",
+      "perfume",
+      "mini figure"
+    ],
+    "printTimeMinutes": 286,
+    "rating": 5,
+    "reviewCount": 1,
+    "reviews": [],
+    "makerWorldUrl": "https://makerworld.com/en/models/2822595-display-riser-shelf",
+    "specifications": {
+      "dimensions": "120 × 120 × 140 mm",
+      "layerHeight": "0.16mm",
+      "infill": "5%"
+    }
+  },
+  {
+    "id": "belvia-amazon-glockstick-tactical-remote-system",
+    "title": "Amazon GlockStick Tactical Remote System",
+    "category": "Figures & Collectibles",
+    "startingPrice": 29.99,
+    "weightGrams": 104,
+    "filamentUsage": 78,
+    "isPreOrder": false,
+    "description": "Imported via Bulk MakerWorld URL.",
+    "images": [
+      "images/products/belvia-amazon-glockstick-tactical-remote-system.jpg",
+      "images/products/belvia-amazon-glockstick-tactical-remote-system-2.jpg",
+      "images/products/belvia-amazon-glockstick-tactical-remote-system-3.jpg",
+      "images/products/belvia-amazon-glockstick-tactical-remote-system-4.jpg",
+      "images/products/belvia-amazon-glockstick-tactical-remote-system-5.jpg",
+      "images/products/belvia-amazon-glockstick-tactical-remote-system-6.jpg",
+      "images/products/belvia-amazon-glockstick-tactical-remote-system-7.jpg",
+      "images/products/belvia-amazon-glockstick-tactical-remote-system-8.jpg",
+      "images/products/belvia-amazon-glockstick-tactical-remote-system-9.jpg",
+      "images/products/belvia-amazon-glockstick-tactical-remote-system-10.jpg",
+      "images/products/belvia-amazon-glockstick-tactical-remote-system-11.jpg",
+      "images/products/belvia-amazon-glockstick-tactical-remote-system-12.jpg",
+      "images/products/belvia-amazon-glockstick-tactical-remote-system-13.jpg",
+      "images/products/belvia-amazon-glockstick-tactical-remote-system-14.jpg",
+      "images/products/belvia-amazon-glockstick-tactical-remote-system-15.jpg",
+      "images/products/belvia-amazon-glockstick-tactical-remote-system-16.jpg",
+      "images/products/belvia-amazon-glockstick-tactical-remote-system-17.jpg",
+      "images/products/belvia-amazon-glockstick-tactical-remote-system-18.jpg",
+      "images/products/belvia-amazon-glockstick-tactical-remote-system-19.jpg",
+      "images/products/belvia-amazon-glockstick-tactical-remote-system-20.jpg"
+    ],
+    "colors": [
+      "Matte Slate",
+      "Obsidian Black",
+      "Chalk White",
+      "Silk Pearl Gold"
+    ],
+    "materials": [
+      "PLA"
+    ],
+    "tags": [
+      "GLOCK",
+      "GUN buddy",
+      "gun",
+      "fire tv",
+      "remote",
+      "firestick",
+      "fire tv remote",
+      "remote case"
+    ],
+    "printTimeMinutes": 234,
+    "rating": 5,
+    "reviewCount": 1,
+    "reviews": [],
+    "makerWorldUrl": "https://makerworld.com/en/models/2831052-amazon-glockstick-tactical-remote-system",
+    "specifications": {
+      "dimensions": "120 × 120 × 140 mm",
+      "layerHeight": "0.16mm",
+      "infill": "15%"
+    }
+  },
+  {
+    "id": "belvia-axolotl-phone-stand",
+    "title": "Axolotl Phone Stand",
+    "category": "Home Decor",
+    "startingPrice": 34.99,
+    "weightGrams": 46,
+    "filamentUsage": 34.5,
+    "isPreOrder": false,
+    "description": "Imported via Bulk MakerWorld URL.",
+    "images": [
+      "images/products/belvia-axolotl-phone-stand.png",
+      "images/products/belvia-axolotl-phone-stand-2.png",
+      "images/products/belvia-axolotl-phone-stand-3.jpg",
+      "images/products/belvia-axolotl-phone-stand-4.jpg",
+      "images/products/belvia-axolotl-phone-stand-5.jpg",
+      "images/products/belvia-axolotl-phone-stand-6.jpg",
+      "images/products/belvia-axolotl-phone-stand-7.jpg",
+      "images/products/belvia-axolotl-phone-stand-8.jpg",
+      "images/products/belvia-axolotl-phone-stand-9.jpg",
+      "images/products/belvia-axolotl-phone-stand-10.jpg",
+      "images/products/belvia-axolotl-phone-stand-11.jpg"
+    ],
+    "colors": [
+      "Matte Slate",
+      "Obsidian Black",
+      "Chalk White",
+      "Silk Pearl Gold"
+    ],
+    "materials": [
+      "PLA"
+    ],
+    "tags": [
+      "kiron",
+      "fish",
+      "phone stand",
+      "phone holder",
+      "iphone",
+      "xiaomi",
+      "funny",
+      "cute",
+      "pink",
+      "decoration",
+      "decor",
+      "animal",
+      "smartphone holder",
+      "mobile stand",
+      "animal stand",
+      "samsung",
+      "iphone stand"
+    ],
+    "printTimeMinutes": 158,
+    "rating": 5,
+    "reviewCount": 1,
+    "reviews": [],
+    "makerWorldUrl": "https://makerworld.com/en/models/2847193-axolotl-phone-stand",
+    "specifications": {
+      "dimensions": "120 × 120 × 140 mm",
+      "layerHeight": "0.16mm",
+      "infill": "15%"
+    }
+  },
+  {
+    "id": "belvia-travel-jewelry-box-with-earring-tray-easy-print",
+    "title": "Travel Jewelry Box with Earring Tray - Easy Print",
+    "category": "Home Decor",
+    "startingPrice": 34.99,
+    "weightGrams": 102,
+    "filamentUsage": 76.5,
+    "isPreOrder": false,
+    "description": "Imported via Bulk MakerWorld URL.",
+    "images": [
+      "images/products/belvia-travel-jewelry-box-with-earring-tray-eas.png",
+      "images/products/belvia-travel-jewelry-box-with-earring-tray-eas-2.png",
+      "images/products/belvia-travel-jewelry-box-with-earring-tray-eas-3.webp",
+      "images/products/belvia-travel-jewelry-box-with-earring-tray-eas-4.jpg",
+      "images/products/belvia-travel-jewelry-box-with-earring-tray-eas-5.jpg",
+      "images/products/belvia-travel-jewelry-box-with-earring-tray-eas-6.jpg",
+      "images/products/belvia-travel-jewelry-box-with-earring-tray-eas-7.jpg",
+      "images/products/belvia-travel-jewelry-box-with-earring-tray-eas-8.jpg",
+      "images/products/belvia-travel-jewelry-box-with-earring-tray-eas-9.jpg",
+      "images/products/belvia-travel-jewelry-box-with-earring-tray-eas-10.png",
+      "images/products/belvia-travel-jewelry-box-with-earring-tray-eas-11.jpg",
+      "images/products/belvia-travel-jewelry-box-with-earring-tray-eas-12.jpg"
+    ],
+    "colors": [
+      "Matte Slate",
+      "Obsidian Black",
+      "Chalk White",
+      "Silk Pearl Gold"
+    ],
+    "materials": [
+      "PLA"
+    ],
+    "tags": [
+      "printinplace",
+      "'home",
+      "Home Decor",
+      "home",
+      "travel",
+      "tra",
+      "travel accessories",
+      "travel accessory",
+      "Box",
+      "box",
+      "women",
+      "organizer",
+      "snaplock",
+      "jewellery",
+      "women accesory",
+      "earrings",
+      "earring",
+      "necklace",
+      "organiser",
+      "bathroom",
+      "Lock",
+      "women accessory",
+      "jewelry"
+    ],
+    "printTimeMinutes": 232,
+    "rating": 5,
+    "reviewCount": 1,
+    "reviews": [],
+    "makerWorldUrl": "https://makerworld.com/en/models/2848245-travel-jewelry-box-with-earring-tray-easy-print",
+    "specifications": {
+      "dimensions": "120 × 120 × 140 mm",
+      "layerHeight": "0.16mm",
+      "infill": "15%"
+    }
+  },
+  {
+    "id": "belvia-personalized-initial-name-sign",
+    "title": "Personalized Initial & Name Sign",
+    "category": "Home Decor",
+    "startingPrice": 34.99,
+    "weightGrams": 85,
+    "filamentUsage": 63.8,
+    "isPreOrder": false,
+    "description": "Imported via Bulk MakerWorld URL.",
+    "images": [
+      "images/products/belvia-personalized-initial-name-sign-customiza.png",
+      "images/products/belvia-personalized-initial-name-sign-customiza-2.png",
+      "images/products/belvia-personalized-initial-name-sign-customiza-3.jpg",
+      "images/products/belvia-personalized-initial-name-sign-customiza-4.png",
+      "images/products/belvia-personalized-initial-name-sign-customiza-5.jpg",
+      "images/products/belvia-personalized-initial-name-sign-customiza-6.png",
+      "images/products/belvia-personalized-initial-name-sign-customiza-7.png",
+      "images/products/belvia-personalized-initial-name-sign-customiza-8.png",
+      "images/products/belvia-personalized-initial-name-sign-customiza-9.jpg",
+      "images/products/belvia-personalized-initial-name-sign-customiza-10.jpg"
+    ],
+    "colors": [
+      "Matte Slate",
+      "Obsidian Black",
+      "Chalk White",
+      "Silk Pearl Gold"
+    ],
+    "materials": [
+      "PLA"
+    ],
+    "tags": [
+      "personalized",
+      "name",
+      "sign",
+      "name sign",
+      "initial",
+      "decor",
+      "kids room",
+      "kids",
+      "room",
+      "baby",
+      "gift",
+      "birthday",
+      "home",
+      "Home Decor",
+      "wall",
+      "wall decor",
+      "custom",
+      "custom name",
+      "parametric",
+      "multicolor",
+      "no ams",
+      "NO AMS",
+      "shelf",
+      "shelf decor",
+      "name plate",
+      "customizable"
+    ],
+    "printTimeMinutes": 134,
+    "rating": 5,
+    "reviewCount": 1,
+    "reviews": [],
+    "makerWorldUrl": "https://makerworld.com/en/models/2845165-personalized-initial-name-sign-customizable",
+    "specifications": {
+      "dimensions": "120 × 120 × 140 mm",
+      "layerHeight": "0.16mm",
+      "infill": "5%"
+    }
+  },
+  {
+    "id": "belvia-wall-saver",
+    "title": "Wall Saver",
+    "category": "Figures & Collectibles",
+    "startingPrice": 29.99,
+    "weightGrams": 2,
+    "filamentUsage": 1.5,
+    "isPreOrder": false,
+    "description": "Imported via Bulk MakerWorld URL.",
+    "images": [
+      "images/products/belvia-wall-saver.png",
+      "images/products/belvia-wall-saver-2.png",
+      "images/products/belvia-wall-saver-3.jpg",
+      "images/products/belvia-wall-saver-4.jpg",
+      "images/products/belvia-wall-saver-5.jpg",
+      "images/products/belvia-wall-saver-6.jpg",
+      "images/products/belvia-wall-saver-7.png",
+      "images/products/belvia-wall-saver-8.jpg"
+    ],
+    "colors": [
+      "Matte Slate",
+      "Obsidian Black",
+      "Chalk White",
+      "Silk Pearl Gold"
+    ],
+    "materials": [
+      "PLA"
+    ],
+    "tags": [
+      "hook",
+      "Hook",
+      "hang",
+      "hanging"
+    ],
+    "printTimeMinutes": 18,
+    "rating": 5,
+    "reviewCount": 1,
+    "reviews": [],
+    "makerWorldUrl": "https://makerworld.com/en/models/2835096-wall-saver",
+    "specifications": {
+      "dimensions": "120 × 120 × 140 mm",
+      "layerHeight": "0.16mm",
+      "infill": "15%"
+    }
+  },
+  {
+    "id": "belvia-stay-puft-wall-mount",
+    "title": "Stay Puft Wall Mount",
+    "category": "Home Decor",
+    "startingPrice": 34.99,
+    "weightGrams": 376,
+    "filamentUsage": 282,
+    "isPreOrder": false,
+    "description": "Imported via Bulk MakerWorld URL.",
+    "images": [
+      "images/products/belvia-stay-puft-wall-mount.png",
+      "images/products/belvia-stay-puft-wall-mount-2.png",
+      "images/products/belvia-stay-puft-wall-mount-3.png",
+      "images/products/belvia-stay-puft-wall-mount-4.png",
+      "images/products/belvia-stay-puft-wall-mount-5.png",
+      "images/products/belvia-stay-puft-wall-mount-6.png",
+      "images/products/belvia-stay-puft-wall-mount-7.png"
+    ],
+    "colors": [
+      "Matte Slate",
+      "Obsidian Black",
+      "Chalk White",
+      "Silk Pearl Gold"
+    ],
+    "materials": [
+      "PLA"
+    ],
+    "tags": [
+      "ghostbusters",
+      "stay puft",
+      "marshmellow",
+      "marshmellow man",
+      "ghost",
+      "wall decor",
+      "kids decor"
+    ],
+    "printTimeMinutes": 1091,
+    "rating": 5,
+    "reviewCount": 1,
+    "reviews": [],
+    "makerWorldUrl": "https://makerworld.com/en/models/2851326-stay-puft-wall-mount",
+    "specifications": {
+      "dimensions": "120 × 120 × 140 mm",
+      "layerHeight": "0.16mm",
+      "infill": "15%"
+    }
+  },
+  {
+    "id": "belvia-hunde-t-rstopper",
+    "title": "Hunde - Türstopper",
+    "category": "Functional Prints",
+    "startingPrice": 14.99,
+    "weightGrams": 40,
+    "filamentUsage": 30,
+    "isPreOrder": false,
+    "description": "Imported via Bulk MakerWorld URL.",
+    "images": [
+      "images/products/belvia-hunde-t-rstopper.jpg",
+      "images/products/belvia-hunde-t-rstopper-2.jpg",
+      "images/products/belvia-hunde-t-rstopper-3.jpg",
+      "images/products/belvia-hunde-t-rstopper-4.png",
+      "images/products/belvia-hunde-t-rstopper-5.jpg"
+    ],
+    "colors": [
+      "Matte Slate",
+      "Obsidian Black",
+      "Chalk White",
+      "Silk Pearl Gold"
+    ],
+    "materials": [
+      "PLA"
+    ],
+    "tags": [
+      "gadget",
+      "dekor",
+      "tool",
+      "deko",
+      "deko 2026",
+      "dog",
+      "hund",
+      "tuerstopper",
+      "door stop",
+      "animal",
+      "door",
+      "animal 2026",
+      "nuetzlich",
+      "praktisch",
+      "haushalt",
+      "tuerhalter",
+      "keil",
+      "klotz"
+    ],
+    "printTimeMinutes": 112,
+    "rating": 5,
+    "reviewCount": 1,
+    "reviews": [],
+    "makerWorldUrl": "https://makerworld.com/en/models/2823450-dog-door-stopper",
+    "specifications": {
+      "dimensions": "120 × 120 × 140 mm",
+      "layerHeight": "0.16mm",
+      "infill": "15%"
+    }
+  },
+  {
+    "id": "belvia-chaveiro-lembracinha-espirito-santo",
+    "title": "Chaveiro lembracinha Espirito Santo",
+    "category": "Figures & Collectibles",
+    "startingPrice": 29.99,
+    "weightGrams": 9,
+    "filamentUsage": 6.8,
+    "isPreOrder": false,
+    "description": "Imported via Bulk MakerWorld URL.",
+    "images": [
+      "images/products/belvia-chaveiro-lembracinha-espirito-santo.jpg",
+      "images/products/belvia-chaveiro-lembracinha-espirito-santo-2.jpg",
+      "images/products/belvia-chaveiro-lembracinha-espirito-santo-3.jpg",
+      "images/products/belvia-chaveiro-lembracinha-espirito-santo-4.jpg",
+      "images/products/belvia-chaveiro-lembracinha-espirito-santo-5.png",
+      "images/products/belvia-chaveiro-lembracinha-espirito-santo-6.jpg",
+      "images/products/belvia-chaveiro-lembracinha-espirito-santo-7.png",
+      "images/products/belvia-chaveiro-lembracinha-espirito-santo-8.png",
+      "images/products/belvia-chaveiro-lembracinha-espirito-santo-9.png"
+    ],
+    "colors": [
+      "Matte Slate",
+      "Obsidian Black",
+      "Chalk White",
+      "Silk Pearl Gold"
+    ],
+    "materials": [
+      "PLA"
+    ],
+    "tags": [
+      "chaveiro",
+      "crisma",
+      "espirito santo",
+      "catolico",
+      "lembrancinha",
+      "lembrancinha religiosa"
+    ],
+    "printTimeMinutes": 36,
+    "rating": 5,
+    "reviewCount": 1,
+    "reviews": [],
+    "makerWorldUrl": "https://makerworld.com/en/models/2836057-holy-spirit-souvenir-keychain",
+    "specifications": {
+      "dimensions": "120 × 120 × 140 mm",
+      "layerHeight": "0.16mm",
+      "infill": "15%"
+    }
+  },
+  {
+    "id": "belvia-octopus-table-lamp-led-kit-strips",
+    "title": "Octopus Table Lamp – LED Kit & Strips",
+    "category": "Home Decor",
+    "startingPrice": 34.99,
+    "weightGrams": 184,
+    "filamentUsage": 138,
+    "isPreOrder": false,
+    "description": "Imported via Bulk MakerWorld URL.",
+    "images": [
+      "images/products/belvia-octopus-table-lamp-led-kit-strips.jpg",
+      "images/products/belvia-octopus-table-lamp-led-kit-strips-2.jpg",
+      "images/products/belvia-octopus-table-lamp-led-kit-strips-3.jpg",
+      "images/products/belvia-octopus-table-lamp-led-kit-strips-4.png",
+      "images/products/belvia-octopus-table-lamp-led-kit-strips-5.jpg",
+      "images/products/belvia-octopus-table-lamp-led-kit-strips-6.png",
+      "images/products/belvia-octopus-table-lamp-led-kit-strips-7.jpg",
+      "images/products/belvia-octopus-table-lamp-led-kit-strips-8.jpg",
+      "images/products/belvia-octopus-table-lamp-led-kit-strips-9.jpg",
+      "images/products/belvia-octopus-table-lamp-led-kit-strips-10.jpg",
+      "images/products/belvia-octopus-table-lamp-led-kit-strips-11.jpg",
+      "images/products/belvia-octopus-table-lamp-led-kit-strips-12.jpg",
+      "images/products/belvia-octopus-table-lamp-led-kit-strips-13.jpg",
+      "images/products/belvia-octopus-table-lamp-led-kit-strips-14.jpg",
+      "images/products/belvia-octopus-table-lamp-led-kit-strips-15.jpg",
+      "images/products/belvia-octopus-table-lamp-led-kit-strips-16.jpg",
+      "images/products/belvia-octopus-table-lamp-led-kit-strips-17.jpg",
+      "images/products/belvia-octopus-table-lamp-led-kit-strips-18.jpg",
+      "images/products/belvia-octopus-table-lamp-led-kit-strips-19.jpg",
+      "images/products/belvia-octopus-table-lamp-led-kit-strips-20.jpg"
+    ],
+    "colors": [
+      "Matte Slate",
+      "Obsidian Black",
+      "Chalk White",
+      "Silk Pearl Gold"
+    ],
+    "materials": [
+      "PLA"
+    ],
+    "tags": [
+      "Lamp",
+      "octopus",
+      "ilterish",
+      "tablelamp",
+      "table",
+      "table accesories",
+      "light",
+      "desk",
+      "realistic",
+      "LED",
+      "led strips",
+      "glow",
+      "IKEA"
+    ],
+    "printTimeMinutes": 505,
+    "rating": 5,
+    "reviewCount": 1,
+    "reviews": [],
+    "makerWorldUrl": "https://makerworld.com/en/models/2843866-octopus-table-lamp-led-kit-strips",
+    "specifications": {
+      "dimensions": "120 × 120 × 140 mm",
+      "layerHeight": "0.16mm",
+      "infill": "15%"
+    }
+  },
+  {
+    "id": "belvia-juno-tray",
+    "title": "Juno Tray",
+    "category": "Home Decor",
+    "startingPrice": 34.99,
+    "weightGrams": 361,
+    "filamentUsage": 270.8,
+    "isPreOrder": false,
+    "description": "Imported via Bulk MakerWorld URL.",
+    "images": [
+      "images/products/belvia-juno-tray.png",
+      "images/products/belvia-juno-tray-2.png",
+      "images/products/belvia-juno-tray-3.png",
+      "images/products/belvia-juno-tray-4.png",
+      "images/products/belvia-juno-tray-5.jpg",
+      "images/products/belvia-juno-tray-6.png",
+      "images/products/belvia-juno-tray-7.jpg",
+      "images/products/belvia-juno-tray-8.png",
+      "images/products/belvia-juno-tray-9.jpg"
+    ],
+    "colors": [
+      "Matte Slate",
+      "Obsidian Black",
+      "Chalk White",
+      "Silk Pearl Gold"
+    ],
+    "materials": [
+      "PLA"
+    ],
+    "tags": [
+      "tray",
+      "juno",
+      "tablett",
+      "servierbrett",
+      "brett",
+      "schaal",
+      "cake",
+      "deco",
+      "decoration",
+      "deko",
+      "sabre",
+      "design",
+      "sabredesign"
+    ],
+    "printTimeMinutes": 504,
+    "rating": 5,
+    "reviewCount": 1,
+    "reviews": [],
+    "makerWorldUrl": "https://makerworld.com/en/models/2841008-juno-tray",
+    "specifications": {
+      "dimensions": "120 × 120 × 140 mm",
+      "layerHeight": "0.16mm",
+      "infill": "15%"
+    }
+  },
+  {
+    "id": "belvia-magnetic-insect-netting-mount",
+    "title": "Magnetic Insect Netting Mount",
+    "category": "Functional Prints",
+    "startingPrice": 14.99,
+    "weightGrams": 27,
+    "filamentUsage": 20.3,
+    "isPreOrder": false,
+    "description": "Imported via Bulk MakerWorld URL.",
+    "images": [
+      "images/products/belvia-magnetic-insect-netting-mount.jpg",
+      "images/products/belvia-magnetic-insect-netting-mount-2.jpg",
+      "images/products/belvia-magnetic-insect-netting-mount-3.jpg",
+      "images/products/belvia-magnetic-insect-netting-mount-4.jpg",
+      "images/products/belvia-magnetic-insect-netting-mount-5.jpg",
+      "images/products/belvia-magnetic-insect-netting-mount-6.jpg",
+      "images/products/belvia-magnetic-insect-netting-mount-7.jpg",
+      "images/products/belvia-magnetic-insect-netting-mount-8.jpg"
+    ],
+    "colors": [
+      "Matte Slate",
+      "Obsidian Black",
+      "Chalk White",
+      "Silk Pearl Gold"
+    ],
+    "materials": [
+      "PLA"
+    ],
+    "tags": [
+      "insect",
+      "netting",
+      "musquitonet",
+      "mosquitonet",
+      "net",
+      "guard",
+      "insect guard",
+      "keep out"
+    ],
+    "printTimeMinutes": 47,
+    "rating": 5,
+    "reviewCount": 1,
+    "reviews": [],
+    "makerWorldUrl": "https://makerworld.com/en/models/2850036-magnetic-insect-netting-mount",
+    "specifications": {
+      "dimensions": "120 × 120 × 140 mm",
+      "layerHeight": "0.16mm",
+      "infill": "15%"
+    }
+  },
+  {
+    "id": "belvia--",
+    "title": "沙滩鲨鱼铲子-去征服这片沙滩-沙滩玩具",
+    "category": "Figures & Collectibles",
+    "startingPrice": 29.99,
+    "weightGrams": 218,
+    "filamentUsage": 163.5,
+    "isPreOrder": false,
+    "description": "Imported via Bulk MakerWorld URL.",
+    "images": [
+      "images/products/belvia-.png",
+      "images/products/belvia--2.png",
+      "images/products/belvia--3.png",
+      "images/products/belvia--4.png",
+      "images/products/belvia--5.png",
+      "images/products/belvia--6.png"
+    ],
+    "colors": [
+      "Matte Slate",
+      "Obsidian Black",
+      "Chalk White",
+      "Silk Pearl Gold"
+    ],
+    "materials": [
+      "PLA"
+    ],
+    "tags": [
+      "沙滩",
+      "鲨鱼",
+      "铲子"
+    ],
+    "printTimeMinutes": 472,
+    "rating": 5,
+    "reviewCount": 1,
+    "reviews": [],
+    "makerWorldUrl": "https://makerworld.com/en/models/2830505-beach-shark-shovel-go-conquer-this-beach-beach-toy",
+    "specifications": {
+      "dimensions": "120 × 120 × 140 mm",
+      "layerHeight": "0.16mm",
+      "infill": "15%"
+    }
+  },
+  {
+    "id": "belvia-duckboards-customizable-",
+    "title": "Duckboards (customizable)",
+    "category": "Functional Prints",
+    "startingPrice": 14.99,
+    "weightGrams": 162,
+    "filamentUsage": 121.5,
+    "isPreOrder": false,
+    "description": "Imported via Bulk MakerWorld URL.",
+    "images": [
+      "images/products/belvia-duckboards-customizable.png",
+      "images/products/belvia-duckboards-customizable-2.png",
+      "images/products/belvia-duckboards-customizable-3.jpg",
+      "images/products/belvia-duckboards-customizable-4.jpg",
+      "images/products/belvia-duckboards-customizable-5.jpg",
+      "images/products/belvia-duckboards-customizable-6.jpg",
+      "images/products/belvia-duckboards-customizable-7.jpg",
+      "images/products/belvia-duckboards-customizable-8.jpg",
+      "images/products/belvia-duckboards-customizable-9.jpg",
+      "images/products/belvia-duckboards-customizable-10.jpg",
+      "images/products/belvia-duckboards-customizable-11.jpg",
+      "images/products/belvia-duckboards-customizable-12.webp"
+    ],
+    "colors": [
+      "Matte Slate",
+      "Obsidian Black",
+      "Chalk White",
+      "Silk Pearl Gold"
+    ],
+    "materials": [
+      "PETG"
+    ],
+    "tags": [
+      "caillebotis",
+      "bathmat",
+      "grating",
+      "drainage",
+      "slatted",
+      "shower",
+      "outdoor",
+      "flooring",
+      "grid",
+      "lattice",
+      "modular",
+      "interlocking",
+      "waterproof",
+      "antislip",
+      "patio",
+      "walkway",
+      "terrace",
+      "poolside",
+      "balcony",
+      "garden",
+      "perforated",
+      "ventilation adapter",
+      "geometric",
+      "honeycomb",
+      "parametric",
+      "minimalist",
+      "ergonomic",
+      "sustainable",
+      "functional",
+      "sauna",
+      "spa",
+      "wetroom",
+      "bathroom",
+      "workshop",
+      "greenhouse",
+      "mudroom",
+      "entryway",
+      "raised",
+      "tile",
+      "panel",
+      "platform",
+      "cover",
+      "duckboard"
+    ],
+    "printTimeMinutes": 294,
+    "rating": 5,
+    "reviewCount": 1,
+    "reviews": [],
+    "makerWorldUrl": "https://makerworld.com/en/models/2829021-duckboards-customizable",
+    "specifications": {
+      "dimensions": "120 × 120 × 140 mm",
+      "layerHeight": "0.16mm",
+      "infill": "15%"
+    }
+  },
+  {
+    "id": "belvia-parametric-floating-name-shelf-sign",
+    "title": "Parametric Floating Name Shelf & Sign",
+    "category": "Home Decor",
+    "startingPrice": 34.99,
+    "weightGrams": 249,
+    "filamentUsage": 186.8,
+    "isPreOrder": false,
+    "description": "Imported via Bulk MakerWorld URL.",
+    "images": [
+      "images/products/belvia-parametric-floating-name-shelf-sign.png",
+      "images/products/belvia-parametric-floating-name-shelf-sign-2.png",
+      "images/products/belvia-parametric-floating-name-shelf-sign-3.png",
+      "images/products/belvia-parametric-floating-name-shelf-sign-4.png",
+      "images/products/belvia-parametric-floating-name-shelf-sign-5.png",
+      "images/products/belvia-parametric-floating-name-shelf-sign-6.png",
+      "images/products/belvia-parametric-floating-name-shelf-sign-7.png",
+      "images/products/belvia-parametric-floating-name-shelf-sign-8.png",
+      "images/products/belvia-parametric-floating-name-shelf-sign-9.png",
+      "images/products/belvia-parametric-floating-name-shelf-sign-10.png",
+      "images/products/belvia-parametric-floating-name-shelf-sign-11.jpg",
+      "images/products/belvia-parametric-floating-name-shelf-sign-12.jpg"
+    ],
+    "colors": [
+      "Matte Slate",
+      "Obsidian Black",
+      "Chalk White",
+      "Silk Pearl Gold"
+    ],
+    "materials": [
+      "PLA"
+    ],
+    "tags": [
+      "parametric",
+      "floating shelf",
+      "name shelf",
+      "wall sign",
+      "custom shelf",
+      "customizable shelf",
+      "wall decor",
+      "personalized shelf",
+      "kitchen decor",
+      "bathroom decor",
+      "kids room",
+      "office decor",
+      "Home Decor",
+      "floating decor",
+      "wall shelf"
+    ],
+    "printTimeMinutes": 299,
+    "rating": 5,
+    "reviewCount": 1,
+    "reviews": [],
+    "makerWorldUrl": "https://makerworld.com/en/models/2825225-parametric-floating-name-shelf-sign",
+    "specifications": {
+      "dimensions": "120 × 120 × 140 mm",
+      "layerHeight": "0.16mm",
+      "infill": "10%"
+    }
+  },
+  {
+    "id": "belvia-suporte-param-trico-para-tigela-de-cachorro",
+    "title": "Suporte Paramétrico para Tigela de Cachorro",
+    "category": "Figures & Collectibles",
+    "startingPrice": 29.99,
+    "weightGrams": 255,
+    "filamentUsage": 191.3,
+    "isPreOrder": false,
+    "description": "Imported via Bulk MakerWorld URL.",
+    "images": [
+      "images/products/belvia-suporte-param-trico-para-tigela-de-cacho.png",
+      "images/products/belvia-suporte-param-trico-para-tigela-de-cacho-2.png",
+      "images/products/belvia-suporte-param-trico-para-tigela-de-cacho-3.png",
+      "images/products/belvia-suporte-param-trico-para-tigela-de-cacho-4.png",
+      "images/products/belvia-suporte-param-trico-para-tigela-de-cacho-5.webp"
+    ],
+    "colors": [
+      "Matte Slate",
+      "Obsidian Black",
+      "Chalk White",
+      "Silk Pearl Gold"
+    ],
+    "materials": [
+      "PLA"
+    ],
+    "tags": [
+      "dog",
+      "bowl",
+      "tigela",
+      "cachorro",
+      "gato",
+      "pet",
+      "pets",
+      "animais",
+      "comedouro",
+      "feeder",
+      "feed",
+      "food",
+      "water",
+      "nome",
+      "personalizado",
+      "custom",
+      "name",
+      "parametrico",
+      "parametric"
+    ],
+    "printTimeMinutes": 464,
+    "rating": 5,
+    "reviewCount": 1,
+    "reviews": [],
+    "makerWorldUrl": "https://makerworld.com/en/models/2830492-parametric-dog-bowl-stand",
+    "specifications": {
+      "dimensions": "120 × 120 × 140 mm",
+      "layerHeight": "0.16mm",
+      "infill": "15%"
+    }
+  },
+  {
+    "id": "belvia-wood-panel-entryway-organizer-with-key-hooks",
+    "title": "Wood Panel Entryway Organizer with Key Hooks",
+    "category": "Home Decor",
+    "startingPrice": 34.99,
+    "weightGrams": 249,
+    "filamentUsage": 186.8,
+    "isPreOrder": false,
+    "description": "Imported via Bulk MakerWorld URL.",
+    "images": [
+      "images/products/belvia-wood-panel-entryway-organizer-with-key-h.png",
+      "images/products/belvia-wood-panel-entryway-organizer-with-key-h-2.png",
+      "images/products/belvia-wood-panel-entryway-organizer-with-key-h-3.png",
+      "images/products/belvia-wood-panel-entryway-organizer-with-key-h-4.png",
+      "images/products/belvia-wood-panel-entryway-organizer-with-key-h-5.png",
+      "images/products/belvia-wood-panel-entryway-organizer-with-key-h-6.png",
+      "images/products/belvia-wood-panel-entryway-organizer-with-key-h-7.png",
+      "images/products/belvia-wood-panel-entryway-organizer-with-key-h-8.png",
+      "images/products/belvia-wood-panel-entryway-organizer-with-key-h-9.png",
+      "images/products/belvia-wood-panel-entryway-organizer-with-key-h-10.png",
+      "images/products/belvia-wood-panel-entryway-organizer-with-key-h-11.png",
+      "images/products/belvia-wood-panel-entryway-organizer-with-key-h-12.png"
+    ],
+    "colors": [
+      "Matte Slate",
+      "Obsidian Black",
+      "Chalk White",
+      "Silk Pearl Gold"
+    ],
+    "materials": [
+      "PLA"
+    ],
+    "tags": [
+      "wall",
+      "shelf",
+      "wall shelf",
+      "organiser",
+      "entry",
+      "hallway",
+      "wall orgainizer",
+      "wallorganizer",
+      "wall organizer",
+      "modern",
+      "wood",
+      "panel",
+      "wood panel",
+      "elegant",
+      "key",
+      "hook",
+      "hey hook",
+      "tray",
+      "decor",
+      "house",
+      "household",
+      "design",
+      "key hook",
+      "keyhook"
+    ],
+    "printTimeMinutes": 351,
+    "rating": 5,
+    "reviewCount": 1,
+    "reviews": [],
+    "makerWorldUrl": "https://makerworld.com/en/models/2831431-wood-panel-entryway-organizer-with-key-hooks",
+    "specifications": {
+      "dimensions": "120 × 120 × 140 mm",
+      "layerHeight": "0.16mm",
+      "infill": "15%"
+    }
+  },
+  {
+    "id": "belvia-oneblade-travel-box",
+    "title": "OneBlade Travel Box",
+    "category": "Figures & Collectibles",
+    "startingPrice": 29.99,
+    "weightGrams": 205,
+    "filamentUsage": 153.8,
+    "isPreOrder": false,
+    "description": "Imported via Bulk MakerWorld URL.",
+    "images": [
+      "images/products/belvia-oneblade-travel-box.jpg",
+      "images/products/belvia-oneblade-travel-box-2.jpg",
+      "images/products/belvia-oneblade-travel-box-3.png",
+      "images/products/belvia-oneblade-travel-box-4.png",
+      "images/products/belvia-oneblade-travel-box-5.png",
+      "images/products/belvia-oneblade-travel-box-6.png",
+      "images/products/belvia-oneblade-travel-box-7.png",
+      "images/products/belvia-oneblade-travel-box-8.png",
+      "images/products/belvia-oneblade-travel-box-9.png",
+      "images/products/belvia-oneblade-travel-box-10.png",
+      "images/products/belvia-oneblade-travel-box-11.png",
+      "images/products/belvia-oneblade-travel-box-12.png",
+      "images/products/belvia-oneblade-travel-box-13.png",
+      "images/products/belvia-oneblade-travel-box-14.png",
+      "images/products/belvia-oneblade-travel-box-15.png",
+      "images/products/belvia-oneblade-travel-box-16.jpg",
+      "images/products/belvia-oneblade-travel-box-17.jpg",
+      "images/products/belvia-oneblade-travel-box-18.jpg"
+    ],
+    "colors": [
+      "Matte Slate",
+      "Obsidian Black",
+      "Chalk White",
+      "Silk Pearl Gold"
+    ],
+    "materials": [
+      "PLA"
+    ],
+    "tags": [
+      "oneblade",
+      "philips",
+      "philips oneblade",
+      "one blade",
+      "oneblade 360",
+      "storage",
+      "box",
+      "Box",
+      "trimmer",
+      "trimmerbox"
+    ],
+    "printTimeMinutes": 330,
+    "rating": 5,
+    "reviewCount": 1,
+    "reviews": [],
+    "makerWorldUrl": "https://makerworld.com/en/models/2845596-oneblade-travel-box",
+    "specifications": {
+      "dimensions": "120 × 120 × 140 mm",
+      "layerHeight": "0.16mm",
+      "infill": "15%"
+    }
+  },
+  {
+    "id": "belvia-necro-dragon-skull-throne-easy-print-",
+    "title": "Necro Dragon – Skull Throne (Easy Print)",
+    "category": "Home Decor",
+    "startingPrice": 34.99,
+    "weightGrams": 171,
+    "filamentUsage": 128.3,
+    "isPreOrder": false,
+    "description": "Imported via Bulk MakerWorld URL.",
+    "images": [
+      "images/products/belvia-necro-dragon-skull-throne-easy-print.png",
+      "images/products/belvia-necro-dragon-skull-throne-easy-print-2.png",
+      "images/products/belvia-necro-dragon-skull-throne-easy-print-3.png",
+      "images/products/belvia-necro-dragon-skull-throne-easy-print-4.png",
+      "images/products/belvia-necro-dragon-skull-throne-easy-print-5.png",
+      "images/products/belvia-necro-dragon-skull-throne-easy-print-6.png",
+      "images/products/belvia-necro-dragon-skull-throne-easy-print-7.jpg",
+      "images/products/belvia-necro-dragon-skull-throne-easy-print-8.jpg",
+      "images/products/belvia-necro-dragon-skull-throne-easy-print-9.jpg",
+      "images/products/belvia-necro-dragon-skull-throne-easy-print-10.jpg"
+    ],
+    "colors": [
+      "Matte Slate",
+      "Obsidian Black",
+      "Chalk White",
+      "Silk Pearl Gold"
+    ],
+    "materials": [
+      "PLA"
+    ],
+    "tags": [
+      "Dragon",
+      "dragon",
+      "dragon statue",
+      "statue",
+      "statue 2026",
+      "black dragon",
+      "dark",
+      "fantasy dragon",
+      "fantasy",
+      "fantasy 2026",
+      "dragon decor",
+      "decor",
+      "'decor",
+      "gothic dragon",
+      "gothic",
+      "necro dragon",
+      "necro",
+      "dragon model",
+      "dragon print",
+      "dark fantasy",
+      "gothic decor",
+      "dark decor",
+      "skull",
+      "skulls",
+      "throne",
+      "Halloween",
+      "halloween",
+      "spooky",
+      "creepy",
+      "creature",
+      "mythical creature",
+      "mythical",
+      "Monster",
+      "collectible",
+      "Art",
+      "art",
+      "display piece",
+      "display",
+      "desk decor",
+      "desk",
+      "shelf",
+      "home decor",
+      "tabletop",
+      "figurine",
+      "easy print",
+      "high detail",
+      "display model",
+      "dragon collectible",
+      "BAMBULAB",
+      "shelf decor"
+    ],
+    "printTimeMinutes": 557,
+    "rating": 5,
+    "reviewCount": 1,
+    "reviews": [],
+    "makerWorldUrl": "https://makerworld.com/en/models/2827905-necro-dragon-skull-throne-easy-print",
+    "specifications": {
+      "dimensions": "120 × 120 × 140 mm",
+      "layerHeight": "0.16mm",
+      "infill": "10%"
+    }
+  },
+  {
+    "id": "belvia-flexi-toothless-articulated-ams",
+    "title": "Flexi Toothless- articulated AMS",
+    "category": "Figures & Collectibles",
+    "startingPrice": 29.99,
+    "weightGrams": 86,
+    "filamentUsage": 64.5,
+    "isPreOrder": false,
+    "description": "Imported via Bulk MakerWorld URL.",
+    "images": [
+      "images/products/belvia-flexi-toothless-articulated-ams.jpg",
+      "images/products/belvia-flexi-toothless-articulated-ams-2.jpg",
+      "images/products/belvia-flexi-toothless-articulated-ams-3.jpg",
+      "images/products/belvia-flexi-toothless-articulated-ams-4.jpg",
+      "images/products/belvia-flexi-toothless-articulated-ams-5.jpg",
+      "images/products/belvia-flexi-toothless-articulated-ams-6.jpg",
+      "images/products/belvia-flexi-toothless-articulated-ams-7.jpg",
+      "images/products/belvia-flexi-toothless-articulated-ams-8.jpg",
+      "images/products/belvia-flexi-toothless-articulated-ams-9.jpg",
+      "images/products/belvia-flexi-toothless-articulated-ams-10.png",
+      "images/products/belvia-flexi-toothless-articulated-ams-11.png"
+    ],
+    "colors": [
+      "Matte Slate",
+      "Obsidian Black",
+      "Chalk White",
+      "Silk Pearl Gold"
+    ],
+    "materials": [
+      "PLA"
+    ],
+    "tags": [
+      "toothless",
+      "dragon",
+      "cute",
+      "wow",
+      "felxi",
+      "articulated",
+      "ams",
+      "train",
+      "cuteness"
+    ],
+    "printTimeMinutes": 266,
+    "rating": 5,
+    "reviewCount": 1,
+    "reviews": [],
+    "makerWorldUrl": "https://makerworld.com/en/models/2853882-flexi-toothless-articulated-ams",
+    "specifications": {
+      "dimensions": "120 × 120 × 140 mm",
+      "layerHeight": "0.16mm",
+      "infill": "15%"
+    }
+  },
+  {
+    "id": "belvia-mason-jar-candy-dispenser-threaded-jar-",
+    "title": "Mason Jar Candy Dispenser (threaded jar)",
+    "category": "Desk Accessories",
+    "startingPrice": 22.99,
+    "weightGrams": 158,
+    "filamentUsage": 118.5,
+    "isPreOrder": false,
+    "description": "Imported via Bulk MakerWorld URL.",
+    "images": [
+      "images/products/belvia-mason-jar-candy-dispenser-threaded-jar.jpg",
+      "images/products/belvia-mason-jar-candy-dispenser-threaded-jar-2.jpg",
+      "images/products/belvia-mason-jar-candy-dispenser-threaded-jar-3.jpg",
+      "images/products/belvia-mason-jar-candy-dispenser-threaded-jar-4.jpg",
+      "images/products/belvia-mason-jar-candy-dispenser-threaded-jar-5.jpg",
+      "images/products/belvia-mason-jar-candy-dispenser-threaded-jar-6.jpg",
+      "images/products/belvia-mason-jar-candy-dispenser-threaded-jar-7.jpg",
+      "images/products/belvia-mason-jar-candy-dispenser-threaded-jar-8.jpg",
+      "images/products/belvia-mason-jar-candy-dispenser-threaded-jar-9.jpg",
+      "images/products/belvia-mason-jar-candy-dispenser-threaded-jar-10.jpg",
+      "images/products/belvia-mason-jar-candy-dispenser-threaded-jar-11.jpg",
+      "images/products/belvia-mason-jar-candy-dispenser-threaded-jar-12.jpg",
+      "images/products/belvia-mason-jar-candy-dispenser-threaded-jar-13.jpg"
+    ],
+    "colors": [
+      "Matte Slate",
+      "Obsidian Black",
+      "Chalk White",
+      "Silk Pearl Gold"
+    ],
+    "materials": [
+      "PLA"
+    ],
+    "tags": [
+      "candy",
+      "candy dispenser",
+      "gumball machine",
+      "dispenser",
+      "dispencer",
+      "candy dispencer",
+      "m and m",
+      "skittles",
+      "jar",
+      "mason jar",
+      "jam jar",
+      "sweet",
+      "sweets"
+    ],
+    "printTimeMinutes": 287,
+    "rating": 5,
+    "reviewCount": 1,
+    "reviews": [],
+    "makerWorldUrl": "https://makerworld.com/en/models/2827339-mason-jar-candy-dispenser-threaded-jar",
+    "specifications": {
+      "dimensions": "120 × 120 × 140 mm",
+      "layerHeight": "0.16mm",
+      "infill": "15%"
+    }
+  },
+  {
+    "id": "belvia-vaso-gufo-realistico",
+    "title": "Vaso Gufo realistico",
+    "category": "Home Decor",
+    "startingPrice": 34.99,
+    "weightGrams": 144,
+    "filamentUsage": 108,
+    "isPreOrder": false,
+    "description": "Imported via Bulk MakerWorld URL.",
+    "images": [
+      "images/products/belvia-vaso-gufo-realistico.jpg",
+      "images/products/belvia-vaso-gufo-realistico-2.jpg",
+      "images/products/belvia-vaso-gufo-realistico-3.jpg",
+      "images/products/belvia-vaso-gufo-realistico-4.jpg",
+      "images/products/belvia-vaso-gufo-realistico-5.jpg",
+      "images/products/belvia-vaso-gufo-realistico-6.jpg"
+    ],
+    "colors": [
+      "Matte Slate",
+      "Obsidian Black",
+      "Chalk White",
+      "Silk Pearl Gold"
+    ],
+    "materials": [
+      "PLA"
+    ],
+    "tags": [
+      "gufo",
+      "vase",
+      "animal",
+      "realistic",
+      "miniature"
+    ],
+    "printTimeMinutes": 249,
+    "rating": 5,
+    "reviewCount": 1,
+    "reviews": [],
+    "makerWorldUrl": "https://makerworld.com/en/models/2825918-realistic-owl-vase",
+    "specifications": {
+      "dimensions": "120 × 120 × 140 mm",
+      "layerHeight": "0.16mm",
+      "infill": "4%"
+    }
+  },
+  {
+    "id": "belvia-cats-curious-mira",
+    "title": "Cats - Curious Mira",
+    "category": "Home Decor",
+    "startingPrice": 34.99,
+    "weightGrams": 787,
+    "filamentUsage": 590.3,
+    "isPreOrder": false,
+    "description": "Imported via Bulk MakerWorld URL.",
+    "images": [
+      "images/products/belvia-cats-curious-mira.jpg",
+      "images/products/belvia-cats-curious-mira-2.jpg",
+      "images/products/belvia-cats-curious-mira-3.jpg",
+      "images/products/belvia-cats-curious-mira-4.jpg",
+      "images/products/belvia-cats-curious-mira-5.jpg",
+      "images/products/belvia-cats-curious-mira-6.jpg",
+      "images/products/belvia-cats-curious-mira-7.jpg",
+      "images/products/belvia-cats-curious-mira-8.png",
+      "images/products/belvia-cats-curious-mira-9.png",
+      "images/products/belvia-cats-curious-mira-10.png",
+      "images/products/belvia-cats-curious-mira-11.jpg"
+    ],
+    "colors": [
+      "Matte Slate",
+      "Obsidian Black",
+      "Chalk White",
+      "Silk Pearl Gold"
+    ],
+    "materials": [
+      "PLA"
+    ],
+    "tags": [
+      "cats",
+      "cat",
+      "Cat",
+      "deko",
+      "deco",
+      "decor",
+      "fun",
+      "curious",
+      "mira",
+      "katze",
+      "katzen",
+      "figure",
+      "animal",
+      "pets",
+      "jiji",
+      "ghibli",
+      "anime",
+      "comic",
+      "gift",
+      "gift 2026",
+      "gift acc",
+      "cute",
+      "sweet",
+      "animallover",
+      "home",
+      "Home Decor",
+      "'home",
+      "table accesory",
+      "livingroom",
+      "livingroom decor",
+      "chihiro",
+      "chibi",
+      "Chibi",
+      "animalfigure",
+      "bigeyes"
+    ],
+    "printTimeMinutes": 2894,
+    "rating": 5,
+    "reviewCount": 1,
+    "reviews": [],
+    "makerWorldUrl": "https://makerworld.com/en/models/2845663-cats-curious-mira",
+    "specifications": {
+      "dimensions": "120 × 120 × 140 mm",
+      "layerHeight": "0.16mm",
+      "infill": "4%"
+    }
+  },
+  {
+    "id": "belvia-makeup-brush-holder-bow",
+    "title": "Makeup Brush Holder - Bow",
+    "category": "Home Decor",
+    "startingPrice": 34.99,
+    "weightGrams": 186,
+    "filamentUsage": 139.5,
+    "isPreOrder": false,
+    "description": "Imported via Bulk MakerWorld URL.",
+    "images": [
+      "images/products/belvia-makeup-brush-holder-bow.png",
+      "images/products/belvia-makeup-brush-holder-bow-2.png",
+      "images/products/belvia-makeup-brush-holder-bow-3.jpg",
+      "images/products/belvia-makeup-brush-holder-bow-4.jpg",
+      "images/products/belvia-makeup-brush-holder-bow-5.png"
+    ],
+    "colors": [
+      "Matte Slate",
+      "Obsidian Black",
+      "Chalk White",
+      "Silk Pearl Gold"
+    ],
+    "materials": [
+      "PLA"
+    ],
+    "tags": [
+      "brush holder",
+      "make up",
+      "make up brush holder",
+      "brush stand",
+      "holder",
+      "stand",
+      "bow",
+      "feminine",
+      "decor",
+      "decoration",
+      "beauty",
+      "brush",
+      "makeup",
+      "makeup brush holder",
+      "makeup brush",
+      "elegant"
+    ],
+    "printTimeMinutes": 327,
+    "rating": 5,
+    "reviewCount": 1,
+    "reviews": [],
+    "makerWorldUrl": "https://makerworld.com/en/models/2834454-makeup-brush-holder-bow",
+    "specifications": {
+      "dimensions": "120 × 120 × 140 mm",
+      "layerHeight": "0.16mm",
+      "infill": "15%"
+    }
+  },
+  {
+    "id": "belvia-floral-ring-holder-keychain",
+    "title": "Floral Ring Holder Keychain",
+    "category": "Keychains",
+    "startingPrice": 9.99,
+    "weightGrams": 10,
+    "filamentUsage": 7.5,
+    "isPreOrder": false,
+    "description": "Imported via Bulk MakerWorld URL.",
+    "images": [
+      "images/products/belvia-floral-ring-holder-keychain.png",
+      "images/products/belvia-floral-ring-holder-keychain-2.png",
+      "images/products/belvia-floral-ring-holder-keychain-3.jpg",
+      "images/products/belvia-floral-ring-holder-keychain-4.jpg",
+      "images/products/belvia-floral-ring-holder-keychain-5.jpg"
+    ],
+    "colors": [
+      "Matte Slate",
+      "Obsidian Black",
+      "Chalk White",
+      "Silk Pearl Gold"
+    ],
+    "materials": [
+      "PLA"
+    ],
+    "tags": [
+      "Ring",
+      "ring",
+      "jewellery",
+      "jewelry",
+      "key",
+      "keychain",
+      "Holder",
+      "holder",
+      "organizer",
+      "decor",
+      "homedecor",
+      "women",
+      "organiser",
+      "floral",
+      "flower",
+      "keychain 1"
+    ],
+    "printTimeMinutes": 39,
+    "rating": 5,
+    "reviewCount": 1,
+    "reviews": [],
+    "makerWorldUrl": "https://makerworld.com/en/models/2845870-floral-ring-holder-keychain",
+    "specifications": {
+      "dimensions": "120 × 120 × 140 mm",
+      "layerHeight": "0.16mm",
+      "infill": "15%"
+    }
+  },
+  {
+    "id": "belvia-gloku-tactical-remote-system",
+    "title": "Gloku Tactical Remote System",
+    "category": "Gaming Accessories",
+    "startingPrice": 19.99,
+    "weightGrams": 124,
+    "filamentUsage": 93,
+    "isPreOrder": false,
+    "description": "Imported via Bulk MakerWorld URL.",
+    "images": [
+      "images/products/belvia-gloku-tactical-remote-system.jpg",
+      "images/products/belvia-gloku-tactical-remote-system-2.jpg",
+      "images/products/belvia-gloku-tactical-remote-system-3.jpg",
+      "images/products/belvia-gloku-tactical-remote-system-4.jpg",
+      "images/products/belvia-gloku-tactical-remote-system-5.jpg",
+      "images/products/belvia-gloku-tactical-remote-system-6.jpg",
+      "images/products/belvia-gloku-tactical-remote-system-7.jpg",
+      "images/products/belvia-gloku-tactical-remote-system-8.jpg",
+      "images/products/belvia-gloku-tactical-remote-system-9.jpg",
+      "images/products/belvia-gloku-tactical-remote-system-10.jpg",
+      "images/products/belvia-gloku-tactical-remote-system-11.jpg",
+      "images/products/belvia-gloku-tactical-remote-system-12.jpg",
+      "images/products/belvia-gloku-tactical-remote-system-13.jpg",
+      "images/products/belvia-gloku-tactical-remote-system-14.jpg",
+      "images/products/belvia-gloku-tactical-remote-system-15.jpg",
+      "images/products/belvia-gloku-tactical-remote-system-16.jpg",
+      "images/products/belvia-gloku-tactical-remote-system-17.jpg",
+      "images/products/belvia-gloku-tactical-remote-system-18.jpg",
+      "images/products/belvia-gloku-tactical-remote-system-19.png",
+      "images/products/belvia-gloku-tactical-remote-system-20.png"
+    ],
+    "colors": [
+      "Matte Slate",
+      "Obsidian Black",
+      "Chalk White",
+      "Silk Pearl Gold"
+    ],
+    "materials": [
+      "PLA"
+    ],
+    "tags": [
+      "roku",
+      "remote",
+      "roku remote",
+      "controller",
+      "funny",
+      "gun",
+      "GLOCK",
+      "handgun"
+    ],
+    "printTimeMinutes": 278,
+    "rating": 5,
+    "reviewCount": 1,
+    "reviews": [],
+    "makerWorldUrl": "https://makerworld.com/en/models/2820311-gloku-tactical-remote-system",
+    "specifications": {
+      "dimensions": "120 × 120 × 140 mm",
+      "layerHeight": "0.16mm",
+      "infill": "10%"
+    }
+  },
+  {
+    "id": "belvia-voronoi-incense-holder-xl-modern-incense-burner",
+    "title": "Voronoi Incense Holder XL – Modern Incense Burner",
+    "category": "Home Decor",
+    "startingPrice": 34.99,
+    "weightGrams": 82,
+    "filamentUsage": 61.5,
+    "isPreOrder": false,
+    "description": "Imported via Bulk MakerWorld URL.",
+    "images": [
+      "images/products/belvia-voronoi-incense-holder-xl-modern-incense.jpg",
+      "images/products/belvia-voronoi-incense-holder-xl-modern-incense-2.jpg",
+      "images/products/belvia-voronoi-incense-holder-xl-modern-incense-3.jpg",
+      "images/products/belvia-voronoi-incense-holder-xl-modern-incense-4.jpg",
+      "images/products/belvia-voronoi-incense-holder-xl-modern-incense-5.jpg"
+    ],
+    "colors": [
+      "Matte Slate",
+      "Obsidian Black",
+      "Chalk White",
+      "Silk Pearl Gold"
+    ],
+    "materials": [
+      "PLA"
+    ],
+    "tags": [
+      "voronoi",
+      "incense",
+      "incenseholder",
+      "incenseburner",
+      "homedecor",
+      "relaxing",
+      "zen",
+      "modern",
+      "geometric",
+      "parametric",
+      "easyprint",
+      "nosupport",
+      "decorative",
+      "meditation",
+      "aroma",
+      "incensestick",
+      "organizer"
+    ],
+    "printTimeMinutes": 226,
+    "rating": 5,
+    "reviewCount": 1,
+    "reviews": [],
+    "makerWorldUrl": "https://makerworld.com/en/models/2846691-voronoi-incense-holder-xl-modern-incense-burner",
+    "specifications": {
+      "dimensions": "120 × 120 × 140 mm",
+      "layerHeight": "0.16mm",
+      "infill": "15%"
+    }
+  },
+  {
+    "id": "belvia-celtic-knot-catchall-tray",
+    "title": "Celtic Knot Catchall Tray",
+    "category": "Desk Accessories",
+    "startingPrice": 22.99,
+    "weightGrams": 41,
+    "filamentUsage": 30.8,
+    "isPreOrder": false,
+    "description": "Imported via Bulk MakerWorld URL.",
+    "images": [
+      "images/products/belvia-celtic-knot-catchall-tray-lattice.png",
+      "images/products/belvia-celtic-knot-catchall-tray-lattice-2.png",
+      "images/products/belvia-celtic-knot-catchall-tray-lattice-3.png",
+      "images/products/belvia-celtic-knot-catchall-tray-lattice-4.png",
+      "images/products/belvia-celtic-knot-catchall-tray-lattice-5.png",
+      "images/products/belvia-celtic-knot-catchall-tray-lattice-6.png",
+      "images/products/belvia-celtic-knot-catchall-tray-lattice-7.png",
+      "images/products/belvia-celtic-knot-catchall-tray-lattice-8.png"
+    ],
+    "colors": [
+      "Matte Slate",
+      "Obsidian Black",
+      "Chalk White",
+      "Silk Pearl Gold"
+    ],
+    "materials": [
+      "PLA"
+    ],
+    "tags": [
+      "tray",
+      "catchall",
+      "organizor",
+      "desk",
+      "container",
+      "woven",
+      "celtic",
+      "knot",
+      "weave",
+      "lattice",
+      "storage",
+      "office",
+      "modern",
+      "minimalist"
+    ],
+    "printTimeMinutes": 142,
+    "rating": 5,
+    "reviewCount": 1,
+    "reviews": [],
+    "makerWorldUrl": "https://makerworld.com/en/models/2838702-celtic-knot-catchall-tray-lattice",
+    "specifications": {
+      "dimensions": "120 × 120 × 140 mm",
+      "layerHeight": "0.16mm",
+      "infill": "15%"
+    }
+  },
+  {
+    "id": "belvia-towel-hanger-8-patterns-pressure-lock",
+    "title": "Towel Hanger - 8 Patterns, Pressure Lock",
+    "category": "Figures & Collectibles",
+    "startingPrice": 29.99,
+    "weightGrams": 136,
+    "filamentUsage": 102,
+    "isPreOrder": false,
+    "description": "Imported via Bulk MakerWorld URL.",
+    "images": [
+      "images/products/belvia-towel-hanger-8-patterns-pressure-lock.png",
+      "images/products/belvia-towel-hanger-8-patterns-pressure-lock-2.png",
+      "images/products/belvia-towel-hanger-8-patterns-pressure-lock-3.png",
+      "images/products/belvia-towel-hanger-8-patterns-pressure-lock-4.png",
+      "images/products/belvia-towel-hanger-8-patterns-pressure-lock-5.png",
+      "images/products/belvia-towel-hanger-8-patterns-pressure-lock-6.jpg",
+      "images/products/belvia-towel-hanger-8-patterns-pressure-lock-7.jpg",
+      "images/products/belvia-towel-hanger-8-patterns-pressure-lock-8.jpg",
+      "images/products/belvia-towel-hanger-8-patterns-pressure-lock-9.jpg",
+      "images/products/belvia-towel-hanger-8-patterns-pressure-lock-10.jpg",
+      "images/products/belvia-towel-hanger-8-patterns-pressure-lock-11.jpg",
+      "images/products/belvia-towel-hanger-8-patterns-pressure-lock-12.jpg",
+      "images/products/belvia-towel-hanger-8-patterns-pressure-lock-13.jpg",
+      "images/products/belvia-towel-hanger-8-patterns-pressure-lock-14.jpg",
+      "images/products/belvia-towel-hanger-8-patterns-pressure-lock-15.jpg",
+      "images/products/belvia-towel-hanger-8-patterns-pressure-lock-16.jpg",
+      "images/products/belvia-towel-hanger-8-patterns-pressure-lock-17.jpg",
+      "images/products/belvia-towel-hanger-8-patterns-pressure-lock-18.jpg",
+      "images/products/belvia-towel-hanger-8-patterns-pressure-lock-19.jpg",
+      "images/products/belvia-towel-hanger-8-patterns-pressure-lock-20.jpg"
+    ],
+    "colors": [
+      "Matte Slate",
+      "Obsidian Black",
+      "Chalk White",
+      "Silk Pearl Gold"
+    ],
+    "materials": [
+      "PLA"
+    ],
+    "tags": [
+      "towel hanger",
+      "wall hanger",
+      "Hook",
+      "wall hook",
+      "towel hook",
+      "jacket",
+      "gravity hanger",
+      "pressure",
+      "coat hanger",
+      "door hook",
+      "hook",
+      "wardrobe",
+      "cloth hanger",
+      "self locking",
+      "autolock",
+      "bathroom",
+      "kitchen",
+      "bedroom",
+      "modern",
+      "Design",
+      "voronoi",
+      "hex pattern",
+      "pattern",
+      "janberrydesign",
+      "towel anchor",
+      "towel ring"
+    ],
+    "printTimeMinutes": 475,
+    "rating": 5,
+    "reviewCount": 1,
+    "reviews": [],
+    "makerWorldUrl": "https://makerworld.com/en/models/2858922-towel-hanger-8-patterns-pressure-lock",
+    "specifications": {
+      "dimensions": "120 × 120 × 140 mm",
+      "layerHeight": "0.16mm",
+      "infill": "15%"
+    }
+  },
+  {
+    "id": "belvia-scalloped-arch-shelf",
+    "title": "Scalloped Arch Shelf",
+    "category": "Home Decor",
+    "startingPrice": 34.99,
+    "weightGrams": 260,
+    "filamentUsage": 195,
+    "isPreOrder": false,
+    "description": "Imported via Bulk MakerWorld URL.",
+    "images": [
+      "images/products/belvia-scalloped-arch-shelf-2-sizes-cute-desk-d.png",
+      "images/products/belvia-scalloped-arch-shelf-2-sizes-cute-desk-d-2.png",
+      "images/products/belvia-scalloped-arch-shelf-2-sizes-cute-desk-d-3.png",
+      "images/products/belvia-scalloped-arch-shelf-2-sizes-cute-desk-d-4.png",
+      "images/products/belvia-scalloped-arch-shelf-2-sizes-cute-desk-d-5.png",
+      "images/products/belvia-scalloped-arch-shelf-2-sizes-cute-desk-d-6.png",
+      "images/products/belvia-scalloped-arch-shelf-2-sizes-cute-desk-d-7.png",
+      "images/products/belvia-scalloped-arch-shelf-2-sizes-cute-desk-d-8.jpg",
+      "images/products/belvia-scalloped-arch-shelf-2-sizes-cute-desk-d-9.jpg"
+    ],
+    "colors": [
+      "Matte Slate",
+      "Obsidian Black",
+      "Chalk White",
+      "Silk Pearl Gold"
+    ],
+    "materials": [
+      "PLA"
+    ],
+    "tags": [
+      "scalloped",
+      "arch",
+      "scalloped design",
+      "shelf",
+      "cute shelf",
+      "scallop",
+      "estante",
+      "decoration",
+      "decoracao",
+      "kids bedroom",
+      "childrens bedroom",
+      "display",
+      "display shelf",
+      "coquette",
+      "vanity",
+      "storage shelf",
+      "trinket",
+      "trinket display",
+      "cute display",
+      "cute display stand",
+      "decor",
+      "cute decor",
+      "aesthetic",
+      "jewlery display",
+      "jewlery",
+      "jewlery organizer",
+      "craft display",
+      "display stand"
+    ],
+    "printTimeMinutes": 252,
+    "rating": 5,
+    "reviewCount": 1,
+    "reviews": [],
+    "makerWorldUrl": "https://makerworld.com/en/models/2842434-scalloped-arch-shelf-2-sizes-cute-desk-display",
+    "specifications": {
+      "dimensions": "120 × 120 × 140 mm",
+      "layerHeight": "0.16mm",
+      "infill": "15%"
+    }
+  },
+  {
+    "id": "belvia-wall-mounted-sunglasses-holder",
+    "title": "Wall Mounted Sunglasses Holder",
+    "category": "Home Decor",
+    "startingPrice": 34.99,
+    "weightGrams": 65,
+    "filamentUsage": 48.8,
+    "isPreOrder": false,
+    "description": "Imported via Bulk MakerWorld URL.",
+    "images": [
+      "images/products/belvia-wall-mounted-sunglasses-holder-parametri.jpg",
+      "images/products/belvia-wall-mounted-sunglasses-holder-parametri-2.jpg",
+      "images/products/belvia-wall-mounted-sunglasses-holder-parametri-3.jpg",
+      "images/products/belvia-wall-mounted-sunglasses-holder-parametri-4.jpg",
+      "images/products/belvia-wall-mounted-sunglasses-holder-parametri-5.jpg",
+      "images/products/belvia-wall-mounted-sunglasses-holder-parametri-6.jpg",
+      "images/products/belvia-wall-mounted-sunglasses-holder-parametri-7.jpg",
+      "images/products/belvia-wall-mounted-sunglasses-holder-parametri-8.jpg",
+      "images/products/belvia-wall-mounted-sunglasses-holder-parametri-9.jpg",
+      "images/products/belvia-wall-mounted-sunglasses-holder-parametri-10.jpg",
+      "images/products/belvia-wall-mounted-sunglasses-holder-parametri-11.jpg",
+      "images/products/belvia-wall-mounted-sunglasses-holder-parametri-12.jpg",
+      "images/products/belvia-wall-mounted-sunglasses-holder-parametri-13.jpg",
+      "images/products/belvia-wall-mounted-sunglasses-holder-parametri-14.jpg",
+      "images/products/belvia-wall-mounted-sunglasses-holder-parametri-15.jpg"
+    ],
+    "colors": [
+      "Matte Slate",
+      "Obsidian Black",
+      "Chalk White",
+      "Silk Pearl Gold"
+    ],
+    "materials": [
+      "PLA"
+    ],
+    "tags": [
+      "sunglasses",
+      "sunglasses organizer",
+      "sunglasses holder",
+      "Holder",
+      "rail",
+      "sunglasses accessory",
+      "accessories",
+      "Home Decor",
+      "home decor",
+      "eyeglasses",
+      "eye glasses",
+      "eyeglasses holder",
+      "sunglass",
+      "sunglasses case",
+      "sunglasses storage",
+      "wall mount",
+      "wallmount",
+      "wall mount accessory",
+      "a1 mini",
+      "easy print",
+      "wood",
+      "wood accent",
+      "wood grain",
+      "modern",
+      "ribbed",
+      "hanger",
+      "countersunk screws",
+      "screws",
+      "wall mount adapter",
+      "parametric",
+      "home decor 2026",
+      "modern home",
+      "modern home accessory",
+      "summer",
+      "summer 2026",
+      "summer essentials",
+      "wall organizer",
+      "sunglasses accessories",
+      "sunglasses wall mount",
+      "sun glasses holder",
+      "parametric decor",
+      "customize"
+    ],
+    "printTimeMinutes": 120,
+    "rating": 5,
+    "reviewCount": 1,
+    "reviews": [],
+    "makerWorldUrl": "https://makerworld.com/en/models/2839639-wall-mounted-sunglasses-holder-parametric",
+    "specifications": {
+      "dimensions": "120 × 120 × 140 mm",
+      "layerHeight": "0.16mm",
+      "infill": "15%"
+    }
+  },
+  {
+    "id": "belvia-alter-baum-mit-totholz-und-rauher-rinde-12-18-25cm",
+    "title": "Alter Baum mit Totholz und rauher Rinde 12/18/25cm",
+    "category": "Figures & Collectibles",
+    "startingPrice": 29.99,
+    "weightGrams": 129,
+    "filamentUsage": 96.8,
+    "isPreOrder": false,
+    "description": "Imported via Bulk MakerWorld URL.",
+    "images": [
+      "images/products/belvia-alter-baum-mit-totholz-und-rauher-rinde-.jpg",
+      "images/products/belvia-alter-baum-mit-totholz-und-rauher-rinde--2.jpg",
+      "images/products/belvia-alter-baum-mit-totholz-und-rauher-rinde--3.jpg",
+      "images/products/belvia-alter-baum-mit-totholz-und-rauher-rinde--4.jpg",
+      "images/products/belvia-alter-baum-mit-totholz-und-rauher-rinde--5.jpg",
+      "images/products/belvia-alter-baum-mit-totholz-und-rauher-rinde--6.jpg",
+      "images/products/belvia-alter-baum-mit-totholz-und-rauher-rinde--7.jpg",
+      "images/products/belvia-alter-baum-mit-totholz-und-rauher-rinde--8.jpg",
+      "images/products/belvia-alter-baum-mit-totholz-und-rauher-rinde--9.png",
+      "images/products/belvia-alter-baum-mit-totholz-und-rauher-rinde--10.jpg",
+      "images/products/belvia-alter-baum-mit-totholz-und-rauher-rinde--11.jpg",
+      "images/products/belvia-alter-baum-mit-totholz-und-rauher-rinde--12.jpg",
+      "images/products/belvia-alter-baum-mit-totholz-und-rauher-rinde--13.jpg",
+      "images/products/belvia-alter-baum-mit-totholz-und-rauher-rinde--14.jpg",
+      "images/products/belvia-alter-baum-mit-totholz-und-rauher-rinde--15.jpg"
+    ],
+    "colors": [
+      "Matte Slate",
+      "Obsidian Black",
+      "Chalk White",
+      "Silk Pearl Gold"
+    ],
+    "materials": [
+      "PLA"
+    ],
+    "tags": [
+      "baum",
+      "alter baum",
+      "rinde",
+      "baumrinde",
+      "geschenk",
+      "terrain",
+      "dnd",
+      "rpg",
+      "wald",
+      "holz",
+      "totholz",
+      "figur",
+      "spiel",
+      "natur"
+    ],
+    "printTimeMinutes": 646,
+    "rating": 5,
+    "reviewCount": 1,
+    "reviews": [],
+    "makerWorldUrl": "https://makerworld.com/en/models/2858424-old-tree-with-deadwood-and-rough-bark-12-18-25cm",
+    "specifications": {
+      "dimensions": "120 × 120 × 140 mm",
+      "layerHeight": "0.16mm",
+      "infill": "12%"
+    }
+  },
+  {
+    "id": "belvia--7-q-craft-",
+    "title": "时尚珍珠托盘-7个形状(Q_Craft)",
+    "category": "Home Decor",
+    "startingPrice": 34.99,
+    "weightGrams": 646,
+    "filamentUsage": 484.5,
+    "isPreOrder": false,
+    "description": "Imported via Bulk MakerWorld URL.",
+    "images": [
+      "images/products/belvia-7-q-craft.png",
+      "images/products/belvia-7-q-craft-2.png",
+      "images/products/belvia-7-q-craft-3.png",
+      "images/products/belvia-7-q-craft-4.png",
+      "images/products/belvia-7-q-craft-5.png",
+      "images/products/belvia-7-q-craft-6.jpg",
+      "images/products/belvia-7-q-craft-7.jpg",
+      "images/products/belvia-7-q-craft-8.png",
+      "images/products/belvia-7-q-craft-9.png",
+      "images/products/belvia-7-q-craft-10.jpg",
+      "images/products/belvia-7-q-craft-11.jpg",
+      "images/products/belvia-7-q-craft-12.jpg"
+    ],
+    "colors": [
+      "Matte Slate",
+      "Obsidian Black",
+      "Chalk White",
+      "Silk Pearl Gold"
+    ],
+    "materials": [
+      "PLA"
+    ],
+    "tags": [
+      "deco",
+      "home",
+      "tray",
+      "small",
+      "fast",
+      "plate",
+      "art",
+      "daily necessities",
+      "daily",
+      "fasion",
+      "funky",
+      "modern",
+      "trays",
+      "bowl",
+      "key",
+      "keys",
+      "coin",
+      "coins",
+      "catchall",
+      "storage",
+      "house",
+      "House",
+      "house accesories",
+      "house accesory",
+      "accesories",
+      "bin",
+      "key holder",
+      "keytray",
+      "key tray",
+      "Home Decor",
+      "HomeAssistant",
+      "relief",
+      "NO AMS",
+      "Fast",
+      "easy",
+      "EasyPrint",
+      "homedecor",
+      "decoration",
+      "decorative",
+      "decor accessories",
+      "'modern",
+      "qcraft",
+      "qcraftdesign",
+      "首饰托盘",
+      "珠宝",
+      "jewelry",
+      "dish",
+      "jewelry accessory",
+      "jewelry accessory box"
+    ],
+    "printTimeMinutes": 1548,
+    "rating": 5,
+    "reviewCount": 1,
+    "reviews": [],
+    "makerWorldUrl": "https://makerworld.com/en/models/2848357-stylish-pearl-tray-7-shapes-q_craft",
+    "specifications": {
+      "dimensions": "120 × 120 × 140 mm",
+      "layerHeight": "0.16mm",
+      "infill": "15%"
+    }
+  },
+  {
+    "id": "belvia-dayton-style-trash-bin-spinner-rims",
+    "title": "Dayton Style Trash Bin Spinner Rims",
+    "category": "Figures & Collectibles",
+    "startingPrice": 29.99,
+    "weightGrams": 150,
+    "filamentUsage": 112.5,
+    "isPreOrder": false,
+    "description": "Imported via Bulk MakerWorld URL.",
+    "images": [
+      "images/products/belvia-dayton-style-trash-bin-spinner-rims.png",
+      "images/products/belvia-dayton-style-trash-bin-spinner-rims-2.png",
+      "images/products/belvia-dayton-style-trash-bin-spinner-rims-3.png",
+      "images/products/belvia-dayton-style-trash-bin-spinner-rims-4.jpg",
+      "images/products/belvia-dayton-style-trash-bin-spinner-rims-5.jpg",
+      "images/products/belvia-dayton-style-trash-bin-spinner-rims-6.jpg",
+      "images/products/belvia-dayton-style-trash-bin-spinner-rims-7.jpg",
+      "images/products/belvia-dayton-style-trash-bin-spinner-rims-8.jpg",
+      "images/products/belvia-dayton-style-trash-bin-spinner-rims-9.png",
+      "images/products/belvia-dayton-style-trash-bin-spinner-rims-10.jpg",
+      "images/products/belvia-dayton-style-trash-bin-spinner-rims-11.jpg",
+      "images/products/belvia-dayton-style-trash-bin-spinner-rims-12.jpg"
+    ],
+    "colors": [
+      "Matte Slate",
+      "Obsidian Black",
+      "Chalk White",
+      "Silk Pearl Gold"
+    ],
+    "materials": [
+      "PLA"
+    ],
+    "tags": [
+      "rims",
+      "dayton",
+      "trash",
+      "cart",
+      "bin",
+      "wheels",
+      "wheel rims",
+      "trash rims",
+      "stroller rims",
+      "spinners",
+      "spinner",
+      "rim caps",
+      "garbage"
+    ],
+    "printTimeMinutes": 200,
+    "rating": 5,
+    "reviewCount": 1,
+    "reviews": [],
+    "makerWorldUrl": "https://makerworld.com/en/models/2835952-dayton-style-trash-bin-spinner-rims",
+    "specifications": {
+      "dimensions": "120 × 120 × 140 mm",
+      "layerHeight": "0.16mm",
+      "infill": "15%"
+    }
+  },
+  {
+    "id": "belvia-bathroom-hanger-hook-shower-towel-hook",
+    "title": "Bathroom Hanger Hook / Shower Towel Hook",
+    "category": "Home Decor",
+    "startingPrice": 34.99,
+    "weightGrams": 4,
+    "filamentUsage": 3,
+    "isPreOrder": false,
+    "description": "Imported via Bulk MakerWorld URL.",
+    "images": [
+      "images/products/belvia-bathroom-hanger-hook-shower-towel-hook.png",
+      "images/products/belvia-bathroom-hanger-hook-shower-towel-hook-2.png",
+      "images/products/belvia-bathroom-hanger-hook-shower-towel-hook-3.jpg",
+      "images/products/belvia-bathroom-hanger-hook-shower-towel-hook-4.jpg",
+      "images/products/belvia-bathroom-hanger-hook-shower-towel-hook-5.png",
+      "images/products/belvia-bathroom-hanger-hook-shower-towel-hook-6.png",
+      "images/products/belvia-bathroom-hanger-hook-shower-towel-hook-7.jpg",
+      "images/products/belvia-bathroom-hanger-hook-shower-towel-hook-8.png",
+      "images/products/belvia-bathroom-hanger-hook-shower-towel-hook-9.jpg",
+      "images/products/belvia-bathroom-hanger-hook-shower-towel-hook-10.png",
+      "images/products/belvia-bathroom-hanger-hook-shower-towel-hook-11.jpg",
+      "images/products/belvia-bathroom-hanger-hook-shower-towel-hook-12.jpg",
+      "images/products/belvia-bathroom-hanger-hook-shower-towel-hook-13.png"
+    ],
+    "colors": [
+      "Matte Slate",
+      "Obsidian Black",
+      "Chalk White",
+      "Silk Pearl Gold"
+    ],
+    "materials": [
+      "PLA"
+    ],
+    "tags": [
+      "towel hanger",
+      "towel hanger for shower",
+      "towel hook",
+      "towel",
+      "Hook",
+      "hook",
+      "hanger",
+      "towel accessory",
+      "accessory",
+      "bathroom",
+      "bathroom organiser",
+      "bath",
+      "bathroom organization",
+      "shower",
+      "shower access",
+      "shower door",
+      "door accessory",
+      "decor",
+      "minimalistic",
+      "modern",
+      "organizer",
+      "practical",
+      "A1",
+      "A1 MINI",
+      "NO AMS",
+      "no suport"
+    ],
+    "printTimeMinutes": 16,
+    "rating": 5,
+    "reviewCount": 1,
+    "reviews": [],
+    "makerWorldUrl": "https://makerworld.com/en/models/2866604-bathroom-hanger-hook-shower-towel-hook",
+    "specifications": {
+      "dimensions": "120 × 120 × 140 mm",
+      "layerHeight": "0.16mm",
+      "infill": "15%"
+    }
+  },
+  {
+    "id": "belvia-mouse-trap-2-gallon-bucket",
+    "title": "Mouse trap 2-gallon bucket",
+    "category": "Home Decor",
+    "startingPrice": 34.99,
+    "weightGrams": 383,
+    "filamentUsage": 287.3,
+    "isPreOrder": false,
+    "description": "Imported via Bulk MakerWorld URL.",
+    "images": [
+      "images/products/belvia-mouse-trap-2-gallon-bucket.png",
+      "images/products/belvia-mouse-trap-2-gallon-bucket-2.png",
+      "images/products/belvia-mouse-trap-2-gallon-bucket-3.jpg",
+      "images/products/belvia-mouse-trap-2-gallon-bucket-4.jpg",
+      "images/products/belvia-mouse-trap-2-gallon-bucket-5.png",
+      "images/products/belvia-mouse-trap-2-gallon-bucket-6.jpg",
+      "images/products/belvia-mouse-trap-2-gallon-bucket-7.jpg",
+      "images/products/belvia-mouse-trap-2-gallon-bucket-8.jpg",
+      "images/products/belvia-mouse-trap-2-gallon-bucket-9.jpg"
+    ],
+    "colors": [
+      "Matte Slate",
+      "Obsidian Black",
+      "Chalk White",
+      "Silk Pearl Gold"
     ],
     "materials": [
       "PETG",
       "ABS"
     ],
-    "printTimeMinutes": 60,
-    "rating": 4.9,
-    "reviewCount": 1,
-    "reviews": [
-      {
-        "userName": "BambuFan",
-        "rating": 5,
-        "comment": "Perfect angle alignment, zero plate scratching.",
-        "verified": true,
-        "date": "2026-05-29"
-      }
+    "tags": [
+      "mouse",
+      "mouse trap",
+      "home depot",
+      "bucket",
+      "bucket2gallon",
+      "2gallon",
+      "2 gallon",
+      "homedepot",
+      "lowes",
+      "trap",
+      "lid",
+      "bucket 2 gallon"
     ],
-    "makerWorldUrl": "https://makerworld.com/en/models/88888",
+    "printTimeMinutes": 731,
+    "rating": 5,
+    "reviewCount": 1,
+    "reviews": [],
+    "makerWorldUrl": "https://makerworld.com/en/models/2861437-mouse-trap-2-gallon-bucket",
     "specifications": {
-      "dimensions": "110mm x 35mm x 15mm",
-      "layerHeight": "0.16mm"
+      "dimensions": "120 × 120 × 140 mm",
+      "layerHeight": "0.16mm",
+      "infill": "15%"
     }
   },
   {
-    "id": "belvia-hotend-assembly",
-    "title": "Hardened Steel Hotend 0.4mm",
-    "category": "Hotends",
-    "startingPrice": 34.99,
-    "weightGrams": 80,
-    "filamentUsage": 0.0,
-    "isPreOrder": true,
-    "description": "Hardened steel hotend nozzle assembly designed for high-temperature carbon fiber printing. Pre-Order Only.",
+    "id": "belvia-formula-1-wheel-tire-decals-for-waste-bins",
+    "title": "Formula 1 Wheel & Tire Decals for Waste Bins",
+    "category": "Figures & Collectibles",
+    "startingPrice": 29.99,
+    "weightGrams": 108,
+    "filamentUsage": 81,
+    "isPreOrder": false,
+    "description": "Imported via Bulk MakerWorld URL.",
     "images": [
-      "images/products/hotend-04.webp"
+      "images/products/belvia-formula-1-wheel-tire-decals-for-waste-bi.jpg",
+      "images/products/belvia-formula-1-wheel-tire-decals-for-waste-bi-2.jpg",
+      "images/products/belvia-formula-1-wheel-tire-decals-for-waste-bi-3.jpg",
+      "images/products/belvia-formula-1-wheel-tire-decals-for-waste-bi-4.jpg",
+      "images/products/belvia-formula-1-wheel-tire-decals-for-waste-bi-5.jpg",
+      "images/products/belvia-formula-1-wheel-tire-decals-for-waste-bi-6.jpg",
+      "images/products/belvia-formula-1-wheel-tire-decals-for-waste-bi-7.jpg"
     ],
     "colors": [
-      "matte-black"
+      "Matte Slate",
+      "Obsidian Black",
+      "Chalk White",
+      "Silk Pearl Gold"
     ],
     "materials": [
       "PLA"
     ],
-    "printTimeMinutes": 0,
-    "rating": 4.7,
-    "reviewCount": 0,
+    "tags": [
+      "formula1",
+      "F1",
+      "wheel",
+      "rims",
+      "tire",
+      "tyre",
+      "garbage",
+      "recycle",
+      "wastebin",
+      "waste",
+      "sweden",
+      "swedish",
+      "trashcan",
+      "motorsport"
+    ],
+    "printTimeMinutes": 221,
+    "rating": 5,
+    "reviewCount": 1,
     "reviews": [],
-    "makerWorldUrl": "https://makerworld.com/en/models/99999",
+    "makerWorldUrl": "https://makerworld.com/en/models/2837821-formula-1-wheel-tire-decals-for-waste-bins",
     "specifications": {
-      "dimensions": "Standard Bambu Toolhead",
-      "layerHeight": "N/A"
+      "dimensions": "120 × 120 × 140 mm",
+      "layerHeight": "0.16mm",
+      "infill": "10%"
     }
   },
   {
-    "id": "belvia-filament-drybox",
-    "title": "Premium Filament Dry Box Shell",
-    "category": "Imported Goods",
-    "startingPrice": 49.99,
-    "weightGrams": 950,
-    "filamentUsage": 820.0,
-    "isPreOrder": true,
-    "description": "Sealed environment storage container keeping your TPU and nylon dry. Complete with humidity sensor window. Pre-Order Only.",
+    "id": "belvia-trash-can-rims",
+    "title": "Trash Can Rims",
+    "category": "Figures & Collectibles",
+    "startingPrice": 29.99,
+    "weightGrams": 143,
+    "filamentUsage": 107.3,
+    "isPreOrder": false,
+    "description": "Imported via Bulk MakerWorld URL.",
     "images": [
-      "images/products/drybox.webp"
+      "images/products/belvia-trash-can-rims.png",
+      "images/products/belvia-trash-can-rims-2.jpg",
+      "images/products/belvia-trash-can-rims-3.jpg",
+      "images/products/belvia-trash-can-rims-4.jpg",
+      "images/products/belvia-trash-can-rims-5.jpg",
+      "images/products/belvia-trash-can-rims-6.jpg",
+      "images/products/belvia-trash-can-rims-7.jpg",
+      "images/products/belvia-trash-can-rims-8.png",
+      "images/products/belvia-trash-can-rims-9.png",
+      "images/products/belvia-trash-can-rims-10.png",
+      "images/products/belvia-trash-can-rims-11.png",
+      "images/products/belvia-trash-can-rims-12.png",
+      "images/products/belvia-trash-can-rims-13.jpg",
+      "images/products/belvia-trash-can-rims-14.jpg",
+      "images/products/belvia-trash-can-rims-15.jpg",
+      "images/products/belvia-trash-can-rims-16.jpg",
+      "images/products/belvia-trash-can-rims-17.jpg",
+      "images/products/belvia-trash-can-rims-18.jpg",
+      "images/products/belvia-trash-can-rims-19.png",
+      "images/products/belvia-trash-can-rims-20.png"
     ],
     "colors": [
-      "matte-black",
-      "white"
+      "Matte Slate",
+      "Obsidian Black",
+      "Chalk White",
+      "Silk Pearl Gold"
     ],
     "materials": [
-      "PLA",
+      "PLA"
+    ],
+    "tags": [
+      "trash",
+      "trash accessory",
+      "trash can accessories",
+      "trash can wheel",
+      "trash can rim",
+      "trash can rims",
+      "trash can wheels",
+      "trash bin",
+      "trash bin wheel"
+    ],
+    "printTimeMinutes": 412,
+    "rating": 5,
+    "reviewCount": 1,
+    "reviews": [],
+    "makerWorldUrl": "https://makerworld.com/en/models/2843339-trash-can-rims",
+    "specifications": {
+      "dimensions": "120 × 120 × 140 mm",
+      "layerHeight": "0.16mm",
+      "infill": "15%"
+    }
+  },
+  {
+    "id": "belvia-shoe-aglet-repair-your-shoes-various-size-",
+    "title": "Shoe aglet - repair your shoes (various size)",
+    "category": "Figures & Collectibles",
+    "startingPrice": 29.99,
+    "weightGrams": 1,
+    "filamentUsage": 0.8,
+    "isPreOrder": false,
+    "description": "Imported via Bulk MakerWorld URL.",
+    "images": [
+      "images/products/belvia-shoe-aglet-repair-your-shoes-various-siz.png",
+      "images/products/belvia-shoe-aglet-repair-your-shoes-various-siz-2.png",
+      "images/products/belvia-shoe-aglet-repair-your-shoes-various-siz-3.jpg",
+      "images/products/belvia-shoe-aglet-repair-your-shoes-various-siz-4.jpg",
+      "images/products/belvia-shoe-aglet-repair-your-shoes-various-siz-5.png",
+      "images/products/belvia-shoe-aglet-repair-your-shoes-various-siz-6.png",
+      "images/products/belvia-shoe-aglet-repair-your-shoes-various-siz-7.jpg",
+      "images/products/belvia-shoe-aglet-repair-your-shoes-various-siz-8.png",
+      "images/products/belvia-shoe-aglet-repair-your-shoes-various-siz-9.png",
+      "images/products/belvia-shoe-aglet-repair-your-shoes-various-siz-10.png",
+      "images/products/belvia-shoe-aglet-repair-your-shoes-various-siz-11.png"
+    ],
+    "colors": [
+      "Matte Slate",
+      "Obsidian Black",
+      "Chalk White",
+      "Silk Pearl Gold"
+    ],
+    "materials": [
       "PETG"
     ],
-    "printTimeMinutes": 480,
-    "rating": 5.0,
-    "reviewCount": 2,
-    "reviews": [
-      {
-        "userName": "NylonPrinter",
-        "rating": 5,
-        "comment": "Humidity drops from 50% to 10% in an hour. Essential.",
-        "verified": true,
-        "date": "2026-05-15"
-      }
+    "tags": [
+      "shoes",
+      "shoes accesories",
+      "shoes accessories",
+      "shoes accessory",
+      "shoes box",
+      "shoe",
+      "shoe acce",
+      "shoe accessories",
+      "shoe accessory",
+      "aglet",
+      "aglets",
+      "fast",
+      "Fast",
+      "simple",
+      "A1",
+      "A1MINI",
+      "repair",
+      "repair accessories",
+      "repair accessory",
+      "repair and maintenance"
     ],
-    "makerWorldUrl": "https://makerworld.com/en/models/77777",
+    "printTimeMinutes": 15,
+    "rating": 5,
+    "reviewCount": 1,
+    "reviews": [],
+    "makerWorldUrl": "https://makerworld.com/en/models/2842390-shoe-aglet-repair-your-shoes-various-size",
     "specifications": {
-      "dimensions": "220mm x 220mm x 250mm",
-      "layerHeight": "0.24mm"
+      "dimensions": "120 × 120 × 140 mm",
+      "layerHeight": "0.16mm",
+      "infill": "15%"
     }
+  },
+  {
+    "id": "belvia-clothesline-socks-hanger",
+    "title": "Clothesline socks hanger",
+    "category": "Functional Prints",
+    "startingPrice": 14.99,
+    "weightGrams": 26,
+    "filamentUsage": 19.5,
+    "isPreOrder": false,
+    "description": "Imported via Bulk MakerWorld URL.",
+    "images": [
+      "images/products/belvia-clothesline-socks-hanger.jpg",
+      "images/products/belvia-clothesline-socks-hanger-2.jpg",
+      "images/products/belvia-clothesline-socks-hanger-3.jpg",
+      "images/products/belvia-clothesline-socks-hanger-4.jpg",
+      "images/products/belvia-clothesline-socks-hanger-5.jpg",
+      "images/products/belvia-clothesline-socks-hanger-6.jpg",
+      "images/products/belvia-clothesline-socks-hanger-7.png",
+      "images/products/belvia-clothesline-socks-hanger-8.png"
+    ],
+    "colors": [
+      "Matte Slate",
+      "Obsidian Black",
+      "Chalk White",
+      "Silk Pearl Gold"
+    ],
+    "materials": [
+      "PLA"
+    ],
+    "tags": [
+      "sock",
+      "hanger",
+      "clothes",
+      "clothesline",
+      "drying",
+      "sockhanger",
+      "dryer accessories",
+      "sock clip",
+      "socks",
+      "drying adapter",
+      "dry",
+      "hang",
+      "hanger adapter",
+      "hanger accessory"
+    ],
+    "printTimeMinutes": 56,
+    "rating": 5,
+    "reviewCount": 1,
+    "reviews": [],
+    "makerWorldUrl": "https://makerworld.com/en/models/2841758-clothesline-socks-hanger",
+    "specifications": {
+      "dimensions": "120 × 120 × 140 mm",
+      "layerHeight": "0.16mm",
+      "infill": "15%"
+    }
+  },
+  {
+    "id": "belvia-baby-yoda-pen-holder",
+    "title": "Baby Yoda- Pen holder",
+    "category": "Desk Accessories",
+    "startingPrice": 22.99,
+    "weightGrams": 113,
+    "filamentUsage": 84.8,
+    "isPreOrder": false,
+    "description": "Imported via Bulk MakerWorld URL.",
+    "images": [
+      "images/products/belvia-baby-yoda-pen-holder.jpg",
+      "images/products/belvia-baby-yoda-pen-holder-2.jpg",
+      "images/products/belvia-baby-yoda-pen-holder-3.jpg",
+      "images/products/belvia-baby-yoda-pen-holder-4.jpg",
+      "images/products/belvia-baby-yoda-pen-holder-5.jpg",
+      "images/products/belvia-baby-yoda-pen-holder-6.jpg",
+      "images/products/belvia-baby-yoda-pen-holder-7.jpg",
+      "images/products/belvia-baby-yoda-pen-holder-8.jpg",
+      "images/products/belvia-baby-yoda-pen-holder-9.jpg",
+      "images/products/belvia-baby-yoda-pen-holder-10.png"
+    ],
+    "colors": [
+      "Matte Slate",
+      "Obsidian Black",
+      "Chalk White",
+      "Silk Pearl Gold"
+    ],
+    "materials": [
+      "PLA"
+    ],
+    "tags": [
+      "penholder",
+      "pen",
+      "yoda",
+      "xute",
+      "cute",
+      "grogu",
+      "starwars",
+      "mandalorian",
+      "wow"
+    ],
+    "printTimeMinutes": 372,
+    "rating": 5,
+    "reviewCount": 1,
+    "reviews": [],
+    "makerWorldUrl": "https://makerworld.com/en/models/2826768-baby-yoda-pen-holder",
+    "specifications": {
+      "dimensions": "120 × 120 × 140 mm",
+      "layerHeight": "0.16mm",
+      "infill": "15%"
+    }
+  },
+  {
+    "id": "belvia-record-player-coaster-holder-pioneer-pl-510a",
+    "title": "Record Player Coaster Holder - Pioneer PL-510A",
+    "category": "Desk Accessories",
+    "startingPrice": 22.99,
+    "weightGrams": 351,
+    "filamentUsage": 263.3,
+    "isPreOrder": false,
+    "description": "Imported via Bulk MakerWorld URL.",
+    "images": [
+      "images/products/belvia-record-player-coaster-holder-pioneer-pl-.jpg",
+      "images/products/belvia-record-player-coaster-holder-pioneer-pl--2.jpg",
+      "images/products/belvia-record-player-coaster-holder-pioneer-pl--3.jpg",
+      "images/products/belvia-record-player-coaster-holder-pioneer-pl--4.jpg",
+      "images/products/belvia-record-player-coaster-holder-pioneer-pl--5.jpg",
+      "images/products/belvia-record-player-coaster-holder-pioneer-pl--6.jpg",
+      "images/products/belvia-record-player-coaster-holder-pioneer-pl--7.jpg",
+      "images/products/belvia-record-player-coaster-holder-pioneer-pl--8.jpg",
+      "images/products/belvia-record-player-coaster-holder-pioneer-pl--9.jpg"
+    ],
+    "colors": [
+      "Matte Slate",
+      "Obsidian Black",
+      "Chalk White",
+      "Silk Pearl Gold"
+    ],
+    "materials": [
+      "PLA"
+    ],
+    "tags": [
+      "coaster",
+      "coasters",
+      "holder",
+      "record",
+      "player",
+      "vinyl",
+      "pioneer",
+      "pl-510a"
+    ],
+    "printTimeMinutes": 871,
+    "rating": 5,
+    "reviewCount": 1,
+    "reviews": [],
+    "makerWorldUrl": "https://makerworld.com/en/models/2868993-record-player-coaster-holder-pioneer-pl-510a",
+    "specifications": {
+      "dimensions": "120 × 120 × 140 mm",
+      "layerHeight": "0.16mm",
+      "infill": "15%"
+    }
+  },
+  {
+    "id": "belvia-spiral-tail-lattice-chameleon-sculpture",
+    "title": "Spiral Tail Lattice Chameleon Sculpture",
+    "category": "Home Decor",
+    "startingPrice": 34.99,
+    "weightGrams": 182,
+    "filamentUsage": 136.5,
+    "isPreOrder": false,
+    "description": "Imported via Bulk MakerWorld URL.",
+    "images": [
+      "images/products/belvia-spiral-tail-lattice-chameleon-sculpture.png",
+      "images/products/belvia-spiral-tail-lattice-chameleon-sculpture-2.png",
+      "images/products/belvia-spiral-tail-lattice-chameleon-sculpture-3.png",
+      "images/products/belvia-spiral-tail-lattice-chameleon-sculpture-4.jpg",
+      "images/products/belvia-spiral-tail-lattice-chameleon-sculpture-5.jpg",
+      "images/products/belvia-spiral-tail-lattice-chameleon-sculpture-6.jpg",
+      "images/products/belvia-spiral-tail-lattice-chameleon-sculpture-7.png",
+      "images/products/belvia-spiral-tail-lattice-chameleon-sculpture-8.jpg",
+      "images/products/belvia-spiral-tail-lattice-chameleon-sculpture-9.jpg",
+      "images/products/belvia-spiral-tail-lattice-chameleon-sculpture-10.jpg"
+    ],
+    "colors": [
+      "Matte Slate",
+      "Obsidian Black",
+      "Chalk White",
+      "Silk Pearl Gold"
+    ],
+    "materials": [
+      "PLA"
+    ],
+    "tags": [
+      "chameleon",
+      "lattice",
+      "decor animal",
+      "animal",
+      "sculpture",
+      "animal2026",
+      "lizard",
+      "reptile",
+      "animal sculpture",
+      "desk decor",
+      "shelf decor"
+    ],
+    "printTimeMinutes": 673,
+    "rating": 5,
+    "reviewCount": 1,
+    "reviews": [],
+    "makerWorldUrl": "https://makerworld.com/en/models/2830155-spiral-tail-lattice-chameleon-sculpture",
+    "specifications": {
+      "dimensions": "120 × 120 × 140 mm",
+      "layerHeight": "0.16mm",
+      "infill": "15%"
+    }
+  },
+  {
+    "id": "belvia-casa-delle-bambole",
+    "title": "Casa delle bambole",
+    "category": "Home Decor",
+    "startingPrice": 34.99,
+    "weightGrams": 242,
+    "filamentUsage": 181.5,
+    "isPreOrder": false,
+    "description": "Imported via Bulk MakerWorld URL.",
+    "images": [
+      "images/products/belvia-casa-delle-bambole-mensola-porta-oggetti.jpg",
+      "images/products/belvia-casa-delle-bambole-mensola-porta-oggetti-2.png",
+      "images/products/belvia-casa-delle-bambole-mensola-porta-oggetti-3.jpg",
+      "images/products/belvia-casa-delle-bambole-mensola-porta-oggetti-4.jpg",
+      "images/products/belvia-casa-delle-bambole-mensola-porta-oggetti-5.jpg",
+      "images/products/belvia-casa-delle-bambole-mensola-porta-oggetti-6.jpg",
+      "images/products/belvia-casa-delle-bambole-mensola-porta-oggetti-7.jpg",
+      "images/products/belvia-casa-delle-bambole-mensola-porta-oggetti-8.jpg",
+      "images/products/belvia-casa-delle-bambole-mensola-porta-oggetti-9.jpg",
+      "images/products/belvia-casa-delle-bambole-mensola-porta-oggetti-10.jpg",
+      "images/products/belvia-casa-delle-bambole-mensola-porta-oggetti-11.jpg",
+      "images/products/belvia-casa-delle-bambole-mensola-porta-oggetti-12.jpg",
+      "images/products/belvia-casa-delle-bambole-mensola-porta-oggetti-13.jpg",
+      "images/products/belvia-casa-delle-bambole-mensola-porta-oggetti-14.png",
+      "images/products/belvia-casa-delle-bambole-mensola-porta-oggetti-15.jpg",
+      "images/products/belvia-casa-delle-bambole-mensola-porta-oggetti-16.jpg",
+      "images/products/belvia-casa-delle-bambole-mensola-porta-oggetti-17.jpg",
+      "images/products/belvia-casa-delle-bambole-mensola-porta-oggetti-18.jpg",
+      "images/products/belvia-casa-delle-bambole-mensola-porta-oggetti-19.jpg",
+      "images/products/belvia-casa-delle-bambole-mensola-porta-oggetti-20.jpg"
+    ],
+    "colors": [
+      "Matte Slate",
+      "Obsidian Black",
+      "Chalk White",
+      "Silk Pearl Gold"
+    ],
+    "materials": [
+      "PLA"
+    ],
+    "tags": [
+      "doll",
+      "dollhouse",
+      "Play",
+      "toys",
+      "Toy",
+      "dolls",
+      "organizer",
+      "decor",
+      "home decor",
+      "house",
+      "'home",
+      "shelf",
+      "library"
+    ],
+    "printTimeMinutes": 450,
+    "rating": 5,
+    "reviewCount": 1,
+    "reviews": [],
+    "makerWorldUrl": "https://makerworld.com/en/models/2855308-dollhouse-shelf-storage",
+    "specifications": {
+      "dimensions": "120 × 120 × 140 mm",
+      "layerHeight": "0.16mm",
+      "infill": "15%"
+    }
+  },
+  {
+    "id": "belvia-floral-key-holder-with-tray-wall-mount",
+    "title": "Floral Key Holder With Tray - Wall Mount",
+    "category": "Home Decor",
+    "startingPrice": 34.99,
+    "weightGrams": 331,
+    "filamentUsage": 248.3,
+    "isPreOrder": false,
+    "description": "Imported via Bulk MakerWorld URL.",
+    "images": [
+      "images/products/belvia-floral-key-holder-with-tray-wall-mount.jpg",
+      "images/products/belvia-floral-key-holder-with-tray-wall-mount-2.jpg",
+      "images/products/belvia-floral-key-holder-with-tray-wall-mount-3.jpg",
+      "images/products/belvia-floral-key-holder-with-tray-wall-mount-4.jpg",
+      "images/products/belvia-floral-key-holder-with-tray-wall-mount-5.jpg",
+      "images/products/belvia-floral-key-holder-with-tray-wall-mount-6.png",
+      "images/products/belvia-floral-key-holder-with-tray-wall-mount-7.jpg",
+      "images/products/belvia-floral-key-holder-with-tray-wall-mount-8.jpg",
+      "images/products/belvia-floral-key-holder-with-tray-wall-mount-9.png",
+      "images/products/belvia-floral-key-holder-with-tray-wall-mount-10.jpg"
+    ],
+    "colors": [
+      "Matte Slate",
+      "Obsidian Black",
+      "Chalk White",
+      "Silk Pearl Gold"
+    ],
+    "materials": [
+      "PLA"
+    ],
+    "tags": [
+      "'home",
+      "Home Decor",
+      "'decor",
+      "decor",
+      "decor 2",
+      "homedecor",
+      "entryway",
+      "key",
+      "keys",
+      "key acc",
+      "women",
+      "minimal",
+      "livingroom",
+      "decoration",
+      "keyholder",
+      "Design",
+      "design",
+      "decoration 2026",
+      "flower",
+      "floral",
+      "elegant",
+      "Art",
+      "art",
+      "organizer",
+      "organiser",
+      "Holder",
+      "holder",
+      "tray",
+      "hanger",
+      "Hook"
+    ],
+    "printTimeMinutes": 622,
+    "rating": 5,
+    "reviewCount": 1,
+    "reviews": [],
+    "makerWorldUrl": "https://makerworld.com/en/models/2837495-floral-key-holder-with-tray-wall-mount",
+    "specifications": {
+      "dimensions": "120 × 120 × 140 mm",
+      "layerHeight": "0.16mm",
+      "infill": "15%"
+    }
+  },
+  {
+    "id": "belvia-sliding-door-cabinet",
+    "title": "Sliding Door Cabinet",
+    "category": "Home Decor",
+    "startingPrice": 34.99,
+    "weightGrams": 337,
+    "filamentUsage": 252.8,
+    "isPreOrder": false,
+    "description": "Imported via Bulk MakerWorld URL.",
+    "images": [
+      "images/products/belvia-sliding-door-cabinet.png",
+      "images/products/belvia-sliding-door-cabinet-2.png",
+      "images/products/belvia-sliding-door-cabinet-3.png",
+      "images/products/belvia-sliding-door-cabinet-4.png",
+      "images/products/belvia-sliding-door-cabinet-5.png"
+    ],
+    "colors": [
+      "Matte Slate",
+      "Obsidian Black",
+      "Chalk White",
+      "Silk Pearl Gold"
+    ],
+    "materials": [
+      "PLA"
+    ],
+    "tags": [
+      "cabinet",
+      "box",
+      "cabin",
+      "shelf",
+      "sliding",
+      "slide",
+      "door",
+      "printin place",
+      "nosupport",
+      "decor",
+      "design",
+      "household",
+      "furniture",
+      "home",
+      "equipment",
+      "storage"
+    ],
+    "printTimeMinutes": 576,
+    "rating": 5,
+    "reviewCount": 1,
+    "reviews": [],
+    "makerWorldUrl": "https://makerworld.com/en/models/2829252-sliding-door-cabinet",
+    "specifications": {
+      "dimensions": "120 × 120 × 140 mm",
+      "layerHeight": "0.16mm",
+      "infill": "15%"
+    }
+  },
+  {
+    "id": "belvia-square-loop-ribbed-vase",
+    "title": "Square loop - ribbed vase",
+    "category": "Home Decor",
+    "startingPrice": 34.99,
+    "weightGrams": 229,
+    "filamentUsage": 171.8,
+    "isPreOrder": false,
+    "description": "Imported via Bulk MakerWorld URL.",
+    "images": [
+      "images/products/belvia-square-loop-ribbed-vase.png",
+      "images/products/belvia-square-loop-ribbed-vase-2.png",
+      "images/products/belvia-square-loop-ribbed-vase-3.jpg",
+      "images/products/belvia-square-loop-ribbed-vase-4.jpg",
+      "images/products/belvia-square-loop-ribbed-vase-5.png",
+      "images/products/belvia-square-loop-ribbed-vase-6.jpg",
+      "images/products/belvia-square-loop-ribbed-vase-7.jpg"
+    ],
+    "colors": [
+      "Matte Slate",
+      "Obsidian Black",
+      "Chalk White",
+      "Silk Pearl Gold"
+    ],
+    "materials": [
+      "PLA"
+    ],
+    "tags": [
+      "vase",
+      "decoration",
+      "decoration 2026",
+      "decoration 2027",
+      "modern",
+      "modern vase",
+      "design vase",
+      "design",
+      "flower",
+      "dried flowers",
+      "'modern",
+      "DECO",
+      "Home Decor",
+      "home decor",
+      "home decor 2026",
+      "moda",
+      "modern style",
+      "square",
+      "loop",
+      "square loop vase",
+      "minimal",
+      "furniture",
+      "pattern",
+      "ribbed",
+      "ribbed 3d vase",
+      "dc93",
+      "minimalist",
+      "Art"
+    ],
+    "printTimeMinutes": 535,
+    "rating": 5,
+    "reviewCount": 1,
+    "reviews": [],
+    "makerWorldUrl": "https://makerworld.com/en/models/2830127-square-loop-ribbed-vase",
+    "specifications": {
+      "dimensions": "120 × 120 × 140 mm",
+      "layerHeight": "0.16mm",
+      "infill": "0%"
+    }
+  },
+  {
+    "id": "belvia-cornholio-dual-light-switch-cover",
+    "title": "Cornholio Dual Light Switch Cover",
+    "category": "Gaming Accessories",
+    "startingPrice": 19.99,
+    "weightGrams": 73,
+    "filamentUsage": 54.8,
+    "isPreOrder": false,
+    "description": "Imported via Bulk MakerWorld URL.",
+    "images": [
+      "images/products/belvia-cornholio-dual-light-switch-cover.jpg",
+      "images/products/belvia-cornholio-dual-light-switch-cover-2.jpg",
+      "images/products/belvia-cornholio-dual-light-switch-cover-3.jpg",
+      "images/products/belvia-cornholio-dual-light-switch-cover-4.jpg",
+      "images/products/belvia-cornholio-dual-light-switch-cover-5.jpg",
+      "images/products/belvia-cornholio-dual-light-switch-cover-6.jpg",
+      "images/products/belvia-cornholio-dual-light-switch-cover-7.jpg",
+      "images/products/belvia-cornholio-dual-light-switch-cover-8.jpg",
+      "images/products/belvia-cornholio-dual-light-switch-cover-9.jpg",
+      "images/products/belvia-cornholio-dual-light-switch-cover-10.jpg",
+      "images/products/belvia-cornholio-dual-light-switch-cover-11.jpg",
+      "images/products/belvia-cornholio-dual-light-switch-cover-12.jpg",
+      "images/products/belvia-cornholio-dual-light-switch-cover-13.jpg"
+    ],
+    "colors": [
+      "Matte Slate",
+      "Obsidian Black",
+      "Chalk White",
+      "Silk Pearl Gold"
+    ],
+    "materials": [
+      "PLA"
+    ],
+    "tags": [
+      "Other House Models",
+      "Household"
+    ],
+    "printTimeMinutes": 215,
+    "rating": 5,
+    "reviewCount": 1,
+    "reviews": [],
+    "makerWorldUrl": "https://makerworld.com/en/models/2867721-cornholio-dual-light-switch-cover",
+    "specifications": {
+      "dimensions": "120 × 120 × 140 mm",
+      "layerHeight": "0.16mm",
+      "infill": "10%"
+    }
+  },
+  {
+    "id": "belvia-vaso-tartaruga-per-piantine-grasse",
+    "title": "Vaso Tartaruga per piantine grasse",
+    "category": "Home Decor",
+    "startingPrice": 34.99,
+    "weightGrams": 149,
+    "filamentUsage": 111.8,
+    "isPreOrder": false,
+    "description": "Imported via Bulk MakerWorld URL.",
+    "images": [
+      "images/products/belvia-vaso-tartaruga-per-piantine-grasse.png",
+      "images/products/belvia-vaso-tartaruga-per-piantine-grasse-2.png",
+      "images/products/belvia-vaso-tartaruga-per-piantine-grasse-3.jpg",
+      "images/products/belvia-vaso-tartaruga-per-piantine-grasse-4.jpg",
+      "images/products/belvia-vaso-tartaruga-per-piantine-grasse-5.jpg",
+      "images/products/belvia-vaso-tartaruga-per-piantine-grasse-6.jpg",
+      "images/products/belvia-vaso-tartaruga-per-piantine-grasse-7.jpg",
+      "images/products/belvia-vaso-tartaruga-per-piantine-grasse-8.jpg",
+      "images/products/belvia-vaso-tartaruga-per-piantine-grasse-9.jpg",
+      "images/products/belvia-vaso-tartaruga-per-piantine-grasse-10.png"
+    ],
+    "colors": [
+      "Matte Slate",
+      "Obsidian Black",
+      "Chalk White",
+      "Silk Pearl Gold"
+    ],
+    "materials": [
+      "PLA"
+    ],
+    "tags": [
+      "turtle",
+      "tartaruga",
+      "vase",
+      "succulent",
+      "plant",
+      "piante grasse",
+      "animal"
+    ],
+    "printTimeMinutes": 346,
+    "rating": 5,
+    "reviewCount": 1,
+    "reviews": [],
+    "makerWorldUrl": "https://makerworld.com/en/models/2866282-turtle-pot-for-succulents",
+    "specifications": {
+      "dimensions": "120 × 120 × 140 mm",
+      "layerHeight": "0.16mm",
+      "infill": "5%"
+    }
+  },
+  {
+    "id": "belvia-my-rights-don-t-end-where-your-feelings-begin",
+    "title": "My Rights Don't End Where Your Feelings Begin",
+    "category": "Home Decor",
+    "startingPrice": 34.99,
+    "weightGrams": 349,
+    "filamentUsage": 261.8,
+    "isPreOrder": false,
+    "description": "Imported via Bulk MakerWorld URL.",
+    "images": [
+      "images/products/belvia-my-rights-don-t-end-where-your-feelings-.jpg",
+      "images/products/belvia-my-rights-don-t-end-where-your-feelings--2.jpg",
+      "images/products/belvia-my-rights-don-t-end-where-your-feelings--3.jpg",
+      "images/products/belvia-my-rights-don-t-end-where-your-feelings--4.jpg",
+      "images/products/belvia-my-rights-don-t-end-where-your-feelings--5.jpg",
+      "images/products/belvia-my-rights-don-t-end-where-your-feelings--6.jpg"
+    ],
+    "colors": [
+      "Matte Slate",
+      "Obsidian Black",
+      "Chalk White",
+      "Silk Pearl Gold"
+    ],
+    "materials": [
+      "PLA"
+    ],
+    "tags": [
+      "patriotic",
+      "2a",
+      "american flag",
+      "freedom",
+      "liberty",
+      "second amendment",
+      "usa",
+      "decor",
+      "rub n buff",
+      "man cave",
+      "safe room"
+    ],
+    "printTimeMinutes": 500,
+    "rating": 5,
+    "reviewCount": 1,
+    "reviews": [],
+    "makerWorldUrl": "https://makerworld.com/en/models/2833948-my-rights-don-t-end-where-your-feelings-begin",
+    "specifications": {
+      "dimensions": "120 × 120 × 140 mm",
+      "layerHeight": "0.16mm",
+      "infill": "15%"
+    }
+  },
+  {
+    "id": "belvia-exploded-moka-display-stand",
+    "title": "Exploded Moka Display Stand",
+    "category": "Desk Accessories",
+    "startingPrice": 22.99,
+    "weightGrams": 422,
+    "filamentUsage": 316.5,
+    "isPreOrder": false,
+    "description": "Imported via Bulk MakerWorld URL.",
+    "images": [
+      "images/products/belvia-exploded-moka-display-stand.png",
+      "images/products/belvia-exploded-moka-display-stand-2.png",
+      "images/products/belvia-exploded-moka-display-stand-3.jpg",
+      "images/products/belvia-exploded-moka-display-stand-4.jpg",
+      "images/products/belvia-exploded-moka-display-stand-5.jpg",
+      "images/products/belvia-exploded-moka-display-stand-6.jpg",
+      "images/products/belvia-exploded-moka-display-stand-7.jpg",
+      "images/products/belvia-exploded-moka-display-stand-8.jpg",
+      "images/products/belvia-exploded-moka-display-stand-9.jpg",
+      "images/products/belvia-exploded-moka-display-stand-10.jpg",
+      "images/products/belvia-exploded-moka-display-stand-11.jpg",
+      "images/products/belvia-exploded-moka-display-stand-12.jpg",
+      "images/products/belvia-exploded-moka-display-stand-13.jpg",
+      "images/products/belvia-exploded-moka-display-stand-14.jpg",
+      "images/products/belvia-exploded-moka-display-stand-15.png",
+      "images/products/belvia-exploded-moka-display-stand-16.jpg",
+      "images/products/belvia-exploded-moka-display-stand-17.jpg"
+    ],
+    "colors": [
+      "Matte Slate",
+      "Obsidian Black",
+      "Chalk White",
+      "Silk Pearl Gold"
+    ],
+    "materials": [
+      "PLA"
+    ],
+    "tags": [
+      "moka",
+      "moka accessory",
+      "moka coffee",
+      "moka coffee tamper",
+      "moka express",
+      "express",
+      "cup",
+      "Holder",
+      "explode",
+      "exploder",
+      "esplosione",
+      "caffe",
+      "caffe accessori"
+    ],
+    "printTimeMinutes": 906,
+    "rating": 5,
+    "reviewCount": 1,
+    "reviews": [],
+    "makerWorldUrl": "https://makerworld.com/en/models/2832889-exploded-moka-display-stand",
+    "specifications": {
+      "dimensions": "120 × 120 × 140 mm",
+      "layerHeight": "0.16mm",
+      "infill": "30%"
+    }
+  },
+  {
+    "id": "belvia-fox-juice-holder-for-kids",
+    "title": "Fox Juice Holder for Kids",
+    "category": "Desk Accessories",
+    "startingPrice": 22.99,
+    "weightGrams": 83,
+    "filamentUsage": 62.3,
+    "isPreOrder": false,
+    "description": "Imported via Bulk MakerWorld URL.",
+    "images": [
+      "images/products/belvia-fox-juice-holder-for-kids.png",
+      "images/products/belvia-fox-juice-holder-for-kids-2.png",
+      "images/products/belvia-fox-juice-holder-for-kids-3.png",
+      "images/products/belvia-fox-juice-holder-for-kids-4.png",
+      "images/products/belvia-fox-juice-holder-for-kids-5.png",
+      "images/products/belvia-fox-juice-holder-for-kids-6.png",
+      "images/products/belvia-fox-juice-holder-for-kids-7.png",
+      "images/products/belvia-fox-juice-holder-for-kids-8.png",
+      "images/products/belvia-fox-juice-holder-for-kids-9.png",
+      "images/products/belvia-fox-juice-holder-for-kids-10.png",
+      "images/products/belvia-fox-juice-holder-for-kids-11.png",
+      "images/products/belvia-fox-juice-holder-for-kids-12.png",
+      "images/products/belvia-fox-juice-holder-for-kids-13.png",
+      "images/products/belvia-fox-juice-holder-for-kids-14.png",
+      "images/products/belvia-fox-juice-holder-for-kids-15.png",
+      "images/products/belvia-fox-juice-holder-for-kids-16.png",
+      "images/products/belvia-fox-juice-holder-for-kids-17.png",
+      "images/products/belvia-fox-juice-holder-for-kids-18.png",
+      "images/products/belvia-fox-juice-holder-for-kids-19.png",
+      "images/products/belvia-fox-juice-holder-for-kids-20.png"
+    ],
+    "colors": [
+      "Matte Slate",
+      "Obsidian Black",
+      "Chalk White",
+      "Silk Pearl Gold"
+    ],
+    "materials": [
+      "PLA"
+    ],
+    "tags": [
+      "fox",
+      "juice holder",
+      "juice box holder",
+      "drink holder",
+      "kids",
+      "children",
+      "straw",
+      "cup holder",
+      "snack",
+      "lunchbox",
+      "personalized",
+      "custom name",
+      "name tag",
+      "cute",
+      "animal",
+      "animal holder",
+      "fox holder",
+      "easy print",
+      "gift",
+      "school",
+      "picnic",
+      "toddler",
+      "kids accessory",
+      "drink accessory",
+      "custom",
+      "color pop",
+      "classic",
+      "orange fox",
+      "personalized gift",
+      "cute fox"
+    ],
+    "printTimeMinutes": 140,
+    "rating": 5,
+    "reviewCount": 1,
+    "reviews": [],
+    "makerWorldUrl": "https://makerworld.com/en/models/2845428-fox-juice-holder-for-kids",
+    "specifications": {
+      "dimensions": "120 × 120 × 140 mm",
+      "layerHeight": "0.16mm",
+      "infill": "15%"
+    }
+  },
+  {
+    "id": "belvia-marc-jacobs-the-bucket-giftbag",
+    "title": "Marc Jacobs \"The Bucket\" / giftbag",
+    "category": "Home Decor",
+    "startingPrice": 34.99,
+    "weightGrams": 337,
+    "filamentUsage": 252.8,
+    "isPreOrder": false,
+    "description": "Imported via Bulk MakerWorld URL.",
+    "images": [
+      "images/products/belvia-marc-jacobs-the-bucket-giftbag.jpg",
+      "images/products/belvia-marc-jacobs-the-bucket-giftbag-2.jpg",
+      "images/products/belvia-marc-jacobs-the-bucket-giftbag-3.jpg",
+      "images/products/belvia-marc-jacobs-the-bucket-giftbag-4.jpg",
+      "images/products/belvia-marc-jacobs-the-bucket-giftbag-5.jpg",
+      "images/products/belvia-marc-jacobs-the-bucket-giftbag-6.jpg",
+      "images/products/belvia-marc-jacobs-the-bucket-giftbag-7.jpg",
+      "images/products/belvia-marc-jacobs-the-bucket-giftbag-8.jpg",
+      "images/products/belvia-marc-jacobs-the-bucket-giftbag-9.jpg",
+      "images/products/belvia-marc-jacobs-the-bucket-giftbag-10.jpg",
+      "images/products/belvia-marc-jacobs-the-bucket-giftbag-11.jpg"
+    ],
+    "colors": [
+      "Matte Slate",
+      "Obsidian Black",
+      "Chalk White",
+      "Silk Pearl Gold"
+    ],
+    "materials": [
+      "PLA"
+    ],
+    "tags": [
+      "marcjacobs",
+      "purse",
+      "designer",
+      "gift",
+      "giftbag",
+      "giftbox",
+      "decor",
+      "deskdecor"
+    ],
+    "printTimeMinutes": 1041,
+    "rating": 5,
+    "reviewCount": 1,
+    "reviews": [],
+    "makerWorldUrl": "https://makerworld.com/en/models/2852687-marc-jacobs-the-bucket-giftbag",
+    "specifications": {
+      "dimensions": "120 × 120 × 140 mm",
+      "layerHeight": "0.16mm",
+      "infill": "8%"
+    }
+  },
+  {
+    "id": "belvia-supporto-a-ganci-per-piante-rinforzato",
+    "title": "supporto a ganci per piante RINFORZATO",
+    "category": "Figures & Collectibles",
+    "startingPrice": 29.99,
+    "weightGrams": 20,
+    "filamentUsage": 15,
+    "isPreOrder": false,
+    "description": "Imported via Bulk MakerWorld URL.",
+    "images": [
+      "images/products/belvia-supporto-a-ganci-per-piante-rinforzato.jpg",
+      "images/products/belvia-supporto-a-ganci-per-piante-rinforzato-2.jpg",
+      "images/products/belvia-supporto-a-ganci-per-piante-rinforzato-3.jpg",
+      "images/products/belvia-supporto-a-ganci-per-piante-rinforzato-4.jpg",
+      "images/products/belvia-supporto-a-ganci-per-piante-rinforzato-5.png",
+      "images/products/belvia-supporto-a-ganci-per-piante-rinforzato-6.jpg"
+    ],
+    "colors": [
+      "Matte Slate",
+      "Obsidian Black",
+      "Chalk White",
+      "Silk Pearl Gold"
+    ],
+    "materials": [
+      "PLA"
+    ],
+    "tags": [
+      "ganci",
+      "plant",
+      "piante",
+      "Lock",
+      "strong"
+    ],
+    "printTimeMinutes": 60,
+    "rating": 5,
+    "reviewCount": 1,
+    "reviews": [],
+    "makerWorldUrl": "https://makerworld.com/en/models/2845616-reinforced-plant-hook-support",
+    "specifications": {
+      "dimensions": "120 × 120 × 140 mm",
+      "layerHeight": "0.16mm",
+      "infill": "15%"
+    }
+  },
+  {
+    "id": "belvia-birdhouse-bluetit-pod",
+    "title": "Birdhouse - Bluetit Pod",
+    "category": "Home Decor",
+    "startingPrice": 34.99,
+    "weightGrams": 793,
+    "filamentUsage": 594.8,
+    "isPreOrder": false,
+    "description": "Imported via Bulk MakerWorld URL.",
+    "images": [
+      "images/products/belvia-birdhouse-bluetit-pod.png",
+      "images/products/belvia-birdhouse-bluetit-pod-2.png",
+      "images/products/belvia-birdhouse-bluetit-pod-3.jpg",
+      "images/products/belvia-birdhouse-bluetit-pod-4.jpg",
+      "images/products/belvia-birdhouse-bluetit-pod-5.png",
+      "images/products/belvia-birdhouse-bluetit-pod-6.jpg",
+      "images/products/belvia-birdhouse-bluetit-pod-7.jpg",
+      "images/products/belvia-birdhouse-bluetit-pod-8.jpg",
+      "images/products/belvia-birdhouse-bluetit-pod-9.jpg"
+    ],
+    "colors": [
+      "Matte Slate",
+      "Obsidian Black",
+      "Chalk White",
+      "Silk Pearl Gold"
+    ],
+    "materials": [
+      "PETG"
+    ],
+    "tags": [
+      "birdhouse",
+      "outdoor",
+      "garden",
+      "birds",
+      "birdfeeder",
+      "decoration",
+      "feeder",
+      "minigun",
+      "t3dl",
+      "tommy3dlab"
+    ],
+    "printTimeMinutes": 1122,
+    "rating": 5,
+    "reviewCount": 1,
+    "reviews": [],
+    "makerWorldUrl": "https://makerworld.com/en/models/2843463-birdhouse-bluetit-pod",
+    "specifications": {
+      "dimensions": "120 × 120 × 140 mm",
+      "layerHeight": "0.16mm",
+      "infill": "15%"
+    }
+  },
+  {
+    "id": "belvia-retro-caravan-can-opener-nail-saver-keychain",
+    "title": "Retro Caravan Can Opener & Nail Saver Keychain",
+    "category": "Keychains",
+    "startingPrice": 9.99,
+    "weightGrams": 12,
+    "filamentUsage": 9,
+    "isPreOrder": false,
+    "description": "Imported via Bulk MakerWorld URL.",
+    "images": [
+      "images/products/belvia-retro-caravan-can-opener-nail-saver-keyc.png",
+      "images/products/belvia-retro-caravan-can-opener-nail-saver-keyc-2.png",
+      "images/products/belvia-retro-caravan-can-opener-nail-saver-keyc-3.jpg",
+      "images/products/belvia-retro-caravan-can-opener-nail-saver-keyc-4.png"
+    ],
+    "colors": [
+      "Matte Slate",
+      "Obsidian Black",
+      "Chalk White",
+      "Silk Pearl Gold"
+    ],
+    "materials": [
+      "PLA"
+    ],
+    "tags": [
+      "functional",
+      "keychain",
+      "can opener",
+      "nail saver",
+      "caravan",
+      "camping",
+      "retro",
+      "travel",
+      "outdoor",
+      "tools",
+      "heart",
+      "gift",
+      "summer",
+      "picnic",
+      "tool",
+      "keyring",
+      "caravan life",
+      "glamping",
+      "fun"
+    ],
+    "printTimeMinutes": 73,
+    "rating": 5,
+    "reviewCount": 1,
+    "reviews": [],
+    "makerWorldUrl": "https://makerworld.com/en/models/2833600-retro-caravan-can-opener-nail-saver-keychain",
+    "specifications": {
+      "dimensions": "120 × 120 × 140 mm",
+      "layerHeight": "0.16mm",
+      "infill": "25%"
+    }
+  },
+  {
+    "id": "belvia-beach-buddy-koozie",
+    "title": "Beach Buddy Koozie",
+    "category": "Desk Accessories",
+    "startingPrice": 22.99,
+    "weightGrams": 211,
+    "filamentUsage": 158.3,
+    "isPreOrder": false,
+    "description": "Imported via Bulk MakerWorld URL.",
+    "images": [
+      "images/products/belvia-beach-buddy-koozie.png",
+      "images/products/belvia-beach-buddy-koozie-2.png",
+      "images/products/belvia-beach-buddy-koozie-3.png",
+      "images/products/belvia-beach-buddy-koozie-4.jpg",
+      "images/products/belvia-beach-buddy-koozie-5.jpg",
+      "images/products/belvia-beach-buddy-koozie-6.jpg",
+      "images/products/belvia-beach-buddy-koozie-7.jpg",
+      "images/products/belvia-beach-buddy-koozie-8.jpg",
+      "images/products/belvia-beach-buddy-koozie-9.jpg"
+    ],
+    "colors": [
+      "Matte Slate",
+      "Obsidian Black",
+      "Chalk White",
+      "Silk Pearl Gold"
+    ],
+    "materials": [
+      "PETG"
+    ],
+    "tags": [
+      "koozie",
+      "koozie can holder",
+      "can",
+      "can 12oz",
+      "beer",
+      "beer accesory",
+      "beer accessories",
+      "beer accessory",
+      "beer adapter",
+      "sand"
+    ],
+    "printTimeMinutes": 284,
+    "rating": 5,
+    "reviewCount": 1,
+    "reviews": [],
+    "makerWorldUrl": "https://makerworld.com/en/models/2864639-beach-buddy-koozie",
+    "specifications": {
+      "dimensions": "120 × 120 × 140 mm",
+      "layerHeight": "0.16mm",
+      "infill": "15%"
+    }
+  },
+  {
+    "id": "belvia-lamp",
+    "title": "Lamp",
+    "category": "Home Decor",
+    "startingPrice": 34.99,
+    "weightGrams": 50,
+    "filamentUsage": 37.5,
+    "isPreOrder": false,
+    "description": "Imported via Bulk MakerWorld URL.",
+    "images": [
+      "images/products/belvia-lamp.jpg",
+      "images/products/belvia-lamp-2.jpg"
+    ],
+    "colors": [
+      "Matte Slate",
+      "Obsidian Black",
+      "Chalk White",
+      "Silk Pearl Gold"
+    ],
+    "materials": [
+      "PLA"
+    ],
+    "tags": [],
+    "printTimeMinutes": 195,
+    "rating": 5,
+    "reviewCount": 1,
+    "reviews": [],
+    "makerWorldUrl": "https://makerworld.com/en/models/1309400-lamp?from=search",
+    "specifications": {
+      "dimensions": "120 × 120 × 140 mm",
+      "layerHeight": "0.16mm",
+      "infill": "15%"
+    }
+  },
+  {
+    "id": "belvia-crystal-lamp",
+    "title": "Crystal Lamp",
+    "category": "Home Decor",
+    "startingPrice": 34.99,
+    "weightGrams": 50,
+    "filamentUsage": 37.5,
+    "isPreOrder": false,
+    "description": "Imported via Bulk MakerWorld URL.",
+    "images": [
+      "images/products/belvia-crystal-lamp.webp",
+      "images/products/belvia-crystal-lamp-2.webp"
+    ],
+    "colors": [
+      "Matte Slate",
+      "Obsidian Black",
+      "Chalk White",
+      "Silk Pearl Gold"
+    ],
+    "materials": [
+      "PLA"
+    ],
+    "tags": [],
+    "printTimeMinutes": 195,
+    "rating": 5,
+    "reviewCount": 1,
+    "reviews": [],
+    "makerWorldUrl": "https://makerworld.com/en/models/1126595-crystal-lamp?from=search",
+    "specifications": {
+      "dimensions": "120 × 120 × 140 mm",
+      "layerHeight": "0.16mm",
+      "infill": "15%"
+    }
+  },
+  {
+    "id": "belvia-turbo-lamp",
+    "title": "Turbo Lamp",
+    "category": "Home Decor",
+    "startingPrice": 34.99,
+    "weightGrams": 50,
+    "filamentUsage": 37.5,
+    "isPreOrder": false,
+    "description": "Imported via Bulk MakerWorld URL.",
+    "images": [
+      "images/products/belvia-turbo-lamp.jpg",
+      "images/products/belvia-turbo-lamp-2.png"
+    ],
+    "colors": [
+      "Matte Slate",
+      "Obsidian Black",
+      "Chalk White",
+      "Silk Pearl Gold"
+    ],
+    "materials": [
+      "PLA"
+    ],
+    "tags": [],
+    "printTimeMinutes": 195,
+    "rating": 5,
+    "reviewCount": 1,
+    "reviews": [],
+    "makerWorldUrl": "https://makerworld.com/en/models/2578452-turbo-lamp?from=search",
+    "specifications": {
+      "dimensions": "120 × 120 × 140 mm",
+      "layerHeight": "0.16mm",
+      "infill": "15%"
+    }
+  },
+  {
+    "id": "belvia-ola-lamp",
+    "title": "Ola Lamp",
+    "category": "Home Decor",
+    "startingPrice": 34.99,
+    "weightGrams": 50,
+    "filamentUsage": 37.5,
+    "isPreOrder": false,
+    "description": "Imported via Bulk MakerWorld URL.",
+    "images": [
+      "images/products/belvia-ola-lamp.png",
+      "images/products/belvia-ola-lamp-2.png"
+    ],
+    "colors": [
+      "Matte Slate",
+      "Obsidian Black",
+      "Chalk White",
+      "Silk Pearl Gold"
+    ],
+    "materials": [
+      "PLA"
+    ],
+    "tags": [],
+    "printTimeMinutes": 195,
+    "rating": 5,
+    "reviewCount": 1,
+    "reviews": [],
+    "makerWorldUrl": "https://makerworld.com/en/models/1331820-ola-lamp?from=search",
+    "specifications": {
+      "dimensions": "120 × 120 × 140 mm",
+      "layerHeight": "0.16mm",
+      "infill": "15%"
+    }
+  },
+  {
+    "id": "belvia-modern-lamp",
+    "title": "Modern Lamp",
+    "category": "Home Decor",
+    "startingPrice": 34.99,
+    "weightGrams": 50,
+    "filamentUsage": 37.5,
+    "isPreOrder": false,
+    "description": "Imported via Bulk MakerWorld URL.",
+    "images": [
+      "images/products/belvia-modern-lamp.jpg",
+      "images/products/belvia-modern-lamp-2.jpg"
+    ],
+    "colors": [
+      "Matte Slate",
+      "Obsidian Black",
+      "Chalk White",
+      "Silk Pearl Gold"
+    ],
+    "materials": [
+      "PLA"
+    ],
+    "tags": [],
+    "printTimeMinutes": 195,
+    "rating": 5,
+    "reviewCount": 1,
+    "reviews": [],
+    "makerWorldUrl": "https://makerworld.com/en/models/1804162-modern-lamp?from=search",
+    "specifications": {
+      "dimensions": "120 × 120 × 140 mm",
+      "layerHeight": "0.16mm",
+      "infill": "15%"
+    }
+  },
+  {
+    "id": "belvia-minecraft-lamp",
+    "title": "Minecraft Lamp",
+    "category": "Home Decor",
+    "startingPrice": 34.99,
+    "weightGrams": 50,
+    "filamentUsage": 37.5,
+    "isPreOrder": false,
+    "description": "Imported via Bulk MakerWorld URL.",
+    "images": [
+      "images/products/belvia-minecraft-lamp.jpg",
+      "images/products/belvia-minecraft-lamp-2.jpg"
+    ],
+    "colors": [
+      "Matte Slate",
+      "Obsidian Black",
+      "Chalk White",
+      "Silk Pearl Gold"
+    ],
+    "materials": [
+      "PLA"
+    ],
+    "tags": [],
+    "printTimeMinutes": 195,
+    "rating": 5,
+    "reviewCount": 1,
+    "reviews": [],
+    "makerWorldUrl": "https://makerworld.com/en/models/1770330-minecraft-lamp?from=search",
+    "specifications": {
+      "dimensions": "120 × 120 × 140 mm",
+      "layerHeight": "0.16mm",
+      "infill": "15%"
+    }
+  },
+  {
+    "id": "belvia-waved-lamp",
+    "title": "Waved Lamp",
+    "category": "Home Decor",
+    "startingPrice": 34.99,
+    "weightGrams": 50,
+    "filamentUsage": 37.5,
+    "isPreOrder": false,
+    "description": "Imported via Bulk MakerWorld URL.",
+    "images": [
+      "images/products/belvia-waved-lamp.jpg"
+    ],
+    "colors": [
+      "Matte Slate",
+      "Obsidian Black",
+      "Chalk White",
+      "Silk Pearl Gold"
+    ],
+    "materials": [
+      "PLA"
+    ],
+    "tags": [],
+    "printTimeMinutes": 195,
+    "rating": 5,
+    "reviewCount": 1,
+    "reviews": [],
+    "makerWorldUrl": "https://makerworld.com/en/models/820447-waved-lamp?from=search",
+    "specifications": {
+      "dimensions": "120 × 120 × 140 mm",
+      "layerHeight": "0.16mm",
+      "infill": "15%"
+    }
+  },
+  {
+    "id": "belvia-d-lamp",
+    "title": "D' lamp",
+    "category": "Home Decor",
+    "startingPrice": 34.99,
+    "weightGrams": 50,
+    "filamentUsage": 37.5,
+    "isPreOrder": false,
+    "description": "Imported via Bulk MakerWorld URL.",
+    "images": [
+      "images/products/belvia-d-lamp.jpg",
+      "images/products/belvia-d-lamp-2.jpg"
+    ],
+    "colors": [
+      "Matte Slate",
+      "Obsidian Black",
+      "Chalk White",
+      "Silk Pearl Gold"
+    ],
+    "materials": [
+      "PLA"
+    ],
+    "tags": [],
+    "printTimeMinutes": 195,
+    "rating": 5,
+    "reviewCount": 1,
+    "reviews": [],
+    "makerWorldUrl": "https://makerworld.com/en/models/1212929-d-lamp?from=search",
+    "specifications": {
+      "dimensions": "120 × 120 × 140 mm",
+      "layerHeight": "0.16mm",
+      "infill": "15%"
+    }
+  },
+  {
+    "id": "belvia-lumea",
+    "title": "Lumea",
+    "category": "Home Decor",
+    "startingPrice": 34.99,
+    "weightGrams": 50,
+    "filamentUsage": 37.5,
+    "isPreOrder": false,
+    "description": "Imported via Bulk MakerWorld URL.",
+    "images": [
+      "images/products/belvia-lumea-a-modern-futuristic-prism-lamp-no-.webp",
+      "images/products/belvia-lumea-a-modern-futuristic-prism-lamp-no--2.webp"
+    ],
+    "colors": [
+      "Matte Slate",
+      "Obsidian Black",
+      "Chalk White",
+      "Silk Pearl Gold"
+    ],
+    "materials": [
+      "PLA"
+    ],
+    "tags": [],
+    "printTimeMinutes": 195,
+    "rating": 5,
+    "reviewCount": 1,
+    "reviews": [],
+    "makerWorldUrl": "https://makerworld.com/en/models/1702818-lumea-a-modern-futuristic-prism-lamp-no-ams?from=search",
+    "specifications": {
+      "dimensions": "120 × 120 × 140 mm",
+      "layerHeight": "0.16mm",
+      "infill": "15%"
+    }
+  },
+  {
+    "id": "belvia-spool-lamp",
+    "title": "Spool lamp",
+    "category": "Home Decor",
+    "startingPrice": 34.99,
+    "weightGrams": 50,
+    "filamentUsage": 37.5,
+    "isPreOrder": false,
+    "description": "Imported via Bulk MakerWorld URL.",
+    "images": [
+      "images/products/belvia-spool-lamp.png",
+      "images/products/belvia-spool-lamp-2.png"
+    ],
+    "colors": [
+      "Matte Slate",
+      "Obsidian Black",
+      "Chalk White",
+      "Silk Pearl Gold"
+    ],
+    "materials": [
+      "PLA"
+    ],
+    "tags": [],
+    "printTimeMinutes": 195,
+    "rating": 5,
+    "reviewCount": 1,
+    "reviews": [],
+    "makerWorldUrl": "https://makerworld.com/en/models/1183655-spool-lamp?from=search",
+    "specifications": {
+      "dimensions": "120 × 120 × 140 mm",
+      "layerHeight": "0.16mm",
+      "infill": "15%"
+    }
+  },
+  {
+    "id": "belvia-pendant-lamp",
+    "title": "Pendant lamp",
+    "category": "Home Decor",
+    "startingPrice": 34.99,
+    "weightGrams": 50,
+    "filamentUsage": 37.5,
+    "isPreOrder": false,
+    "description": "Imported via Bulk MakerWorld URL.",
+    "images": [
+      "images/products/belvia-pendant-lamp.jpg",
+      "images/products/belvia-pendant-lamp-2.jpg"
+    ],
+    "colors": [
+      "Matte Slate",
+      "Obsidian Black",
+      "Chalk White",
+      "Silk Pearl Gold"
+    ],
+    "materials": [
+      "PLA"
+    ],
+    "tags": [],
+    "printTimeMinutes": 195,
+    "rating": 5,
+    "reviewCount": 1,
+    "reviews": [],
+    "makerWorldUrl": "https://makerworld.com/en/models/682844-pendant-lamp?from=search",
+    "specifications": {
+      "dimensions": "120 × 120 × 140 mm",
+      "layerHeight": "0.16mm",
+      "infill": "15%"
+    }
+  },
+  {
+    "id": "belvia-david-lamp",
+    "title": "David - Lamp",
+    "category": "Home Decor",
+    "startingPrice": 34.99,
+    "weightGrams": 50,
+    "filamentUsage": 37.5,
+    "isPreOrder": false,
+    "description": "Imported via Bulk MakerWorld URL.",
+    "images": [
+      "images/products/belvia-david-lamp.jpg",
+      "images/products/belvia-david-lamp-2.jpg"
+    ],
+    "colors": [
+      "Matte Slate",
+      "Obsidian Black",
+      "Chalk White",
+      "Silk Pearl Gold"
+    ],
+    "materials": [
+      "PLA"
+    ],
+    "tags": [],
+    "printTimeMinutes": 195,
+    "rating": 5,
+    "reviewCount": 1,
+    "reviews": [],
+    "makerWorldUrl": "https://makerworld.com/en/models/1924041-david-lamp?from=search",
+    "specifications": {
+      "dimensions": "120 × 120 × 140 mm",
+      "layerHeight": "0.16mm",
+      "infill": "15%"
+    }
+  },
+  {
+    "id": "belvia-nuke-lamp",
+    "title": "Nuke Lamp",
+    "category": "Home Decor",
+    "startingPrice": 34.99,
+    "weightGrams": 50,
+    "filamentUsage": 37.5,
+    "isPreOrder": false,
+    "description": "Imported via Bulk MakerWorld URL.",
+    "images": [
+      "images/products/belvia-nuke-lamp.jpg",
+      "images/products/belvia-nuke-lamp-2.jpg"
+    ],
+    "colors": [
+      "Matte Slate",
+      "Obsidian Black",
+      "Chalk White",
+      "Silk Pearl Gold"
+    ],
+    "materials": [
+      "PLA"
+    ],
+    "tags": [],
+    "printTimeMinutes": 195,
+    "rating": 5,
+    "reviewCount": 1,
+    "reviews": [],
+    "makerWorldUrl": "https://makerworld.com/en/models/1717438-nuke-lamp?from=search",
+    "specifications": {
+      "dimensions": "120 × 120 × 140 mm",
+      "layerHeight": "0.16mm",
+      "infill": "15%"
+    }
+  },
+  {
+    "id": "belvia-mushroom-lamp",
+    "title": "Mushroom Lamp",
+    "category": "Home Decor",
+    "startingPrice": 34.99,
+    "weightGrams": 50,
+    "filamentUsage": 37.5,
+    "isPreOrder": false,
+    "description": "Imported via Bulk MakerWorld URL.",
+    "images": [
+      "images/products/belvia-mushroom-lamp.jpg"
+    ],
+    "colors": [
+      "Matte Slate",
+      "Obsidian Black",
+      "Chalk White",
+      "Silk Pearl Gold"
+    ],
+    "materials": [
+      "PLA"
+    ],
+    "tags": [],
+    "printTimeMinutes": 195,
+    "rating": 5,
+    "reviewCount": 1,
+    "reviews": [],
+    "makerWorldUrl": "https://makerworld.com/en/models/800160-mushroom-lamp?from=search",
+    "specifications": {
+      "dimensions": "120 × 120 × 140 mm",
+      "layerHeight": "0.16mm",
+      "infill": "15%"
+    }
+  },
+  {
+    "id": "belvia-owl-lamp",
+    "title": "Owl Lamp",
+    "category": "Home Decor",
+    "startingPrice": 34.99,
+    "weightGrams": 50,
+    "filamentUsage": 37.5,
+    "isPreOrder": false,
+    "description": "Imported via Bulk MakerWorld URL.",
+    "images": [
+      "images/products/belvia-owl-lamp.webp",
+      "images/products/belvia-owl-lamp-2.webp"
+    ],
+    "colors": [
+      "Matte Slate",
+      "Obsidian Black",
+      "Chalk White",
+      "Silk Pearl Gold"
+    ],
+    "materials": [
+      "PLA"
+    ],
+    "tags": [],
+    "printTimeMinutes": 195,
+    "rating": 5,
+    "reviewCount": 1,
+    "reviews": [],
+    "makerWorldUrl": "https://makerworld.com/en/models/650440-owl-lamp?from=search",
+    "specifications": {
+      "dimensions": "120 × 120 × 140 mm",
+      "layerHeight": "0.16mm",
+      "infill": "15%"
+    }
+  },
+  {
+    "id": "belvia-cumulis-table-lamp",
+    "title": "Cumulis Table Lamp",
+    "category": "Home Decor",
+    "startingPrice": 34.99,
+    "weightGrams": 50,
+    "filamentUsage": 37.5,
+    "isPreOrder": false,
+    "description": "Imported via Bulk MakerWorld URL.",
+    "images": [
+      "images/products/belvia-cumulis-table-lamp.webp",
+      "images/products/belvia-cumulis-table-lamp-2.webp"
+    ],
+    "colors": [
+      "Matte Slate",
+      "Obsidian Black",
+      "Chalk White",
+      "Silk Pearl Gold"
+    ],
+    "materials": [
+      "PLA"
+    ],
+    "tags": [],
+    "printTimeMinutes": 195,
+    "rating": 5,
+    "reviewCount": 1,
+    "reviews": [],
+    "makerWorldUrl": "https://makerworld.com/en/models/2012709-cumulis-table-lamp?from=search",
+    "specifications": {
+      "dimensions": "120 × 120 × 140 mm",
+      "layerHeight": "0.16mm",
+      "infill": "15%"
+    }
+  },
+  {
+    "id": "belvia-design-lamp-the-wave",
+    "title": "Design Lamp - The Wave",
+    "category": "Home Decor",
+    "startingPrice": 34.99,
+    "weightGrams": 50,
+    "filamentUsage": 37.5,
+    "isPreOrder": false,
+    "description": "Imported via Bulk MakerWorld URL.",
+    "images": [
+      "images/products/belvia-design-lamp-the-wave.png",
+      "images/products/belvia-design-lamp-the-wave-2.png"
+    ],
+    "colors": [
+      "Matte Slate",
+      "Obsidian Black",
+      "Chalk White",
+      "Silk Pearl Gold"
+    ],
+    "materials": [
+      "PLA"
+    ],
+    "tags": [],
+    "printTimeMinutes": 195,
+    "rating": 5,
+    "reviewCount": 1,
+    "reviews": [],
+    "makerWorldUrl": "https://makerworld.com/en/models/2571932-design-lamp-the-wave?from=search",
+    "specifications": {
+      "dimensions": "120 × 120 × 140 mm",
+      "layerHeight": "0.16mm",
+      "infill": "15%"
+    }
+  },
+  {
+    "id": "belvia-litophane-lamp-with-your-own-photos",
+    "title": "Litophane lamp with your own photos",
+    "category": "Home Decor",
+    "startingPrice": 34.99,
+    "weightGrams": 50,
+    "filamentUsage": 37.5,
+    "isPreOrder": false,
+    "description": "Imported via Bulk MakerWorld URL.",
+    "images": [
+      "images/products/belvia-litophane-lamp-with-your-own-photos.jpg"
+    ],
+    "colors": [
+      "Matte Slate",
+      "Obsidian Black",
+      "Chalk White",
+      "Silk Pearl Gold"
+    ],
+    "materials": [
+      "PLA"
+    ],
+    "tags": [],
+    "printTimeMinutes": 195,
+    "rating": 5,
+    "reviewCount": 1,
+    "reviews": [],
+    "makerWorldUrl": "https://makerworld.com/en/models/1048683-litophane-lamp-with-your-own-photos?from=search",
+    "specifications": {
+      "dimensions": "120 × 120 × 140 mm",
+      "layerHeight": "0.16mm",
+      "infill": "15%"
+    }
+  },
+  {
+    "id": "belvia-snail-lamp",
+    "title": "Snail Lamp",
+    "category": "Home Decor",
+    "startingPrice": 34.99,
+    "weightGrams": 50,
+    "filamentUsage": 37.5,
+    "isPreOrder": false,
+    "description": "Imported via Bulk MakerWorld URL.",
+    "images": [
+      "images/products/belvia-snail-lamp.jpg",
+      "images/products/belvia-snail-lamp-2.jpg"
+    ],
+    "colors": [
+      "Matte Slate",
+      "Obsidian Black",
+      "Chalk White",
+      "Silk Pearl Gold"
+    ],
+    "materials": [
+      "PLA"
+    ],
+    "tags": [],
+    "printTimeMinutes": 195,
+    "rating": 5,
+    "reviewCount": 1,
+    "reviews": [],
+    "makerWorldUrl": "https://makerworld.com/en/models/2192789-snail-lamp?from=search",
+    "specifications": {
+      "dimensions": "120 × 120 × 140 mm",
+      "layerHeight": "0.16mm",
+      "infill": "15%"
+    }
+  },
+  {
+    "id": "belvia-mountain-light-lamp",
+    "title": "Mountain Light Lamp",
+    "category": "Home Decor",
+    "startingPrice": 34.99,
+    "weightGrams": 50,
+    "filamentUsage": 37.5,
+    "isPreOrder": false,
+    "description": "Imported via Bulk MakerWorld URL.",
+    "images": [
+      "images/products/belvia-mountain-light-lamp.png",
+      "images/products/belvia-mountain-light-lamp-2.png"
+    ],
+    "colors": [
+      "Matte Slate",
+      "Obsidian Black",
+      "Chalk White",
+      "Silk Pearl Gold"
+    ],
+    "materials": [
+      "PLA"
+    ],
+    "tags": [],
+    "printTimeMinutes": 195,
+    "rating": 5,
+    "reviewCount": 1,
+    "reviews": [],
+    "makerWorldUrl": "https://makerworld.com/en/models/2471017-mountain-light-lamp?from=search",
+    "specifications": {
+      "dimensions": "120 × 120 × 140 mm",
+      "layerHeight": "0.16mm",
+      "infill": "15%"
+    }
+  },
+  {
+    "id": "belvia-fluffy-tail-cute-flexi-cat-toy-keychain",
+    "title": "Fluffy Tail Cute Flexi Cat Toy / Keychain",
+    "category": "Keychains",
+    "startingPrice": 9.99,
+    "weightGrams": 50,
+    "filamentUsage": 37.5,
+    "isPreOrder": false,
+    "description": "Imported via Bulk MakerWorld URL.",
+    "images": [
+      "images/products/belvia-fluffy-tail-cute-flexi-cat-toy-keychain.png",
+      "images/products/belvia-fluffy-tail-cute-flexi-cat-toy-keychain-2.png"
+    ],
+    "colors": [
+      "Matte Slate",
+      "Obsidian Black",
+      "Chalk White",
+      "Silk Pearl Gold"
+    ],
+    "materials": [
+      "PLA"
+    ],
+    "tags": [],
+    "printTimeMinutes": 195,
+    "rating": 5,
+    "reviewCount": 1,
+    "reviews": [],
+    "makerWorldUrl": "https://makerworld.com/en/models/2459711-fluffy-tail-cute-flexi-cat-toy-keychain?from=recommend#profileId-2813010",
+    "specifications": {
+      "dimensions": "120 × 120 × 140 mm",
+      "layerHeight": "0.16mm",
+      "infill": "15%"
+    }
+  },
+  {
+    "id": "belvia-flexi-funny-octopus",
+    "title": "Flexi Funny Octopus",
+    "category": "Keychains",
+    "startingPrice": 9.99,
+    "weightGrams": 50,
+    "filamentUsage": 37.5,
+    "isPreOrder": false,
+    "description": "Imported via Bulk MakerWorld URL.",
+    "images": [
+      "images/products/belvia-flexi-funny-octopus.jpg",
+      "images/products/belvia-flexi-funny-octopus-2.jpg"
+    ],
+    "colors": [
+      "Matte Slate",
+      "Obsidian Black",
+      "Chalk White",
+      "Silk Pearl Gold"
+    ],
+    "materials": [
+      "PLA"
+    ],
+    "tags": [],
+    "printTimeMinutes": 195,
+    "rating": 5,
+    "reviewCount": 1,
+    "reviews": [],
+    "makerWorldUrl": "https://makerworld.com/en/models/1029890-flexi-funny-octopus#profileId-1012486",
+    "specifications": {
+      "dimensions": "120 × 120 × 140 mm",
+      "layerHeight": "0.16mm",
+      "infill": "15%"
+    }
+  },
+  {
+    "id": "belvia-articulated-shark",
+    "title": "Articulated Shark",
+    "category": "Figures & Collectibles",
+    "startingPrice": 29.99,
+    "weightGrams": 50,
+    "filamentUsage": 37.5,
+    "isPreOrder": false,
+    "description": "Imported via Bulk MakerWorld URL.",
+    "images": [
+      "images/products/belvia-articulated-shark.jpg"
+    ],
+    "colors": [
+      "Matte Slate",
+      "Obsidian Black",
+      "Chalk White",
+      "Silk Pearl Gold"
+    ],
+    "materials": [
+      "PLA"
+    ],
+    "tags": [],
+    "printTimeMinutes": 195,
+    "rating": 5,
+    "reviewCount": 1,
+    "reviews": [],
+    "makerWorldUrl": "https://makerworld.com/en/models/463778-articulated-shark#profileId-372543",
+    "specifications": {
+      "dimensions": "120 × 120 × 140 mm",
+      "layerHeight": "0.16mm",
+      "infill": "15%"
+    }
+  },
+  {
+    "id": "belvia-skull-detaliert",
+    "title": "skull detaliert",
+    "category": "Figures & Collectibles",
+    "startingPrice": 29.99,
+    "weightGrams": 203,
+    "filamentUsage": 152.3,
+    "isPreOrder": false,
+    "description": "Processed via MakerWorld AI.",
+    "images": [
+      "images/products/belvia-skull-detaliert.png",
+      "images/products/belvia-skull-detaliert-2.png",
+      "images/products/belvia-skull-detaliert-3.png",
+      "images/products/belvia-skull-detaliert-4.png",
+      "images/products/belvia-skull-detaliert-5.jpg",
+      "images/products/belvia-skull-detaliert-6.jpg",
+      "images/products/belvia-skull-detaliert-7.png",
+      "images/products/belvia-skull-detaliert-8.jpg",
+      "images/products/belvia-skull-detaliert-9.png",
+      "images/products/belvia-skull-detaliert-10.jpg",
+      "images/products/belvia-skull-detaliert-11.png",
+      "images/products/belvia-skull-detaliert-12.jpg",
+      "images/products/belvia-skull-detaliert-13.png",
+      "images/products/belvia-skull-detaliert-14.jpg",
+      "images/products/belvia-skull-detaliert-15.png",
+      "images/products/belvia-skull-detaliert-16.jpg"
+    ],
+    "colors": [
+      "Matte Slate",
+      "Obsidian Black",
+      "Chalk White",
+      "Silk Pearl Gold"
+    ],
+    "materials": [
+      "PLA"
+    ],
+    "tags": [],
+    "printTimeMinutes": 287,
+    "rating": 5,
+    "reviewCount": 1,
+    "reviews": [],
+    "makerWorldUrl": "https://makerworld.com/en/models/2149708-detailed-skull?from=recommend#profileId-2329411",
+    "specifications": {
+      "dimensions": "120 × 120 × 140 mm",
+      "layerHeight": "0.16mm",
+      "infill": "15%"
+    }
+  },
+  {
+    "id": "imported-001",
+    "title": "Bambu Lab Automatic Material System (AMS)",
+    "description": "The ultimate colored printing upgrade. Allows your 3D printer to print in up to 4 colors simultaneously with automatic filament spool detection, airtight moisture-proof chassis, and fallback runout sensors.",
+    "category": "Premium Hardware",
+    "startingPrice": 349,
+    "weightGrams": 2400,
+    "filamentUsage": 1800,
+    "isPreOrder": true,
+    "images": [
+      "https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&q=80&w=800",
+      "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&q=80&w=800"
+    ],
+    "colors": [
+      "Chitubox Graphite Black"
+    ],
+    "materials": [
+      "Heavy Polycarbonate Injection"
+    ],
+    "tags": [],
+    "printTimeMinutes": 0,
+    "rating": 4.9,
+    "reviewCount": 104,
+    "reviews": [],
+    "makerWorldUrl": "",
+    "specifications": {
+      "dimensions": "368 x 224 x 224 mm",
+      "layerHeight": "0.16mm"
+    },
+    "estimatedArrival": "Arriving June 26 via Air Cargo",
+    "depositPercentage": 30,
+    "originalImportCountry": "Germany"
+  },
+  {
+    "id": "imported-002",
+    "title": "Prism Multi-Chroma Silk Co-Extrusion Filament",
+    "description": "High-grade dual-color silk filament imported directly. Extrudes yellow-gold on one side and crimson-red on the other, creating jaw-dropping active-color changes as your model moves in the light.",
+    "category": "Exotic Filaments",
+    "startingPrice": 34.99,
+    "weightGrams": 1000,
+    "filamentUsage": 1000,
+    "isPreOrder": true,
+    "images": [
+      "https://images.unsplash.com/photo-1545241047-6083a3684587?auto=format&fit=crop&q=80&w=800",
+      "https://images.unsplash.com/photo-1614064641938-3bbee52942c7?auto=format&fit=crop&q=80&w=800"
+    ],
+    "colors": [
+      "Royal Gold & Crimson Red",
+      "Emerald Green & Ocean Blue"
+    ],
+    "materials": [
+      "Co-Extruded Silk PLA"
+    ],
+    "tags": [],
+    "printTimeMinutes": 0,
+    "rating": 5,
+    "reviewCount": 78,
+    "reviews": [],
+    "makerWorldUrl": "",
+    "specifications": {
+      "dimensions": "200mm Reel Dia (75mm Width)",
+      "layerHeight": "0.16mm"
+    },
+    "estimatedArrival": "Arriving June 29 via Express Cargo",
+    "depositPercentage": 50,
+    "originalImportCountry": "Japan"
+  },
+  {
+    "id": "imported-003",
+    "title": "E3D Revo Micro High-End Heating Block Kit",
+    "description": "Ultra-lightweight premium hotend upgrade allowing tool-less nozzle swapping at room temperature. Heats from room temp to 200°C in under 22 seconds using an integrated crystal heating ring.",
+    "category": "Premium Hardware",
+    "startingPrice": 115,
+    "weightGrams": 30,
+    "filamentUsage": 22.5,
+    "isPreOrder": true,
+    "images": [
+      "https://images.unsplash.com/photo-1504148455328-c376907d081c?auto=format&fit=crop&q=80&w=800",
+      "https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&q=80&w=800"
+    ],
+    "colors": [
+      "Nozzle Brass Gold",
+      "Anodized Black Sleek"
+    ],
+    "materials": [
+      "Titanium Heatbreak & Brass"
+    ],
+    "tags": [],
+    "printTimeMinutes": 0,
+    "rating": 4.8,
+    "reviewCount": 42,
+    "reviews": [],
+    "makerWorldUrl": "",
+    "specifications": {
+      "dimensions": "42 x 26 x 26 mm",
+      "layerHeight": "0.16mm"
+    },
+    "estimatedArrival": "Arriving July 08 via freight cargo Express",
+    "depositPercentage": 25,
+    "originalImportCountry": "United Kingdom"
   }
 ]

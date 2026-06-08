@@ -31,6 +31,8 @@ export interface Product {
   estimatedArrival?: string; // e.g., "Arriving July 20"
   depositPercentage?: number; // e.g., 30 for 30% deposit
   originalImportCountry?: string; // e.g., "Germany", "Japan"
+  makerWorldUrl?: string; // MakerWorld source page URL
+  tags?: string[]; // MakerWorld scraped tags
 }
 
 export interface CustomPrintRequest {
@@ -85,3 +87,24 @@ export interface CartItem {
   calculatedWeight?: number;
   calculatedDimensions?: string;
 }
+
+export interface Order {
+  id: string; // e.g. "BLV-ORD-100204"
+  items: CartItem[];
+  totalCost: number;
+  totalWeight: number;
+  shippingInfo: {
+    name: string;
+    phone: string;
+    address: string;
+  };
+  payment: {
+    method: 'bKash' | 'Nagad' | '';
+    trxId: string;
+    screenshotUrl: string; // URL of uploaded payment proof
+    submittedAt?: string;
+  };
+  status: 'Pending' | 'Paid' | 'Processing' | 'Shipped' | 'Completed';
+  createdAt: string;
+}
+

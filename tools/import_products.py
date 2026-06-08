@@ -67,6 +67,23 @@ def optimize_image(raw_url, product_id):
         return out_path
 
 def add_product(url, price, category, database_path):
+    # Load catalog first to check for duplicates
+    if os.path.exists(database_path):
+        try:
+            with open(database_path, "r", encoding="utf-8") as f:
+                catalog = json.load(f)
+        except Exception as e:
+            print(f"Error loading catalog: {e}")
+            catalog = []
+    else:
+        catalog = []
+
+    # Prevent duplicate imports by URL
+    for p in catalog:
+        if p.get("makerWorldUrl") == url:
+            print(f"Product with MakerWorld URL '{url}' already exists in catalog. Skipping import to prevent duplicates.")
+            return
+
     # Deterministic fallback details if makerworld scrape returns minimal info
     data = get_product_data_from_makerworld(url)
     if not data:
@@ -79,6 +96,12 @@ def add_product(url, price, category, database_path):
     clean_title = data["title"].split('|')[0].strip()
     product_id = "belvia-" + clean_title.lower().replace(" ", "-")
     
+    # Prevent duplicate imports by computed ID
+    for p in catalog:
+        if p["id"] == product_id:
+            print(f"Product with ID '{product_id}' already exists in catalog. Skipping import to prevent duplicates.")
+            return
+
     img_rel_path = optimize_image(data["raw_image_url"], product_id)
 
     new_prod = {
@@ -104,15 +127,6 @@ def add_product(url, price, category, database_path):
         }
     }
 
-    # Load and write catalog safely
-    if os.path.exists(database_path):
-        with open(database_path, "r", encoding="utf-8") as f:
-            catalog = json.load(f)
-    else:
-        catalog = []
-
-    # Avoid duplicate IDs
-    catalog = [p for p in catalog if p["id"] != product_id]
     catalog.append(new_prod)
 
     with open(database_path, "w", encoding="utf-8") as f:

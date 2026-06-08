@@ -160,7 +160,7 @@ export default function ImportedPreOrders({
                         </div>
                         <div className="flex items-end space-x-1 mt-0.5">
                           <span className="text-xl font-mono font-extrabold text-accent">${depositPrice.toFixed(2)}</span>
-                          <span className="text-[10px] font-mono text-text-secondary mb-0.5">({p.depositPercentage}% DEPOSIT)</span>
+                          <span className="text-[10px] font-mono text-text-secondary mb-0.5">({p.depositPercentage || 50}% DEPOSIT)</span>
                         </div>
                       </div>
 

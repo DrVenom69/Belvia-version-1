@@ -9,32 +9,48 @@ interface SidebarGroup {
   count: number;
 }
 
-const CATEGORIES_SIDEBAR: SidebarGroup[] = [
-  { name: 'All Categories', mappedCategories: 'All', count: 9 },
-  { 
-    name: 'Art & Sculptures', 
-    mappedCategories: ['Home Decor', 'Figures & Collectibles'],
-    count: 4,
+const PARENT_GROUPS = [
+  {
+    name: 'Art & Sculptures',
+    categories: ['Home Decor', 'Figures & Collectibles'],
     subcategories: [
-      { name: 'Home Decor Slices', mappedCategory: 'Home Decor' },
-      { name: 'Collectible Figures', mappedCategory: 'Figures & Collectibles' }
+      { name: 'Home Decor Slices', category: 'Home Decor' },
+      { name: 'Collectible Figures', category: 'Figures & Collectibles' }
     ]
   },
-  { 
-    name: 'Desk & Organisation', 
-    mappedCategories: ['Desk Accessories', 'Functional Prints'],
-    count: 3,
+  {
+    name: 'Desk & Organisation',
+    categories: ['Desk Accessories', 'Functional Prints'],
     subcategories: [
-      { name: 'Desk Accessories', mappedCategory: 'Desk Accessories' },
-      { name: 'Functional Utility', mappedCategory: 'Functional Prints' }
+      { name: 'Desk Accessories', category: 'Desk Accessories' },
+      { name: 'Functional Utility', category: 'Functional Prints' }
     ]
   },
-  { 
-    name: 'Gaming & Spares', 
-    mappedCategories: 'Gaming Accessories',
-    count: 2,
+  {
+    name: 'Gaming & Spares',
+    categories: ['Gaming Accessories'],
     subcategories: [
-      { name: 'Console Holders', mappedCategory: 'Gaming Accessories' }
+      { name: 'Console Holders', category: 'Gaming Accessories' }
+    ]
+  },
+  {
+    name: 'Accessories & Merch',
+    categories: ['Keychains', 'Business Merchandise'],
+    subcategories: [
+      { name: 'Keychains', category: 'Keychains' },
+      { name: 'Business Merchandise', category: 'Business Merchandise' }
+    ]
+  },
+  {
+    name: 'Custom & Other',
+    categories: ['Custom Orders', 'Imported Goods', 'A1 Mini Mods', 'Hotends', 'Premium Hardware', 'Exotic Filaments'],
+    subcategories: [
+      { name: 'Custom Orders', category: 'Custom Orders' },
+      { name: 'Imported Goods', category: 'Imported Goods' },
+      { name: 'A1 Mini Mods', category: 'A1 Mini Mods' },
+      { name: 'Hotends', category: 'Hotends' },
+      { name: 'Premium Hardware', category: 'Premium Hardware' },
+      { name: 'Exotic Filaments', category: 'Exotic Filaments' }
     ]
   }
 ];
@@ -61,6 +77,45 @@ export default function ProductGrid({
   const [modelTypeTab, setModelTypeTab] = useState<'3d-models' | 'laser-cut'>('3d-models');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [sortBy, setSortBy] = useState<string>('default');
+
+  // Dynamically compute sidebar categories based on loaded products
+  const categoriesSidebar = useMemo(() => {
+    const categoryCounts: Record<string, number> = {};
+    let totalCount = 0;
+    products.forEach(p => {
+      if (p.isPreOrder) return;
+      categoryCounts[p.category] = (categoryCounts[p.category] || 0) + 1;
+      totalCount++;
+    });
+
+    const groups: SidebarGroup[] = [
+      { name: 'All Categories', mappedCategories: 'All', count: totalCount }
+    ];
+
+    PARENT_GROUPS.forEach(group => {
+      let groupCount = 0;
+      const activeSubs: { name: string; mappedCategory: string }[] = [];
+
+      group.subcategories.forEach(sub => {
+        const count = categoryCounts[sub.category] || 0;
+        if (count > 0) {
+          groupCount += count;
+          activeSubs.push({ name: `${sub.name}`, mappedCategory: sub.category });
+        }
+      });
+
+      if (groupCount > 0) {
+        groups.push({
+          name: group.name,
+          mappedCategories: group.categories,
+          subcategories: activeSubs,
+          count: groupCount
+        });
+      }
+    });
+
+    return groups;
+  }, [products]);
 
   // Multi-color color lookup dictionary for beautiful UI swatches
   const colorMap: Record<string, string> = {
@@ -214,7 +269,7 @@ export default function ProductGrid({
               </h3>
               
               <div className="space-y-1.5">
-                {CATEGORIES_SIDEBAR.map((catGroup) => {
+                {categoriesSidebar.map((catGroup) => {
                   const isSelectedGroup = selectedCategoryGroup === catGroup.name;
                   return (
                     <div key={catGroup.name} className="space-y-1">
@@ -313,7 +368,10 @@ export default function ProductGrid({
                       className="group rounded-2xl bg-bg-surface/75 border border-border-premium hover:border-accent/40 hover:shadow-accent/5 transition-all duration-300 relative flex flex-col h-full overflow-hidden text-left shadow-xs"
                     >
                       {/* Image Showcase */}
-                      <div className="aspect-square w-full bg-bg-base relative overflow-hidden">
+                      <div 
+                        onClick={() => onQuickView(p)}
+                        className="aspect-square w-full bg-bg-base relative overflow-hidden cursor-pointer"
+                      >
                         <img
                           referrerPolicy="no-referrer"
                           src={p.images[0]}
@@ -365,7 +423,10 @@ export default function ProductGrid({
                         <div>
                           
                           {/* Title */}
-                          <h3 className="font-display font-extrabold text-sm text-text-primary mt-1 line-clamp-1 group-hover:text-accent transition">
+                          <h3 
+                            onClick={() => onQuickView(p)}
+                            className="font-display font-extrabold text-sm text-text-primary mt-1 line-clamp-1 group-hover:text-accent transition cursor-pointer hover:underline"
+                          >
                             {p.title}
                           </h3>
                           

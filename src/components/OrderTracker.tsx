@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, MapPin, CheckCircle2, Circle, Clock, Flame, ShieldAlert, Cpu, Truck, Package } from 'lucide-react';
+import { Order } from '../types';
 
 interface TrackingMilestone {
   title: string;
@@ -89,12 +90,170 @@ export default function OrderTracker() {
   const [searchCode, setSearchCode] = useState('');
   const [activeShipment, setActiveShipment] = useState<MockShipment | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
+  const [dbOrders, setDbOrders] = useState<Order[]>([]);
+
+  // Fetch all orders on mount to search locally
+  useEffect(() => {
+    fetch('/api/get-orders')
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) {
+          setDbOrders(data);
+        }
+      })
+      .catch(err => console.error("Error fetching tracker orders:", err));
+  }, []);
 
   const handleSearch = (code: string) => {
     const trimmed = code.trim().toUpperCase();
     setHasSearched(true);
+
+    // 1. Check preloaded mock shipments
     if (PRELOADED_SHIPMENTS[trimmed]) {
       setActiveShipment(PRELOADED_SHIPMENTS[trimmed]);
+      return;
+    }
+
+    // 2. Check local database orders
+    const foundOrder = dbOrders.find(o => o.id.toUpperCase() === trimmed);
+    if (foundOrder) {
+      const firstItem = foundOrder.items[0];
+      const totalQty = foundOrder.items.reduce((acc, item) => acc + item.quantity, 0);
+
+      const createdDateStr = new Date(foundOrder.createdAt).toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+
+      const submittedDateStr = foundOrder.payment.submittedAt
+        ? new Date(foundOrder.payment.submittedAt).toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+          })
+        : '';
+
+      const milestones: TrackingMilestone[] = [
+        {
+          title: 'Order Placed',
+          description: 'Order reference generated and checkout initiated.',
+          time: createdDateStr,
+          status: 'completed'
+        }
+      ];
+
+      // Payment verification milestone mapping
+      if (foundOrder.status === 'Pending') {
+        milestones.push({
+          title: 'Payment Pending',
+          description: 'Awaiting manual payment proof submission.',
+          time: '',
+          status: 'current'
+        });
+      } else if (foundOrder.status === 'Paid') {
+        milestones.push({
+          title: 'Payment Verification',
+          description: `Proof submitted (TrxID: ${foundOrder.payment.trxId}). Awaiting admin verification.`,
+          time: submittedDateStr,
+          status: 'current'
+        });
+      } else {
+        milestones.push({
+          title: 'Payment Verified',
+          description: `Payment cleared successfully (TrxID: ${foundOrder.payment.trxId}).`,
+          time: submittedDateStr || createdDateStr,
+          status: 'completed'
+        });
+      }
+
+      // Manufacturing queue milestone mapping
+      if (foundOrder.status === 'Processing') {
+        milestones.push({
+          title: 'Active Core Printing',
+          description: '3D Slicing Node Active. Printing infill structures at layer 840/1520.',
+          time: 'Live Telemetry Active',
+          status: 'current'
+        });
+      } else if (foundOrder.status === 'Shipped' || foundOrder.status === 'Completed') {
+        milestones.push({
+          title: '3D Printing Complete',
+          description: 'All layers completed and verified for ESD standards.',
+          time: createdDateStr,
+          status: 'completed'
+        });
+      } else {
+        milestones.push({
+          title: 'Queue Scheduled',
+          description: 'Awaiting payment verification before file dispatch.',
+          time: '',
+          status: 'pending'
+        });
+      }
+
+      // Courier delivery milestone mapping
+      if (foundOrder.status === 'Shipped') {
+        milestones.push({
+          title: 'Dispatched via Courier',
+          description: 'Handed over to local courier. Out for delivery in transit.',
+          time: 'In Transit',
+          status: 'current'
+        });
+      } else if (foundOrder.status === 'Completed') {
+        milestones.push({
+          title: 'Package Delivered',
+          description: 'Successfully received and confirmed by client.',
+          time: 'Completed',
+          status: 'completed'
+        });
+      } else {
+        milestones.push({
+          title: 'Courier Logistics Dispatch',
+          description: 'Queue awaiting print manufacture run.',
+          time: '',
+          status: 'pending'
+        });
+      }
+
+      // Reverse so latest is first
+      milestones.reverse();
+
+      const mappedShipment: MockShipment = {
+        id: foundOrder.id,
+        productName: firstItem
+          ? `${firstItem.product.title}${foundOrder.items.length > 1 ? ` + ${foundOrder.items.length - 1} other shapes` : ''}`
+          : 'Custom Manufacturing Order',
+        qty: totalQty,
+        material: firstItem ? firstItem.selectedMaterial : 'PLA (Matte)',
+        color: firstItem ? firstItem.selectedColor : 'Obsidian Black',
+        weightGrams: foundOrder.totalWeight,
+        status: (() => {
+          if (foundOrder.status === 'Pending') return 'Awaiting Payment';
+          if (foundOrder.status === 'Paid') return 'Awaiting Verification';
+          if (foundOrder.status === 'Processing') return 'Printing Active Core';
+          if (foundOrder.status === 'Shipped') return 'In Transit - Courier';
+          return 'Completed';
+        })(),
+        estimatedArrival: (() => {
+          if (foundOrder.status === 'Pending') return 'Awaiting Payment';
+          if (foundOrder.status === 'Paid') return 'Awaiting Admin Verification';
+          if (foundOrder.status === 'Processing') return 'Estimated: 2-3 Days';
+          if (foundOrder.status === 'Shipped') return 'Estimated: 1-2 Days (In Transit)';
+          return 'Delivered';
+        })(),
+        milestones,
+        telemetry: foundOrder.status === 'Processing' ? {
+          nozzleTemp: '218°C',
+          bedTemp: '55°C',
+          layer: '840 / 1520 Slices',
+          speed: '250 mm/s',
+          filamentLeft: '34 meters'
+        } : undefined
+      };
+
+      setActiveShipment(mappedShipment);
     } else {
       setActiveShipment(null);
     }
@@ -113,7 +272,7 @@ export default function OrderTracker() {
             Belvia Logistics Tracker
           </h2>
           <p className="text-text-secondary text-sm mt-3 max-w-lg mx-auto">
-            Input your specialized Reference shipment code (e.g., `BLV-SHIP-99120`) to review machine printing slices, active bed temperature diagnostics, and air freighting milestones.
+            Input your specialized Reference shipment code (e.g., `BLV-ORD-XXXXXX` or `BLV-SHIP-99120`) to review machine printing slices, active bed temperature diagnostics, and air freighting milestones.
           </p>
         </div>
 
@@ -133,7 +292,7 @@ export default function OrderTracker() {
                 type="text"
                 value={searchCode}
                 onChange={(e) => setSearchCode(e.target.value)}
-                placeholder="Enter BLV-SHIP-XXXXX..."
+                placeholder="Enter order reference (e.g. BLV-ORD-100204)..."
                 className="w-full bg-bg-base text-text-primary pl-10.5 pr-4 py-3 rounded-xl border border-border-premium focus:border-accent focus:ring-1 focus:ring-accent/30 text-sm font-mono tracking-wider transition"
               />
             </div>
@@ -262,7 +421,7 @@ export default function OrderTracker() {
                             <h4 className={`text-sm font-bold ${isCurrent ? 'text-accent text-base' : 'text-text-primary'}`}>
                               {ml.title}
                             </h4>
-                            <span className="text-[10px] font-mono text-text-muted">{ml.time}</span>
+                            {ml.time && <span className="text-[10px] font-mono text-text-muted">{ml.time}</span>}
                           </div>
                           <p className="text-text-secondary text-xs">{ml.description}</p>
                         </div>
@@ -280,7 +439,7 @@ export default function OrderTracker() {
               </div>
               <h3 className="font-display font-black text-lg text-text-primary">Tracking Reference Not Found</h3>
               <p className="text-text-secondary text-xs max-w-xs mx-auto">
-                The G-Code tracking coordinate reference code `{searchCode}` could not be resolved across our logistics queues. Try selecting one of our verified default codes above!
+                The tracking coordinate reference code `{searchCode}` could not be resolved across our logistics queues. Try entering a valid order reference code or one of our verified default codes above!
               </p>
             </div>
           )

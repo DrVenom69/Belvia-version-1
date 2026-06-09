@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   User, Lock, Settings, Heart, ShoppingCart, CheckCircle2, 
-  Truck, Cpu, Star, Mail, MapPin, Edit2, LogOut, Code, ClipboardList, Info, Sparkles 
+  Truck, Cpu, Star, Mail, MapPin, Edit2, LogOut, Code, ClipboardList, Info, Sparkles, Camera, Upload
 } from 'lucide-react';
 import { Product, Review } from '../types';
 import { getStoredReviews, saveStoredReview, getStoredProducts } from '../data';
@@ -12,6 +12,8 @@ interface MyAccountHubProps {
   onToggleWishlist: (p: Product) => void;
   onAddToCartAndRemove: (p: Product) => void;
   onQuickView: (p: Product) => void;
+  profilePicture?: string | null;
+  onProfilePictureChange?: (url: string | null) => void;
 }
 
 interface PastOrder {
@@ -31,7 +33,9 @@ export default function MyAccountHub({
   wishlist,
   onToggleWishlist,
   onAddToCartAndRemove,
-  onQuickView
+  onQuickView,
+  profilePicture,
+  onProfilePictureChange
 }: MyAccountHubProps) {
   // Authentication status
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(true); // Pre-logged in for maximum user testing convenience
@@ -50,8 +54,19 @@ export default function MyAccountHub({
   const [laserSpeed, setLaserSpeed] = useState<string>('240 mm/s Standard Quality');
   const [infillTarget, setInfillTarget] = useState<string>('15% Gyroid (Elastic Strength)');
 
-  // Active sub-navigation
-  const [activeSubView, setActiveSubView] = useState<'profile' | 'orders' | 'wishlist'>('orders');
+  // Profile picture upload ref
+  const profilePicInputRef = useRef<HTMLInputElement>(null);
+  const [picUploadHover, setPicUploadHover] = useState(false);
+
+  // Active sub-navigation — reads from sessionStorage if set by navbar dropdown
+  const [activeSubView, setActiveSubView] = useState<'profile' | 'orders' | 'wishlist'>(() => {
+    const stored = sessionStorage.getItem('belvia_account_subview');
+    if (stored === 'profile' || stored === 'orders' || stored === 'wishlist') {
+      sessionStorage.removeItem('belvia_account_subview');
+      return stored;
+    }
+    return 'orders';
+  });
 
   // Track Shipments local state
   const [shipmentSearchCode, setShipmentSearchCode] = useState<string>('');
@@ -166,6 +181,30 @@ export default function MyAccountHub({
     setGlobalReviews(getStoredReviews());
   }, []);
 
+  const handleProfilePicUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) return;
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Image must be under 5 MB.');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const dataUrl = ev.target?.result as string;
+      localStorage.setItem('belvia_profile_pic', dataUrl);
+      if (onProfilePictureChange) onProfilePictureChange(dataUrl);
+    };
+    reader.readAsDataURL(file);
+    // Reset input so same file can be re-selected
+    e.target.value = '';
+  };
+
+  const handleRemoveProfilePic = () => {
+    localStorage.removeItem('belvia_profile_pic');
+    if (onProfilePictureChange) onProfilePictureChange(null);
+  };
+
   const handleTrackerSearch = (code: string) => {
     const trimmed = code.trim().toUpperCase();
     setTestedCode(trimmed);
@@ -187,7 +226,8 @@ export default function MyAccountHub({
       rating: reviewRating,
       text: reviewTextText.trim(),
       createdAt: new Date().toISOString(),
-      isVerified: true
+      isVerified: true,
+      avatarUrl: profilePicture || undefined
     };
 
     saveStoredReview(newRev);
@@ -305,11 +345,48 @@ export default function MyAccountHub({
               {/* User Bio Card */}
               <div className="bg-[#070b13] border border-bg-elevated rounded-2xl p-6 shadow-xl relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-accent/10 to-transparent rounded-full pointer-events-none" />
+
+                {/* Hidden profile pic input */}
+                <input
+                  ref={profilePicInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleProfilePicUpload}
+                />
                 
                 <div className="flex items-center space-x-4">
-                  <div className="w-14 h-14 bg-gradient-to-tr from-accent to-accent-secondary rounded-2xl flex items-center justify-center font-black text-xl text-white shadow-md border border-white/15">
-                    {firstName.substring(0, 1)}{lastName.substring(0,1)}
-                  </div>
+                  {/* Clickable Avatar with Upload Overlay */}
+                  <button
+                    id="profile-avatar-upload-btn"
+                    onClick={() => profilePicInputRef.current?.click()}
+                    onMouseEnter={() => setPicUploadHover(true)}
+                    onMouseLeave={() => setPicUploadHover(false)}
+                    className="relative w-16 h-16 shrink-0 group cursor-pointer focus:outline-none"
+                    title="Click to upload profile picture"
+                  >
+                    {profilePicture ? (
+                      <img
+                        src={profilePicture}
+                        alt="Profile"
+                        className="w-16 h-16 rounded-2xl object-cover border-2 border-accent/30 shadow-md"
+                      />
+                    ) : (
+                      <div className="w-16 h-16 bg-gradient-to-tr from-accent to-accent-secondary rounded-2xl flex items-center justify-center font-black text-xl text-white shadow-md border border-white/15">
+                        {firstName.substring(0, 1)}{lastName.substring(0,1)}
+                      </div>
+                    )}
+                    {/* Upload hover overlay */}
+                    <div className={`absolute inset-0 rounded-2xl bg-black/60 flex flex-col items-center justify-center transition-opacity duration-200 ${picUploadHover ? 'opacity-100' : 'opacity-0'}`}>
+                      <Camera className="w-5 h-5 text-white" />
+                      <span className="text-[9px] text-white font-mono mt-0.5">Upload</span>
+                    </div>
+                    {/* Tiny camera badge */}
+                    <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-accent border-2 border-[#070b13] flex items-center justify-center shadow">
+                      <Camera className="w-3 h-3 text-white" />
+                    </div>
+                  </button>
+
                   <div>
                     <h3 className="font-display font-black text-lg text-white">
                       {firstName} {lastName}
@@ -318,6 +395,14 @@ export default function MyAccountHub({
                       <Sparkles className="w-3 h-3 text-accent animate-pulse" />
                       <span>LEGITIMATE BUYER</span>
                     </span>
+                    {profilePicture && (
+                      <button
+                        onClick={handleRemoveProfilePic}
+                        className="block mt-1.5 text-[9px] font-mono text-red-400 hover:text-red-300 transition cursor-pointer"
+                      >
+                        ✕ Remove photo
+                      </button>
+                    )}
                   </div>
                 </div>
 

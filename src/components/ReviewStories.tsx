@@ -11,6 +11,7 @@ interface StorySlide {
   rating: number;
   reviewText: string;
   productName: string;
+  avatarUrl?: string; // optional override from user-uploaded profile picture
 }
 
 const STORY_SLIDES: StorySlide[] = [
@@ -62,9 +63,10 @@ const STORY_SLIDES: StorySlide[] = [
 
 interface ReviewStoriesProps {
   onSelectProduct: (productId: string) => void;
+  userProfilePicture?: string | null;
 }
 
-export default function ReviewStories({ onSelectProduct }: ReviewStoriesProps) {
+export default function ReviewStories({ onSelectProduct, userProfilePicture }: ReviewStoriesProps) {
   const [activeStoryIdx, setActiveStoryIdx] = useState<number | null>(null);
   const [progress, setProgress] = useState<number>(0);
   const [isPaused, setIsPaused] = useState<boolean>(false);
@@ -135,37 +137,42 @@ export default function ReviewStories({ onSelectProduct }: ReviewStoriesProps) {
         
         {/* Story round reels strip */}
         <div className="flex space-x-5 overflow-x-auto pb-1 select-none scrollbar-none">
-          {STORY_SLIDES.map((slide, idx) => (
-            <button
-              id={`story-trigger-${slide.clientHandle}`}
-              key={slide.id}
-              onClick={() => handleOpenStory(idx)}
-              className="flex flex-col items-center space-y-1.5 focus:outline-none cursor-pointer shrink-0 group"
-            >
-              <div className="relative">
-                {/* Glowing ring */}
-                <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-pink-500 via-orange-500 to-yellow-400 p-[2.5px] group-hover:scale-105 transition-all duration-300">
-                  <div className="w-14 h-14 rounded-full bg-bg-base" />
+          {STORY_SLIDES.map((slide, idx) => {
+            // Show user's uploaded profile picture on their own stories (first story = logged-in user demo)
+            const displayAvatar = idx === 0 && userProfilePicture ? userProfilePicture : slide.avatar;
+            return (
+              <button
+                id={`story-trigger-${slide.clientHandle}`}
+                key={slide.id}
+                onClick={() => handleOpenStory(idx)}
+                className="flex flex-col items-center space-y-1.5 focus:outline-none cursor-pointer shrink-0 group"
+              >
+                <div className="relative">
+                  {/* Glowing ring */}
+                  <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-pink-500 via-orange-500 to-yellow-400 p-[2.5px] group-hover:scale-105 transition-all duration-300">
+                    <div className="w-14 h-14 rounded-full bg-bg-base" />
+                  </div>
+                  <div className="relative w-15 h-15 rounded-full overflow-hidden p-1">
+                    <img
+                      referrerPolicy="no-referrer"
+                      src={displayAvatar}
+                      alt={slide.clientHandle}
+                      className="w-full h-full object-cover rounded-full"
+                      onError={(e) => { (e.target as HTMLImageElement).src = slide.avatar; }}
+                    />
+                  </div>
+                  
+                  {/* Live star badge inside circle */}
+                  <span className="absolute bottom-0 right-0 w-4.5 h-4.5 rounded-full bg-orange-500 border border-bg-base flex items-center justify-center shadow">
+                    <Star className="w-2.5 h-2.5 text-text-on-accent fill-current" />
+                  </span>
                 </div>
-                <div className="relative w-15 h-15 rounded-full overflow-hidden p-1">
-                  <img
-                    referrerPolicy="no-referrer"
-                    src={slide.avatar}
-                    alt={slide.clientHandle}
-                    className="w-full h-full object-cover rounded-full"
-                  />
-                </div>
-                
-                {/* Live star badge inside circle */}
-                <span className="absolute bottom-0 right-0 w-4.5 h-4.5 rounded-full bg-orange-500 border border-bg-base flex items-center justify-center shadow">
-                  <Star className="w-2.5 h-2.5 text-text-on-accent fill-current" />
+                <span className="text-[10px] font-mono font-medium text-text-secondary group-hover:text-text-primary transition">
+                  @{slide.clientHandle}
                 </span>
-              </div>
-              <span className="text-[10px] font-mono font-medium text-text-secondary group-hover:text-text-primary transition">
-                @{slide.clientHandle}
-              </span>
-            </button>
-          ))}
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -213,7 +220,13 @@ export default function ReviewStories({ onSelectProduct }: ReviewStoriesProps) {
               <div className="flex justify-between items-center text-white">
                 <div className="flex items-center space-x-2.5">
                   <div className="w-9 h-9 rounded-full overflow-hidden border border-white/20 shrink-0">
-                    <img referrerPolicy="no-referrer" src={currentSlide.avatar} alt="story micro" className="w-full h-full object-cover" />
+                    <img
+                      referrerPolicy="no-referrer"
+                      src={activeStoryIdx === 0 && userProfilePicture ? userProfilePicture : currentSlide.avatar}
+                      alt="story micro"
+                      className="w-full h-full object-cover"
+                      onError={(e) => { (e.target as HTMLImageElement).src = currentSlide.avatar; }}
+                    />
                   </div>
                   <div className="text-left">
                     <span className="font-mono text-xs font-bold block leading-tight">@{currentSlide.clientHandle}</span>

@@ -43,6 +43,20 @@ export default function App() {
   const [customRequests, setCustomRequests] = useState<CustomPrintRequest[]>([]);
   const [bulkOrders, setBulkOrders] = useState<BulkOrderRequest[]>([]);
 
+  // Profile picture — persisted to localStorage as base64 data URL
+  const [profilePicture, setProfilePicture] = useState<string | null>(() => {
+    return localStorage.getItem('belvia_profile_pic') || null;
+  });
+
+  const handleProfilePictureChange = (url: string | null) => {
+    setProfilePicture(url);
+    if (url) {
+      localStorage.setItem('belvia_profile_pic', url);
+    } else {
+      localStorage.removeItem('belvia_profile_pic');
+    }
+  };
+
   // Light/Dark mode state (syncs with localStorage and document element class)
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
     if (typeof window !== 'undefined') {
@@ -416,6 +430,8 @@ export default function App() {
         onWishlistOpen={() => setIsWishlistOpen(true)}
         theme={theme}
         toggleTheme={toggleTheme}
+        profilePicture={profilePicture}
+        onLogout={() => setActiveTab('home')}
       />
 
       {/* 2. DYNAMIC CONTENT SWITCHBOARD */}
@@ -432,10 +448,13 @@ export default function App() {
             />
 
             {/* Instagram Story-style reviews tape */}
-            <ReviewStories onSelectProduct={(pId) => {
-              const found = products.find(p => p.id === pId);
-              if (found) setSelectedProduct(found);
-            }} />
+            <ReviewStories
+              onSelectProduct={(pId) => {
+                const found = products.find(p => p.id === pId);
+                if (found) setSelectedProduct(found);
+              }}
+              userProfilePicture={profilePicture}
+            />
 
             {/* Ready prints short list */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 pt-10 text-left">
@@ -551,6 +570,8 @@ export default function App() {
               onToggleWishlist={handleToggleWishlist}
               onAddToCartAndRemove={handleAddToCartAndRemoveFromWishlist}
               onQuickView={setSelectedProduct}
+              profilePicture={profilePicture}
+              onProfilePictureChange={handleProfilePictureChange}
             />
           </div>
         )}

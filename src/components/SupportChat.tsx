@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { MessageSquare, X, Send, User, Bot, Sparkles, HelpCircle } from 'lucide-react';
+import { useChat } from '../contexts/ChatContext';
 
 interface ChatMessage {
   id: string;
@@ -9,9 +10,8 @@ interface ChatMessage {
 }
 
 export default function SupportChat() {
-  const [isOpen, setIsOpen] = useState(false);
+  const { isOpen, setIsOpen, inputText, setInputText, productContext, setProductContext } = useChat();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [inputText, setInputText] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [unreadCount, setUnreadCount] = useState(1);
   const chatEndRef = useRef<HTMLDivElement>(null);
@@ -34,9 +34,12 @@ export default function SupportChat() {
   }, [messages, isTyping]);
 
   const handleToggle = () => {
-    setIsOpen(!isOpen);
-    if (!isOpen) {
+    const nextOpen = !isOpen;
+    setIsOpen(nextOpen);
+    if (nextOpen) {
       setUnreadCount(0);
+    } else {
+      setProductContext(null);
     }
   };
 
@@ -52,6 +55,7 @@ export default function SupportChat() {
 
     setMessages((prev) => [...prev, userMsg]);
     setInputText('');
+    setProductContext(null);
     setIsTyping(true);
 
     try {
@@ -125,7 +129,7 @@ export default function SupportChat() {
   };
 
   return (
-    <div id="support-chat-wrapper" className="fixed bottom-6 right-6 z-45 font-sans text-left">
+    <div id="support-chat-wrapper" className="fixed bottom-20 right-6 sm:bottom-6 sm:right-6 font-sans text-left" style={{ zIndex: 60 }}>
       {/* 1. FLOATING TOGGLE TRIGGER */}
       {!isOpen && (
         <button
@@ -149,7 +153,7 @@ export default function SupportChat() {
       {isOpen && (
         <div
           id="support-chat-window"
-          className="w-85 sm:w-96 h-[480px] bg-bg-base border border-bg-elevated rounded-2xl flex flex-col justify-between shadow-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-6 duration-200"
+          className="w-[calc(100vw-2rem)] sm:w-96 max-w-sm h-[480px] bg-bg-base border border-bg-elevated rounded-2xl flex flex-col justify-between shadow-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-6 duration-200"
         >
           {/* Window Header */}
           <div className="bg-bg-elevated px-4 py-3.5 border-b border-border-premium flex items-center justify-between">
@@ -248,6 +252,33 @@ export default function SupportChat() {
                   🧬 Filaments Spec Guide
                 </button>
               </div>
+            </div>
+          )}
+
+          {/* Product context card visual */}
+          {productContext && (
+            <div className="mx-3 mb-2 p-2 rounded-xl bg-bg-surface border border-accent/20 flex items-center justify-between animate-in fade-in slide-in-from-bottom-2 duration-200 text-left">
+              <div className="flex items-center space-x-2">
+                <img 
+                  src={productContext.images[0] || '/images/placeholder.png'} 
+                  alt={productContext.title} 
+                  className="w-10 h-10 object-cover rounded-lg border border-border-premium"
+                  onError={(e) => {
+                    e.currentTarget.src = '/images/placeholder.png';
+                  }}
+                />
+                <div className="text-left">
+                  <span className="text-[9px] font-mono text-accent uppercase block">{productContext.category}</span>
+                  <span className="text-xs font-bold text-text-primary block line-clamp-1">{productContext.title}</span>
+                </div>
+              </div>
+              <button 
+                type="button" 
+                onClick={() => setProductContext(null)} 
+                className="p-1 rounded bg-bg-elevated hover:bg-bg-surface text-text-secondary hover:text-text-primary border border-border-premium cursor-pointer transition text-xs font-mono"
+              >
+                [X]
+              </button>
             </div>
           )}
 

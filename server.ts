@@ -41,6 +41,11 @@ const PORT = 3000;
 // Middleware
 app.use(express.json({ limit: "10mb" }));
 
+// Protect private data directory from static/direct requests
+app.use("/data", (req, res) => {
+  res.status(404).send("Not Found");
+});
+
 // ── Admin API Key Authentication Middleware ──────────────────────────────
 // Protects admin write endpoints. Clients must send x-admin-key header
 // matching the ADMIN_SECRET_KEY environment variable.

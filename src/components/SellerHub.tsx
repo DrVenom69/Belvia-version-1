@@ -26,9 +26,24 @@ import {
   Calendar,
   GripVertical,
   Globe,
-  Save
+  Save,
+  Star,
+  Tag,
+  Ticket,
+  Settings,
+  MessageSquare
 } from 'lucide-react';
-import { Product, Order } from '../types';
+import { Product, Order, Coupon, Filament, Accessory } from '../types';
+import { formatPrice } from '../utils/format';
+import { calculateFloorPrice } from '../utils/pricingEngine';
+
+// Helper: returns headers with the admin API key from localStorage
+function getAdminHeaders(extraHeaders: Record<string, string> = {}): Record<string, string> {
+  const key = localStorage.getItem('belvia_admin_key');
+  const headers: Record<string, string> = { ...extraHeaders };
+  if (key) headers['x-admin-key'] = key;
+  return headers;
+}
 
 interface SellerHubProps {
   products: Product[];
@@ -37,6 +52,8 @@ interface SellerHubProps {
   onImportBulkProducts: (newProducts: Product[]) => void;
   onResetCatalog: () => void;
   onUpdateProducts: (products: Product[]) => void;
+  categories: any[];
+  onRefreshCategories: () => void;
 }
 
 export default function SellerHub({ 
@@ -45,9 +62,137 @@ export default function SellerHub({
   onDeleteProduct, 
   onImportBulkProducts, 
   onResetCatalog,
-  onUpdateProducts
+  onUpdateProducts,
+  categories,
+  onRefreshCategories
 }: SellerHubProps) {
-  const [activeSubTab, setActiveSubTab] = useState<'ai' | 'bulk' | 'manual' | 'inventory' | 'orders' | 'preorders'>('ai');
+  const [activeSubTab, setActiveSubTab] = useState<'ai' | 'bulk' | 'manual' | 'inventory' | 'orders' | 'preorders' | 'carousel' | 'coupons' | 'festivals' | 'filaments' | 'pricehealth' | 'settings' | 'support-logs'>('ai');
+
+  // --- EDIT MODE STATE ---
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [showEditCustomCategoryInput, setShowEditCustomCategoryInput] = useState<boolean>(false);
+  const [editCustomCategoryName, setEditCustomCategoryName] = useState<string>('');
+  const [editImageInput, setEditImageInput] = useState<string>('');
+
+  const editRecipe = editingProduct?.material_recipe || {
+    filament_name: '',
+    filament_grams: 0,
+    print_hours: 0,
+    has_uv_finish: false,
+    resin_grams: 2,
+    accessories: [],
+    target_margin: null
+  };
+
+  // --- FILAMENTS & ACCESSORIES STATE ---
+  const [filaments, setFilaments] = useState<Filament[]>([]);
+  const [isFilamentsLoading, setIsFilamentsLoading] = useState(false);
+  const [accessories, setAccessories] = useState<Accessory[]>([]);
+  const [isAccessoriesLoading, setIsAccessoriesLoading] = useState(false);
+
+  // Spool Form State
+  const [spoolName, setSpoolName] = useState('');
+  const [spoolType, setSpoolType] = useState('PLA');
+  const [spoolColor, setSpoolColor] = useState('');
+  const [spoolBrand, setSpoolBrand] = useState('');
+  const [spoolWeight, setSpoolWeight] = useState('1000');
+  const [spoolPrice, setSpoolPrice] = useState('');
+  const [spoolNotes, setSpoolNotes] = useState('');
+  const [spoolError, setSpoolError] = useState('');
+  const [spoolSuccess, setSpoolSuccess] = useState('');
+  const [isCreatingSpool, setIsCreatingSpool] = useState(false);
+
+  // Accessory Form State
+  const [accFormName, setAccFormName] = useState('');
+  const [accFormUnit, setAccFormUnit] = useState('piece');
+  const [accFormCost, setAccFormCost] = useState('');
+  const [accFormStock, setAccFormStock] = useState('100');
+  const [accFormError, setAccFormError] = useState('');
+  const [accFormSuccess, setAccFormSuccess] = useState('');
+  const [isSavingAccessory, setIsSavingAccessory] = useState(false);
+
+  // Settings State
+  const [hubSettings, setHubSettings] = useState<Record<string, string>>({});
+  const [isSettingsLoading, setIsSettingsLoading] = useState(false);
+  const [settingsError, setSettingsError] = useState('');
+  const [settingsSuccess, setSettingsSuccess] = useState('');
+  const [isSavingSettings, setIsSavingSettings] = useState(false);
+
+  // Product Recipe Costing State (for Add Product Form)
+  const [newRecipeFilamentName, setNewRecipeFilamentName] = useState('');
+  const [newRecipeFilamentGrams, setNewRecipeFilamentGrams] = useState('');
+  const [newRecipeResinGrams, setNewRecipeResinGrams] = useState('2');
+  const [newRecipeHasUvFinish, setNewRecipeHasUvFinish] = useState(false);
+  const [newRecipeAccessories, setNewRecipeAccessories] = useState<string[]>([]);
+  const [newRecipePrintHours, setNewRecipePrintHours] = useState('');
+  const [newRecipeTargetMargin, setNewRecipeTargetMargin] = useState<string>(''); // empty = fallback to settings
+  const [newResinEnabled, setNewResinEnabled] = useState<boolean>(false);
+  const [newResinPrice, setNewResinPrice] = useState<string>('');
+
+
+  // --- CHAT SUPPORT LOGS STATE & HANDLERS ---
+  const [unmatchedQuestions, setUnmatchedQuestions] = useState<any[]>([]);
+  const [isUnmatchedLoading, setIsUnmatchedLoading] = useState(false);
+  const [unmatchedError, setUnmatchedError] = useState('');
+  const [unmatchedSuccess, setUnmatchedSuccess] = useState('');
+
+  const fetchUnmatchedQuestions = async () => {
+    setIsUnmatchedLoading(true);
+    setUnmatchedError('');
+    try {
+      const res = await fetch('/api/admin/unmatched-questions', {
+        headers: getAdminHeaders()
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && Array.isArray(data.questions)) {
+          setUnmatchedQuestions(data.questions);
+        } else {
+          setUnmatchedError(data.error || 'Failed to fetch unmatched questions.');
+        }
+      } else {
+        setUnmatchedError('Failed to fetch unmatched questions. Server returned status ' + res.status);
+      }
+    } catch (err: any) {
+      console.error('Failed to fetch unmatched questions:', err);
+      setUnmatchedError(err.message || 'Failed to fetch unmatched questions.');
+    } finally {
+      setIsUnmatchedLoading(false);
+    }
+  };
+
+  const handleClearUnmatched = async () => {
+    if (!confirm('Are you sure you want to clear all support chat logs? This action cannot be undone.')) {
+      return;
+    }
+    setIsUnmatchedLoading(true);
+    setUnmatchedError('');
+    setUnmatchedSuccess('');
+    try {
+      const res = await fetch('/api/admin/unmatched-questions/clear', {
+        method: 'POST',
+        headers: getAdminHeaders()
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success) {
+          setUnmatchedQuestions([]);
+          setUnmatchedSuccess('Support chat logs successfully cleared.');
+          setTimeout(() => setUnmatchedSuccess(''), 3000);
+        } else {
+          setUnmatchedError(data.error || 'Failed to clear unmatched questions.');
+        }
+      } else {
+        setUnmatchedError('Failed to clear unmatched questions. Server returned status ' + res.status);
+      }
+    } catch (err: any) {
+      console.error('Failed to clear unmatched questions:', err);
+      setUnmatchedError(err.message || 'Failed to clear unmatched questions.');
+    } finally {
+      setIsUnmatchedLoading(false);
+    }
+  };
+
 
   // --- ORDERS MANAGEMENT STATE & HANDLERS ---
   const [orders, setOrders] = useState<Order[]>([]);
@@ -57,7 +202,9 @@ export default function SellerHub({
   const fetchOrders = async () => {
     setIsOrdersLoading(true);
     try {
-      const res = await fetch('/api/get-orders');
+      const res = await fetch('/api/get-orders', {
+        headers: getAdminHeaders()
+      });
       if (res.ok) {
         const data = await res.json();
         if (Array.isArray(data)) {
@@ -71,27 +218,412 @@ export default function SellerHub({
     }
   };
 
+  const fetchFilaments = async () => {
+    setIsFilamentsLoading(true);
+    try {
+      const res = await fetch('/api/filaments');
+      if (res.ok) {
+        const data = await res.json();
+        setFilaments(data.filaments || []);
+      }
+    } catch (err) {
+      console.error('Failed to fetch filaments:', err);
+    } finally {
+      setIsFilamentsLoading(false);
+    }
+  };
+
+  const fetchAccessories = async () => {
+    setIsAccessoriesLoading(true);
+    try {
+      const res = await fetch('/api/accessories');
+      if (res.ok) {
+        const data = await res.json();
+        setAccessories(data.accessories || []);
+      }
+    } catch (err) {
+      console.error('Failed to fetch accessories:', err);
+    } finally {
+      setIsAccessoriesLoading(false);
+    }
+  };
+
+  const fetchHubSettings = async () => {
+    setIsSettingsLoading(true);
+    try {
+      const res = await fetch('/api/get-settings');
+      if (res.ok) {
+        const data = await res.json();
+        if (data.settings) setHubSettings(data.settings);
+      }
+    } catch (err) {
+      console.error('Failed to fetch settings:', err);
+    } finally {
+      setIsSettingsLoading(false);
+    }
+  };
+
+  const handleCreateSpool = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSpoolError('');
+    setSpoolSuccess('');
+    if (!spoolName.trim() || !spoolPrice) {
+      setSpoolError('Spool name and purchase price are required.');
+      return;
+    }
+    setIsCreatingSpool(true);
+    try {
+      const res = await fetch('/api/admin/filaments', {
+        method: 'POST',
+        headers: getAdminHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify({
+          name: spoolName.trim(),
+          type: spoolType,
+          color: spoolColor.trim() || null,
+          brand: spoolBrand.trim() || null,
+          spool_weight_grams: Number(spoolWeight),
+          purchase_price_bdt: Number(spoolPrice),
+          notes: spoolNotes.trim() || null
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to create spool.');
+      setSpoolSuccess(`Spool "${data.filament.name}" added successfully.`);
+      setSpoolName('');
+      setSpoolColor('');
+      setSpoolBrand('');
+      setSpoolPrice('');
+      setSpoolNotes('');
+      await fetchFilaments();
+    } catch (err: any) {
+      setSpoolError(err.message || 'Failed to create spool.');
+    } finally {
+      setIsCreatingSpool(false);
+    }
+  };
+
+  const handleMarkSpoolEmpty = async (spoolId: string) => {
+    try {
+      const res = await fetch(`/api/admin/filaments/${spoolId}`, {
+        method: 'PATCH',
+        headers: getAdminHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify({ is_empty: true })
+      });
+      if (res.ok) {
+        setFilaments(prev => prev.map(s => s.id === spoolId ? { ...s, is_empty: true, grams_remaining: 0 } : s));
+        alert("Spool marked as empty. Scoped products recalculated.");
+      }
+    } catch (err) {
+      console.error('Failed to mark spool empty:', err);
+    }
+  };
+
+  const handleDeleteSpool = async (spoolId: string) => {
+    if (!confirm("Delete this spool permanently? This will trigger floor price recalculation.")) return;
+    try {
+      const res = await fetch(`/api/admin/filaments/${spoolId}`, {
+        method: 'DELETE',
+        headers: getAdminHeaders()
+      });
+      if (res.ok) {
+        setFilaments(prev => prev.filter(s => s.id !== spoolId));
+        alert("Spool deleted successfully.");
+      }
+    } catch (err) {
+      console.error('Failed to delete spool:', err);
+    }
+  };
+
+  const handleSaveAccessory = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAccFormError('');
+    setAccFormSuccess('');
+    if (!accFormName.trim() || !accFormCost) {
+      setAccFormError('Accessory name and cost per unit are required.');
+      return;
+    }
+    setIsSavingAccessory(true);
+    try {
+      const res = await fetch('/api/admin/accessories', {
+        method: 'POST',
+        headers: getAdminHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify({
+          name: accFormName.trim(),
+          unit: accFormUnit,
+          cost_per_unit_bdt: Number(accFormCost),
+          stock_count: Number(accFormStock)
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to save accessory.');
+      setAccFormSuccess(`Accessory "${data.accessory.name}" saved!`);
+      setAccFormName('');
+      setAccFormCost('');
+      setAccFormStock('100');
+      await fetchAccessories();
+    } catch (err: any) {
+      setAccFormError(err.message || 'Failed to save accessory.');
+    } finally {
+      setIsSavingAccessory(false);
+    }
+  };
+
+  const handleSaveHubSettings = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSettingsError('');
+    setSettingsSuccess('');
+    setIsSavingSettings(true);
+    try {
+      const res = await fetch('/api/save-settings', {
+        method: 'POST',
+        headers: getAdminHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify(hubSettings)
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to save settings.');
+      setSettingsSuccess('Settings saved successfully!');
+      // Sync settings globally by triggering a lightweight page reload or status update
+      if (window.location) {
+        setTimeout(() => window.location.reload(), 1000);
+      }
+    } catch (err: any) {
+      setSettingsError(err.message || 'Failed to save settings.');
+    } finally {
+      setIsSavingSettings(false);
+    }
+  };
+
   useEffect(() => {
     if (activeSubTab === 'orders') {
       fetchOrders();
     }
-  }, [activeSubTab]);
+    if (activeSubTab === 'coupons') {
+      fetchCoupons();
+    }
+    if (activeSubTab === 'festivals') {
+      fetchFestivals();
+    }
+    if (activeSubTab === 'filaments' || activeSubTab === 'pricehealth' || activeSubTab === 'manual' || editingProduct) {
+      fetchFilaments();
+      fetchAccessories();
+    }
+    if (activeSubTab === 'settings') {
+      fetchHubSettings();
+    }
+    if (activeSubTab === 'support-logs') {
+      fetchUnmatchedQuestions();
+    }
+  }, [activeSubTab, editingProduct]);
 
-  const handleUpdateOrderStatus = async (orderId: string, nextStatus: 'Pending' | 'Paid' | 'Processing' | 'Shipped' | 'Completed') => {
-    const updated = orders.map(o => {
-      if (o.id === orderId) {
-        return { ...o, status: nextStatus };
-      }
-      return o;
-    });
+  // --- COUPON MANAGEMENT STATE & HANDLERS ---
+  const [coupons, setCoupons] = useState<Coupon[]>([]);
+  const [isCouponsLoading, setIsCouponsLoading] = useState(false);
+  const [couponFormCode, setCouponFormCode] = useState('');
+  const [couponFormType, setCouponFormType] = useState<'percent' | 'flat'>('percent');
+  const [couponFormValue, setCouponFormValue] = useState('');
+  const [couponFormMaxUses, setCouponFormMaxUses] = useState('');
+  const [couponFormValidUntil, setCouponFormValidUntil] = useState('');
+  const [couponFormCreatedBy, setCouponFormCreatedBy] = useState('');
+  const [couponFormError, setCouponFormError] = useState('');
+  const [couponFormSuccess, setCouponFormSuccess] = useState('');
+  const [isCreatingCoupon, setIsCreatingCoupon] = useState(false);
 
+  const fetchCoupons = async () => {
+    setIsCouponsLoading(true);
     try {
-      const res = await fetch('/api/save-orders', {
+      const res = await fetch('/api/admin/coupons', { headers: getAdminHeaders() });
+      if (res.ok) {
+        const data = await res.json();
+        setCoupons(data.coupons || []);
+      }
+    } catch (err) {
+      console.error('Failed to fetch coupons:', err);
+    } finally {
+      setIsCouponsLoading(false);
+    }
+  };
+
+  const handleCreateCoupon = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setCouponFormError('');
+    setCouponFormSuccess('');
+    if (!couponFormCode.trim() || !couponFormValue) {
+      setCouponFormError('Code and Value are required.');
+      return;
+    }
+    setIsCreatingCoupon(true);
+    try {
+      const res = await fetch('/api/admin/coupons', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updated)
+        headers: getAdminHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify({
+          code: couponFormCode.trim().toUpperCase(),
+          type: couponFormType,
+          value: Number(couponFormValue),
+          max_uses: couponFormMaxUses ? Number(couponFormMaxUses) : null,
+          valid_until: couponFormValidUntil || null,
+          created_by: couponFormCreatedBy.trim() || null
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to create coupon.');
+      setCouponFormSuccess(`Coupon "${data.coupon.code}" created!`);
+      setCouponFormCode('');
+      setCouponFormValue('');
+      setCouponFormMaxUses('');
+      setCouponFormValidUntil('');
+      setCouponFormCreatedBy('');
+      await fetchCoupons();
+    } catch (err: any) {
+      setCouponFormError(err.message || 'Failed to create coupon.');
+    } finally {
+      setIsCreatingCoupon(false);
+    }
+  };
+
+  const handleToggleCouponActive = async (coupon: Coupon) => {
+    try {
+      const res = await fetch(`/api/admin/coupons/${coupon.id}`, {
+        method: 'PATCH',
+        headers: getAdminHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify({ is_active: !coupon.is_active })
       });
       if (res.ok) {
+        setCoupons(prev => prev.map(c => c.id === coupon.id ? { ...c, is_active: !c.is_active } : c));
+      }
+    } catch (err) {
+      console.error('Failed to toggle coupon:', err);
+    }
+  };
+
+  const handleDeleteCoupon = async (coupon: Coupon) => {
+    if (!confirm(`Delete coupon "${coupon.code}"? This cannot be undone.`)) return;
+    try {
+      const res = await fetch(`/api/admin/coupons/${coupon.id}`, {
+        method: 'DELETE',
+        headers: getAdminHeaders()
+      });
+      if (res.ok) {
+        setCoupons(prev => prev.filter(c => c.id !== coupon.id));
+      }
+    } catch (err) {
+      console.error('Failed to delete coupon:', err);
+    }
+  };
+
+  // --- FESTIVAL DISCOUNT MANAGEMENT STATE & HANDLERS ---
+  const [festivals, setFestivals] = useState<any[]>([]);
+  const [isFestivalsLoading, setIsFestivalsLoading] = useState(false);
+  const [festFormName, setFestFormName] = useState('');
+  const [festFormPercent, setFestFormPercent] = useState('');
+  const [festFormCategory, setFestFormCategory] = useState('');
+  const [festFormStart, setFestFormStart] = useState('');
+  const [festFormEnd, setFestFormEnd] = useState('');
+  const [festFormError, setFestFormError] = useState('');
+  const [festFormSuccess, setFestFormSuccess] = useState('');
+  const [isCreatingFestival, setIsCreatingFestival] = useState(false);
+  const [festEditId, setFestEditId] = useState<string | null>(null);
+
+  const fetchFestivals = async () => {
+    setIsFestivalsLoading(true);
+    try {
+      const res = await fetch('/api/admin/festival-discounts', { headers: getAdminHeaders() });
+      if (res.ok) {
+        const data = await res.json();
+        setFestivals(data.festivals || []);
+      }
+    } catch (err) {
+      console.error('Failed to fetch festivals:', err);
+    } finally {
+      setIsFestivalsLoading(false);
+    }
+  };
+
+  const handleCreateFestival = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setFestFormError('');
+    setFestFormSuccess('');
+    if (!festFormName.trim() || !festFormPercent || !festFormStart || !festFormEnd) {
+      setFestFormError('Name, Percent, Start, and End are required.');
+      return;
+    }
+    setIsCreatingFestival(true);
+    try {
+      const url = festEditId
+        ? `/api/admin/festival-discounts/${festEditId}`
+        : '/api/admin/festival-discounts';
+      const method = festEditId ? 'PATCH' : 'POST';
+      const res = await fetch(url, {
+        method,
+        headers: getAdminHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify({
+          name: festFormName.trim(),
+          percent: Number(festFormPercent),
+          category: festFormCategory.trim() || null,
+          start_date: new Date(festFormStart).toISOString(),
+          end_date: new Date(festFormEnd).toISOString(),
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed.');
+      setFestFormSuccess(festEditId ? 'Festival updated!' : `Festival "${data.festival?.name || festFormName}" created!`);
+      setFestFormName(''); setFestFormPercent(''); setFestFormCategory('');
+      setFestFormStart(''); setFestFormEnd(''); setFestEditId(null);
+      await fetchFestivals();
+    } catch (err: any) {
+      setFestFormError(err.message);
+    } finally {
+      setIsCreatingFestival(false);
+    }
+  };
+
+  const handleToggleFestivalActive = async (fest: any) => {
+    try {
+      const res = await fetch(`/api/admin/festival-discounts/${fest.id}`, {
+        method: 'PATCH',
+        headers: getAdminHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify({ is_active: !fest.is_active })
+      });
+      if (res.ok) setFestivals(prev => prev.map(f => f.id === fest.id ? { ...f, is_active: !f.is_active } : f));
+    } catch (err) { console.error(err); }
+  };
+
+  const handleDeleteFestival = async (fest: any) => {
+    if (!confirm(`Delete "${fest.name}"? This cannot be undone.`)) return;
+    try {
+      const res = await fetch(`/api/admin/festival-discounts/${fest.id}`, {
+        method: 'DELETE',
+        headers: getAdminHeaders()
+      });
+      if (res.ok) setFestivals(prev => prev.filter(f => f.id !== fest.id));
+    } catch (err) { console.error(err); }
+  };
+
+  const handleEditFestival = (fest: any) => {
+    setFestEditId(fest.id);
+    setFestFormName(fest.name);
+    setFestFormPercent(String(fest.percent));
+    setFestFormCategory(fest.category || '');
+    setFestFormStart(fest.start_date ? new Date(fest.start_date).toISOString().slice(0,16) : '');
+    setFestFormEnd(fest.end_date ? new Date(fest.end_date).toISOString().slice(0,16) : '');
+    setFestFormError('');
+    setFestFormSuccess('');
+  };
+
+  const handleUpdateOrderStatus = async (orderId: string, nextStatus: 'Pending' | 'Paid' | 'Processing' | 'Shipped' | 'Completed') => {
+    try {
+      const res = await fetch('/api/update-order-status', {
+        method: 'POST',
+        headers: getAdminHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify({ orderId, status: nextStatus })
+      });
+      if (res.ok) {
+        const updated = orders.map(o => {
+          if (o.id === orderId) {
+            return { ...o, status: nextStatus };
+          }
+          return o;
+        });
         setOrders(updated);
       } else {
         alert("Failed to save updated order status.");
@@ -120,6 +652,7 @@ export default function SellerHub({
   // DND States
   const [draggedPreorderId, setDraggedPreorderId] = useState<string | null>(null);
   const [preorderDragOverId, setPreorderDragOverId] = useState<string | null>(null);
+  const [draggedCarouselIdx, setDraggedCarouselIdx] = useState<number | null>(null);
 
   const preorderFileInputRef = useRef<HTMLInputElement>(null);
 
@@ -170,6 +703,84 @@ export default function SellerHub({
 
     onUpdateProducts(nextProducts);
     setDraggedPreorderId(null);
+  };
+
+  // Carousel DND & Remix Handlers
+  const handleCarouselDragStart = (e: React.DragEvent, index: number) => {
+    setDraggedCarouselIdx(index);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleCarouselDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+  };
+
+  const handleCarouselDrop = (e: React.DragEvent, targetIndex: number) => {
+    e.preventDefault();
+    if (draggedCarouselIdx === null || draggedCarouselIdx === targetIndex) return;
+
+    // Get currently featured products
+    const featuredList = products
+      .filter(p => p.featured_carousel === true)
+      .sort((a, b) => {
+        const orderA = a.carousel_order !== undefined ? a.carousel_order : 999999;
+        const orderB = b.carousel_order !== undefined ? b.carousel_order : 999999;
+        if (orderA !== orderB) return orderA - orderB;
+        const timeA = a.updated_at ? new Date(a.updated_at).getTime() : 0;
+        const timeB = b.updated_at ? new Date(b.updated_at).getTime() : 0;
+        return timeB - timeA;
+      });
+
+    const reordered = [...featuredList];
+    const [draggedItem] = reordered.splice(draggedCarouselIdx, 1);
+    reordered.splice(targetIndex, 0, draggedItem);
+
+    // Map each item in the reordered list to its new index
+    const orderMap = new Map<string, number>();
+    reordered.forEach((item, idx) => {
+      orderMap.set(item.id, idx);
+    });
+
+    const nextProducts = products.map(p => {
+      if (p.featured_carousel) {
+        return {
+          ...p,
+          carousel_order: orderMap.get(p.id) ?? p.carousel_order ?? 0,
+          updated_at: new Date().toISOString()
+        };
+      }
+      return p;
+    });
+
+    onUpdateProducts(nextProducts);
+    setDraggedCarouselIdx(null);
+  };
+
+  const handleCarouselRemix = () => {
+    // Pick 8 random products from catalog
+    const allWithImages = products.filter(p => p.images && p.images.length > 0);
+    if (allWithImages.length === 0) {
+      alert("No products with images in catalog to remix.");
+      return;
+    }
+
+    // Shuffle and pick 8
+    const shuffled = [...allWithImages].sort(() => 0.5 - Math.random());
+    const countToSelect = Math.min(8, shuffled.length);
+    const selected = shuffled.slice(0, countToSelect);
+    const selectedIds = new Set(selected.map(p => p.id));
+
+    const nextProducts = products.map(p => {
+      const isFeatured = selectedIds.has(p.id);
+      return {
+        ...p,
+        featured_carousel: isFeatured,
+        carousel_order: isFeatured ? selected.findIndex(x => x.id === p.id) : 0,
+        updated_at: new Date().toISOString()
+      };
+    });
+
+    onUpdateProducts(nextProducts);
   };
 
   // Editing handlers
@@ -281,7 +892,7 @@ export default function SellerHub({
         try {
           const res = await fetch('/api/upload-image', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: getAdminHeaders({ 'Content-Type': 'application/json' }),
             body: JSON.stringify({
               fileName: `${Date.now()}_preorder_${file.name}`,
               base64Data
@@ -367,6 +978,8 @@ export default function SellerHub({
   const [newTitle, setNewTitle] = useState<string>('');
   const [newDesc, setNewDesc] = useState<string>('');
   const [newCategory, setNewCategory] = useState<string>('Desk Accessories');
+  const [showCustomCategoryInput, setShowCustomCategoryInput] = useState<boolean>(false);
+  const [customCategoryName, setCustomCategoryName] = useState<string>('');
   const [newPrice, setNewPrice] = useState<string>('19.99');
   const [selectedNewColors, setSelectedNewColors] = useState<string[]>(['Matte Slate', 'Chalk White']);
   const [selectedNewMaterials, setSelectedNewMaterials] = useState<string[]>(['PLA (Matte)']);
@@ -409,18 +1022,27 @@ Colors suited: Burnt Orange with Matte Slate eyes or Chalk White body.`);
     product?: Partial<Product>;
     images?: string[];
     selectedImages?: string[];
+    editTitle?: string;    // user-editable title override
     editPrice?: string;   // user-editable price override
     editTags?: string;    // user-editable tags (comma-separated)
+    editCategory?: string; // user-editable category override
+    selected?: boolean;   // user-selectable import status
     error?: string;
   }
   const [bulkUrlText, setBulkUrlText] = useState<string>('');
   const [bulkEntries, setBulkEntries] = useState<BulkUrlEntry[]>([]);
+  const [expandedRowIdx, setExpandedRowIdx] = useState<number | null>(null);
   const [isBulkRunning, setIsBulkRunning] = useState<boolean>(false);
   const [bulkCommitSuccess, setBulkCommitSuccess] = useState<boolean>(false);
 
-  // --- EDIT MODE STATE ---
-  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
-  const [editImageInput, setEditImageInput] = useState<string>('');
+  // Edit mode state and editRecipe moved to the top of SellerHub
+
+  const featuredCount = products.filter(p => {
+    if (editingProduct && p.id === editingProduct.id) {
+      return editingProduct.featured_carousel || false;
+    }
+    return p.featured_carousel || false;
+  }).length;
 
   // --- BULK EDIT STATE ---
   const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
@@ -454,7 +1076,7 @@ Colors suited: Burnt Orange with Matte Slate eyes or Chalk White body.`);
     try {
       const response = await fetch('/api/import-makerworld', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAdminHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({ rawText: makerworldPaste })
       });
       const data = await response.json();
@@ -487,7 +1109,7 @@ Colors suited: Burnt Orange with Matte Slate eyes or Chalk White body.`);
     try {
       const response = await fetch('/api/import-makerworld-by-url', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAdminHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({ url: makerworldUrl.trim() })
       });
       const data = await response.json();
@@ -532,7 +1154,7 @@ Colors suited: Burnt Orange with Matte Slate eyes or Chalk White body.`);
       title: cleanTitle,
       description: parsedAiProduct.description || 'Processed via MakerWorld AI.',
       category: (parsedAiProduct.category as any) || 'Desk Accessories',
-      price: parsedAiProduct.price || 19.99,
+      price: parsedAiProduct.price || 2000,
       colors: parsedAiProduct.colors || ['Chalk White', 'Matte Slate'],
       materials: parsedAiProduct.materials || ['PLA (Matte)'],
       rating: 5.0,
@@ -594,7 +1216,7 @@ Colors suited: Burnt Orange with Matte Slate eyes or Chalk White body.`);
       try {
         const response = await fetch('/api/upload-image', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: getAdminHeaders({ 'Content-Type': 'application/json' }),
           body: JSON.stringify({
             fileName: `${Date.now()}_${file.name}`,
             base64Data
@@ -640,12 +1262,81 @@ Colors suited: Burnt Orange with Matte Slate eyes or Chalk White body.`);
       return;
     }
 
+    const finalCategory = newCategory === "NEW_CATEGORY_TRIGGER" ? customCategoryName.trim() : newCategory;
+    if (newCategory === "NEW_CATEGORY_TRIGGER" && !finalCategory) {
+      alert("Please enter a custom category name.");
+      return;
+    }
+
+    // Build Material Recipe
+    let recipe: any = null;
+    let initialFloorPrice: number | undefined = undefined;
+    let initialNeedsReview = false;
+
+    if (newRecipeFilamentName) {
+      recipe = {
+        filament_name: newRecipeFilamentName,
+        filament_grams: parseFloat(newRecipeFilamentGrams) || 0,
+        print_hours: parseFloat(newRecipePrintHours) || 0,
+        has_uv_finish: newRecipeHasUvFinish
+      };
+      if (newRecipeHasUvFinish) {
+        recipe.resin_grams = parseFloat(newRecipeResinGrams) || 0;
+      }
+      if (newRecipeAccessories.length > 0) {
+        recipe.accessories = newRecipeAccessories;
+      }
+      if (newRecipeTargetMargin) {
+        recipe.target_margin = parseFloat(newRecipeTargetMargin);
+      }
+
+      // Cost floor calculation
+      const spoolsOfName = filaments.filter(s => s.name === newRecipeFilamentName && !s.is_empty);
+      let totalSpoolCost = 0;
+      let totalSpoolWeight = 0;
+      spoolsOfName.forEach(s => {
+        totalSpoolCost += s.purchase_price_bdt;
+        totalSpoolWeight += s.spool_weight_grams;
+      });
+      const filamentCostPerGram = totalSpoolWeight > 0 ? (totalSpoolCost / totalSpoolWeight) : 0;
+      
+      const resinAccessory = accessories.find(a => a.name === "UV Resin");
+      const resinCostPerGram = resinAccessory ? resinAccessory.cost_per_unit_bdt : 10;
+      
+      const accCosts: Record<string, number> = {};
+      accessories.forEach(a => {
+        accCosts[a.name] = a.cost_per_unit_bdt;
+      });
+      
+      const settingsObj = {
+        default_target_margin: parseFloat(hubSettings.default_target_margin) || 50,
+        electricity_cost_per_hour: parseFloat(hubSettings.electricity_cost_per_hour) || 3,
+        depreciation_cost_per_hour: parseFloat(hubSettings.depreciation_cost_per_hour) || 20,
+        packaging_cost_flat: parseFloat(hubSettings.packaging_cost_flat) || 40,
+        platform_fee_percent: parseFloat(hubSettings.platform_fee_percent) || 3
+      };
+      
+      try {
+        const calc = calculateFloorPrice(
+          recipe,
+          filamentCostPerGram,
+          resinCostPerGram,
+          accCosts,
+          settingsObj
+        );
+        initialFloorPrice = calc.floor_price_bdt;
+        initialNeedsReview = (Math.round(parseFloat(newPrice)) || 2000) < calc.floor_price_bdt;
+      } catch (err) {
+        console.error("Failed to calculate initial floor price:", err);
+      }
+    }
+
     const readyProduct: Product = {
       id: computedId,
       title: newTitle,
       description: newDesc || (newIsPreOrder ? 'Premium imported hardware pre-order slot.' : 'Handcrafted precision filament print optimized by Belvia team.'),
-      category: newCategory as any,
-      price: parseFloat(newPrice) || 19.99,
+      category: finalCategory,
+      price: Math.round(parseFloat(newPrice)) || 2000,
       colors: selectedNewColors.length ? selectedNewColors : ['Chalk White'],
       materials: selectedNewMaterials.length ? selectedNewMaterials : ['PLA (Matte)'],
       rating: 4.8,
@@ -659,11 +1350,18 @@ Colors suited: Burnt Orange with Matte Slate eyes or Chalk White body.`);
       isPreOrder: newIsPreOrder,
       estimatedArrival: newIsPreOrder ? newEstimatedArrival : undefined,
       depositPercentage: newIsPreOrder ? newDepositPercentage : undefined,
-      originalImportCountry: newIsPreOrder ? newOriginalImportCountry : undefined
+      originalImportCountry: newIsPreOrder ? newOriginalImportCountry : undefined,
+      material_recipe: recipe || undefined,
+      floor_price_bdt: initialFloorPrice,
+      needs_price_review: initialNeedsReview,
+      resin_enabled: newResinEnabled,
+      resin_price: newResinEnabled && newResinPrice ? Math.round(parseFloat(newResinPrice)) || 0 : null
     };
 
     onAddProduct(readyProduct);
     setManualSuccessMsg(true);
+    setShowCustomCategoryInput(false);
+    setCustomCategoryName('');
 
     // Reset Fields
     setNewTitle('');
@@ -675,6 +1373,18 @@ Colors suited: Burnt Orange with Matte Slate eyes or Chalk White body.`);
     setNewEstimatedArrival('Arriving June 26 via Air Cargo');
     setNewDepositPercentage(30);
     setNewOriginalImportCountry('Germany');
+    setNewResinEnabled(false);
+    setNewResinPrice('');
+    
+    // Reset Recipe Fields
+    setNewRecipeFilamentName('');
+    setNewRecipeFilamentGrams('');
+    setNewRecipeResinGrams('2');
+    setNewRecipeHasUvFinish(false);
+    setNewRecipeAccessories([]);
+    setNewRecipePrintHours('');
+    setNewRecipeTargetMargin('');
+    
     setTimeout(() => setManualSuccessMsg(false), 2000);
   };
 
@@ -717,7 +1427,7 @@ Colors suited: Burnt Orange with Matte Slate eyes or Chalk White body.`);
       try {
         const response = await fetch('/api/import-makerworld-by-url', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: getAdminHeaders({ 'Content-Type': 'application/json' }),
           body: JSON.stringify({ url })
         });
         const data = await response.json();
@@ -730,8 +1440,11 @@ Colors suited: Burnt Orange with Matte Slate eyes or Chalk White body.`);
                 product: data.product,
                 images: data.product.images || [],
                 selectedImages: data.product.images || [],
+                editTitle: data.product.title || '',
                 editPrice: String(data.product.price ?? ''),
-                editTags: Array.isArray(data.product.tags) ? data.product.tags.join(', ') : ''
+                editTags: Array.isArray(data.product.tags) ? data.product.tags.join(', ') : '',
+                editCategory: data.product.category || '',
+                selected: true
               }
             : e
           ));
@@ -770,24 +1483,36 @@ Colors suited: Burnt Orange with Matte Slate eyes or Chalk White body.`);
     setBulkEntries(prev => prev.map((e, i) => i === entryIdx ? { ...e, editTags: value } : e));
   };
 
+  const handleBulkEditCategory = (entryIdx: number, value: string) => {
+    setBulkEntries(prev => prev.map((e, i) => i === entryIdx ? { ...e, editCategory: value } : e));
+  };
+
+  const handleBulkEditTitle = (entryIdx: number, value: string) => {
+    setBulkEntries(prev => prev.map((e, i) => i === entryIdx ? { ...e, editTitle: value } : e));
+  };
+
   const handleBulkCommit = () => {
-    const readyEntries = bulkEntries.filter(e => e.status === 'success' && e.product);
-    if (readyEntries.length === 0) return;
+    const readyEntries = bulkEntries.filter(e => e.status === 'success' && e.product && e.selected !== false);
+    if (readyEntries.length === 0) {
+      alert('No selected products to commit.');
+      return;
+    }
 
     const existingIds = new Set(products.map(p => p.id));
     const toAdd: Product[] = [];
 
     for (const entry of readyEntries) {
       const p = entry.product!;
-      const cleanTitle = p.title?.split('|')[0].trim() || 'Bulk Import Product';
+      const rawTitle = entry.editTitle || p.title || 'Bulk Import Product';
+      const cleanTitle = rawTitle.split('|')[0].trim();
       const computedId = 'belvia-' + cleanTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-');
       if (existingIds.has(computedId)) continue;
       existingIds.add(computedId);
 
       // Use user-edited price if provided and valid, else fall back to scraped price
       const resolvedPrice = entry.editPrice && !isNaN(parseFloat(entry.editPrice))
-        ? parseFloat(parseFloat(entry.editPrice).toFixed(2))
-        : (p.price || 19.99);
+        ? Math.round(parseFloat(entry.editPrice))
+        : (p.price || 2000);
 
       // Parse user-edited tags
       const resolvedTags = entry.editTags
@@ -798,7 +1523,7 @@ Colors suited: Burnt Orange with Matte Slate eyes or Chalk White body.`);
         id: computedId,
         title: cleanTitle,
         description: p.description || 'Imported via Bulk MakerWorld URL.',
-        category: (p.category as any) || 'Desk Accessories',
+        category: entry.editCategory || p.category || 'Desk Accessories',
         price: resolvedPrice,
         colors: p.colors || ['Chalk White', 'Matte Slate'],
         materials: p.materials || ['PLA (Matte)'],
@@ -845,9 +1570,90 @@ Colors suited: Burnt Orange with Matte Slate eyes or Chalk White body.`);
     URL.revokeObjectURL(url);
   };
 
+  const getFilamentCostPerGram = (name: string): number => {
+    if (!name) return 0;
+    const spoolsOfName = filaments.filter(s => s.name === name && !s.is_empty);
+    let totalSpoolCost = 0;
+    let totalSpoolWeight = 0;
+    spoolsOfName.forEach(s => {
+      totalSpoolCost += s.purchase_price_bdt;
+      totalSpoolWeight += s.spool_weight_grams;
+    });
+    return totalSpoolWeight > 0 ? (totalSpoolCost / totalSpoolWeight) : 0;
+  };
+
+  const updateEditRecipeField = (field: string, value: any) => {
+    if (!editingProduct) return;
+    const currentRecipe = editingProduct.material_recipe || {
+      filament_name: '',
+      filament_grams: 0,
+      print_hours: 0,
+      has_uv_finish: false,
+      resin_grams: 2,
+      accessories: [],
+      target_margin: null
+    };
+    const nextRecipe = { ...currentRecipe, [field]: value };
+    setEditingProduct({
+      ...editingProduct,
+      material_recipe: nextRecipe
+    });
+  };
+
+  const toggleEditRecipeAccessory = (accName: string) => {
+    if (!editingProduct) return;
+    const currentRecipe = editingProduct.material_recipe || {
+      filament_name: '',
+      filament_grams: 0,
+      print_hours: 0,
+      has_uv_finish: false,
+      resin_grams: 2,
+      accessories: [],
+      target_margin: null
+    };
+    const currentAccs = currentRecipe.accessories || [];
+    const nextAccs = currentAccs.includes(accName)
+      ? currentAccs.filter(a => a !== accName)
+      : [...currentAccs, accName];
+    setEditingProduct({
+      ...editingProduct,
+      material_recipe: {
+        ...currentRecipe,
+        accessories: nextAccs
+      }
+    });
+  };
+
+  const handleUpdateToRecommended = (product: Product) => {
+    const recommendedPrice = product.floor_price_bdt || product.price;
+    const updated = products.map(p => p.id === product.id ? {
+      ...p,
+      price: recommendedPrice,
+      needs_price_review: false
+    } : p);
+    onUpdateProducts(updated);
+  };
+
+  const handleBulkUpdateToRecommended = () => {
+    const updated = products.map(p => {
+      if (p.needs_price_review && p.floor_price_bdt) {
+        return {
+          ...p,
+          price: p.floor_price_bdt,
+          needs_price_review: false
+        };
+      }
+      return p;
+    });
+    onUpdateProducts(updated);
+    alert("All flagged products updated to recommended prices!");
+  };
+
   // --- EDIT PRODUCT ACTIONS ---
   const handleStartEdit = (product: Product) => {
     setEditingProduct({ ...product });
+    setShowEditCustomCategoryInput(false);
+    setEditCustomCategoryName("");
   };
 
   const handleSaveEdit = () => {
@@ -857,9 +1663,70 @@ Colors suited: Burnt Orange with Matte Slate eyes or Chalk White body.`);
       return;
     }
 
-    const updated = products.map(p => p.id === editingProduct.id ? editingProduct : p);
+    const finalCategory = showEditCustomCategoryInput ? editCustomCategoryName.trim() : editingProduct.category;
+    if (showEditCustomCategoryInput && !finalCategory) {
+      alert("Please enter a custom category name.");
+      return;
+    }
+
+    let updatedProduct = {
+      ...editingProduct,
+      category: finalCategory,
+      resin_enabled: !!editingProduct.resin_enabled,
+      resin_price: editingProduct.resin_enabled && editingProduct.resin_price != null ? Math.round(Number(editingProduct.resin_price)) : null
+    };
+
+    const recipe = updatedProduct.material_recipe;
+    if (recipe && recipe.filament_name) {
+      const spoolsOfName = filaments.filter(s => s.name === recipe.filament_name && !s.is_empty);
+      let totalSpoolCost = 0;
+      let totalSpoolWeight = 0;
+      spoolsOfName.forEach(s => {
+        totalSpoolCost += s.purchase_price_bdt;
+        totalSpoolWeight += s.spool_weight_grams;
+      });
+      const filamentCostPerGram = totalSpoolWeight > 0 ? (totalSpoolCost / totalSpoolWeight) : 0;
+      
+      const resinAccessory = accessories.find(a => a.name === "UV Resin");
+      const resinCostPerGram = resinAccessory ? resinAccessory.cost_per_unit_bdt : 10;
+      
+      const accCosts: Record<string, number> = {};
+      accessories.forEach(a => {
+        accCosts[a.name] = a.cost_per_unit_bdt;
+      });
+      
+      const settingsObj = {
+        default_target_margin: parseFloat(hubSettings.default_target_margin) || 50,
+        electricity_cost_per_hour: parseFloat(hubSettings.electricity_cost_per_hour) || 3,
+        depreciation_cost_per_hour: parseFloat(hubSettings.depreciation_cost_per_hour) || 20,
+        packaging_cost_flat: parseFloat(hubSettings.packaging_cost_flat) || 40,
+        platform_fee_percent: parseFloat(hubSettings.platform_fee_percent) || 3
+      };
+      
+      try {
+        const calc = calculateFloorPrice(
+          recipe,
+          filamentCostPerGram,
+          resinCostPerGram,
+          accCosts,
+          settingsObj
+        );
+        updatedProduct.floor_price_bdt = calc.floor_price_bdt;
+        updatedProduct.needs_price_review = updatedProduct.price < calc.floor_price_bdt;
+      } catch (err) {
+        console.error("Failed to calculate floor price during edit save:", err);
+      }
+    } else {
+      // If recipe is removed or not set, clear floor price metrics
+      updatedProduct.floor_price_bdt = undefined;
+      updatedProduct.needs_price_review = false;
+    }
+
+    const updated = products.map(p => p.id === editingProduct.id ? updatedProduct : p);
     onUpdateProducts(updated);
     setEditingProduct(null);
+    setShowEditCustomCategoryInput(false);
+    setEditCustomCategoryName("");
   };
 
   const handleAddEditImage = () => {
@@ -932,9 +1799,9 @@ Colors suited: Burnt Orange with Matte Slate eyes or Chalk White body.`);
           if (bulkPriceAction === 'flat') {
             price = val;
           } else if (bulkPriceAction === 'percent_increase') {
-            price = parseFloat((p.price * (1 + val / 100)).toFixed(2));
+            price = Math.round(p.price * (1 + val / 100));
           } else if (bulkPriceAction === 'percent_decrease') {
-            price = parseFloat((p.price * (1 - val / 100)).toFixed(2));
+            price = Math.round(p.price * (1 - val / 100));
           }
         }
 
@@ -1057,14 +1924,21 @@ Colors suited: Burnt Orange with Matte Slate eyes or Chalk White body.`);
         </div>
 
         {/* Workspace Subtabs */}
-        <div className="flex bg-bg-surface border border-border-premium rounded-xl p-1 mb-8 max-w-5xl overflow-x-auto">
+        <div className="grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-6 bg-bg-surface border border-border-premium rounded-xl p-1.5 gap-1.5 mb-8 max-w-5xl mx-auto">
           {[
             { id: 'ai', name: 'MakerWorld AI Agent', icon: Sparkles },
             { id: 'bulk', name: 'Bulk URL Import', icon: Link2 },
             { id: 'manual', name: 'Drag & Drop Manual', icon: PlusCircle },
             { id: 'inventory', name: 'Active Inventory Catalog', icon: Grid },
+            { id: 'carousel', name: 'Hero Carousel', icon: Star },
             { id: 'orders', name: 'Manage Orders & Payments', icon: ListChecks },
-            { id: 'preorders', name: 'Manage Pre-Orders', icon: Calendar }
+            { id: 'preorders', name: 'Manage Pre-Orders', icon: Calendar },
+            { id: 'coupons', name: 'Coupon Manager', icon: Tag },
+            { id: 'festivals', name: 'Festival Discounts', icon: Sparkles },
+            { id: 'filaments', name: 'Filaments & Stock', icon: Layers },
+            { id: 'pricehealth', name: 'Price Health', icon: AlertTriangle },
+            { id: 'settings', name: 'Store Settings', icon: Settings },
+            { id: 'support-logs', name: 'Chat Support Logs', icon: MessageSquare }
           ].map((tab) => {
             const Icon = tab.icon;
             return (
@@ -1075,10 +1949,10 @@ Colors suited: Burnt Orange with Matte Slate eyes or Chalk White body.`);
                   setActiveSubTab(tab.id as any);
                   setEditingProduct(null); // Clear editing product on tab switch
                 }}
-                className={`flex-1 flex items-center justify-center space-x-2 py-2.5 px-1.5 rounded-lg text-xs font-medium cursor-pointer transition ${
+                className={`w-full flex items-center justify-center space-x-2 py-2.5 px-2 sm:px-3 rounded-lg text-xs font-medium cursor-pointer transition-all duration-200 border ${
                   activeSubTab === tab.id && !editingProduct
-                    ? 'bg-accent-secondary text-white font-bold'
-                    : 'text-text-secondary hover:text-text-primary hover:bg-bg-elevated/45'
+                    ? 'bg-accent-secondary text-white font-bold border-white/5 shadow-sm shadow-accent-secondary/10'
+                    : 'text-text-secondary hover:text-text-primary hover:bg-bg-elevated/45 border-transparent'
                 }`}
               >
                 <Icon className="w-4 h-4" />
@@ -1200,9 +2074,14 @@ Colors suited: Burnt Orange with Matte Slate eyes or Chalk White body.`);
                       <span className="text-text-secondary text-right font-bold text-accent">[Auto-Assign SKU]</span>
                     </div>
 
-                    <div className="border-b border-border-premium pb-2 flex justify-between text-left items-start">
+                    <div className="border-b border-border-premium pb-2 flex justify-between text-left items-center gap-3">
                       <span className="text-text-secondary shrink-0 w-20">TITLE:</span>
-                      <span className="text-text-primary text-right font-sans font-bold">{parsedAiProduct.title}</span>
+                      <input
+                        type="text"
+                        value={parsedAiProduct.title || ''}
+                        onChange={(e) => setParsedAiProduct(prev => prev ? { ...prev, title: e.target.value } : null)}
+                        className="bg-bg-base text-text-primary border border-border-premium rounded-xl py-1.5 px-3 text-xs w-full font-sans focus:border-accent focus:outline-none text-right font-bold"
+                      />
                     </div>
 
                     <div className="border-b border-border-premium pb-2 flex justify-between items-start">
@@ -1217,7 +2096,7 @@ Colors suited: Burnt Orange with Matte Slate eyes or Chalk White body.`);
 
                     <div className="border-b border-border-premium pb-2 flex justify-between">
                       <span className="text-text-secondary">SUGGESTED MSRP:</span>
-                      <span className="text-accent font-bold">${parsedAiProduct.price?.toFixed(2)}</span>
+                      <span className="text-accent font-bold">{formatPrice(parsedAiProduct.price || 0)}</span>
                     </div>
 
                     <div className="border-b border-border-premium pb-2 flex justify-between items-start">
@@ -1391,127 +2270,227 @@ Colors suited: Burnt Orange with Matte Slate eyes or Chalk White body.`);
                       <button
                         id="btn-bulk-commit"
                         onClick={handleBulkCommit}
-                        className="px-4.5 py-2 rounded-xl bg-accent-secondary hover:bg-accent text-white font-bold text-xs cursor-pointer transition shadow"
+                        className="px-4.5 py-2 rounded-xl bg-accent-secondary hover:bg-accent text-white font-bold text-xs cursor-pointer transition shadow animate-pulse"
                       >
-                        Add {bulkEntries.filter(e => e.status === 'success').length} to Catalog
+                        Save All Selected ({bulkEntries.filter(e => e.status === 'success' && e.selected !== false).length})
                       </button>
                     )
                   )}
                 </div>
 
-                {/* Per-URL entries */}
-                <div className="space-y-3 max-h-[70vh] overflow-y-auto pr-1">
-                  {bulkEntries.map((entry, idx) => (
-                    <div
-                      key={idx}
-                      className={`rounded-xl border p-4 space-y-3 transition ${
-                        entry.status === 'success' ? 'border-emerald-500/30 bg-emerald-500/5'
-                        : entry.status === 'error' ? 'border-red-500/30 bg-red-500/5'
-                        : entry.status === 'duplicate' ? 'border-amber-500/30 bg-amber-500/5'
-                        : entry.status === 'loading' ? 'border-blue-500/30 bg-blue-500/5'
-                        : 'border-border-premium bg-bg-base'
-                      }`}
-                    >
-                      {/* URL row + status icon */}
-                      <div className="flex items-start justify-between gap-3">
-                        <span className="font-mono text-[10px] text-text-secondary break-all leading-relaxed flex-1">
-                          {entry.url}
-                        </span>
-                        <div className="shrink-0 mt-0.5">
-                          {entry.status === 'loading' && <Loader2 className="w-4 h-4 text-blue-400 animate-spin" />}
-                          {entry.status === 'success' && <CircleCheck className="w-4 h-4 text-emerald-400" />}
-                          {entry.status === 'error' && <CircleX className="w-4 h-4 text-red-400" />}
-                          {entry.status === 'duplicate' && <AlertTriangle className="w-4 h-4 text-amber-400" />}
-                          {entry.status === 'pending' && <div className="w-4 h-4 rounded-full border border-border-premium" />}
-                        </div>
-                      </div>
+                {/* Per-URL entries review table */}
+                <div className="overflow-x-auto border border-border-premium rounded-xl bg-bg-surface/30 max-h-[70vh] overflow-y-auto">
+                  <table className="w-full text-left border-collapse font-sans text-xs">
+                    <thead>
+                      <tr className="border-b border-border-premium bg-bg-base font-mono text-[10px] text-text-secondary uppercase tracking-widest">
+                        <th className="py-3 px-4 w-[5%] text-center">
+                          <input
+                            type="checkbox"
+                            checked={bulkEntries.filter(e => e.status === 'success').length > 0 && bulkEntries.filter(e => e.status === 'success' && e.selected !== false).length === bulkEntries.filter(e => e.status === 'success').length}
+                            onChange={(e) => {
+                              const checked = e.target.checked;
+                              setBulkEntries(prev => prev.map(entry => entry.status === 'success' ? { ...entry, selected: checked } : entry));
+                            }}
+                            className="rounded border-border-premium text-accent focus:ring-accent accent-accent cursor-pointer"
+                          />
+                        </th>
+                        <th className="py-3 px-3 w-[8%] text-center">Preview</th>
+                        <th className="py-3 px-3 w-[30%]">Title</th>
+                        <th className="py-3 px-3 w-[22%]">Category</th>
+                        <th className="py-3 px-3 w-[15%]">Price (BDT)</th>
+                        <th className="py-3 px-3 w-[10%] text-center">Status</th>
+                        <th className="py-3 px-3 w-[10%] text-center">Config</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border-premium/50 bg-bg-surface/10">
+                      {bulkEntries.map((entry, idx) => {
+                        const mainImg = (entry.selectedImages && entry.selectedImages[0]) || (entry.images && entry.images[0]) || '';
+                        const isSuccess = entry.status === 'success';
+                        const isExpanded = expandedRowIdx === idx;
 
-                      {/* Error / duplicate message */}
-                      {(entry.status === 'error' || entry.status === 'duplicate') && entry.error && (
-                        <p className="text-[10px] font-mono text-red-400/80">{entry.error}</p>
-                      )}
+                        return (
+                          <React.Fragment key={idx}>
+                            <tr className={`hover:bg-bg-elevated/20 transition ${
+                              entry.status === 'success' ? 'text-text-primary'
+                              : entry.status === 'error' ? 'text-red-400'
+                              : entry.status === 'duplicate' ? 'text-amber-400' : 'text-text-secondary'
+                            }`}>
+                              {/* Checkbox Column */}
+                              <td className="py-3.5 px-4 text-center">
+                                {isSuccess ? (
+                                  <input
+                                    type="checkbox"
+                                    checked={entry.selected !== false}
+                                    onChange={(e) => {
+                                      const checked = e.target.checked;
+                                      setBulkEntries(prev => prev.map((eVal, i) => i === idx ? { ...eVal, selected: checked } : eVal));
+                                    }}
+                                    className="rounded border-border-premium text-accent focus:ring-accent accent-accent cursor-pointer"
+                                  />
+                                ) : (
+                                  <span className="text-text-muted/40 font-mono">-</span>
+                                )}
+                              </td>
 
-                      {/* Success: product summary + inline edit + image picker */}
-                      {entry.status === 'success' && entry.product && (
-                        <div className="space-y-3">
-                          {/* Info grid */}
-                          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 font-mono text-[10px]">
-                            <div className="col-span-2 sm:col-span-1">
-                              <span className="text-text-secondary block">TITLE</span>
-                              <span className="text-text-primary font-bold font-sans text-xs leading-tight">{entry.product.title?.split('|')[0].trim()}</span>
-                            </div>
-                            <div>
-                              <span className="text-text-secondary block">CATEGORY</span>
-                              <span className="text-accent font-bold">{entry.product.category}</span>
-                            </div>
-                            <div>
-                              <span className="text-text-secondary block">WEIGHT</span>
-                              <span className="text-text-primary font-bold">{entry.product.weightGrams}g</span>
-                            </div>
-                          </div>
+                              {/* Preview Thumbnail Column */}
+                              <td className="py-2 px-3 text-center">
+                                <div className="w-10 h-10 rounded border border-border-premium overflow-hidden bg-bg-base mx-auto">
+                                  {mainImg ? (
+                                    <img src={mainImg} alt="" className="w-full h-full object-cover" />
+                                  ) : (
+                                    <Layers className="w-5 h-5 text-text-muted/30 m-auto mt-2.5" />
+                                  )}
+                                </div>
+                              </td>
 
-                          {/* Editable price + tags */}
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                            <div>
-                              <label className="block text-[10px] font-mono text-text-secondary uppercase tracking-widest mb-1">Price (USD)</label>
-                              <div className="relative">
-                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-accent font-bold text-xs">$</span>
-                                <input
-                                  type="number"
-                                  step="0.01"
-                                  min="0"
-                                  value={entry.editPrice ?? ''}
-                                  onChange={(e) => handleBulkEditPrice(idx, e.target.value)}
-                                  className="w-full bg-bg-base text-text-primary border border-border-premium rounded-lg py-2 pl-6 pr-3 text-xs font-mono focus:border-accent focus:outline-none"
-                                />
-                              </div>
-                            </div>
-                            <div>
-                              <label className="block text-[10px] font-mono text-text-secondary uppercase tracking-widest mb-1">Tags (comma-separated)</label>
-                              <input
-                                type="text"
-                                value={entry.editTags ?? ''}
-                                onChange={(e) => handleBulkEditTags(idx, e.target.value)}
-                                placeholder="e.g. flexi, articulated, cat"
-                                className="w-full bg-bg-base text-text-primary border border-border-premium rounded-lg py-2 px-3 text-xs font-mono focus:border-accent focus:outline-none"
-                              />
-                            </div>
-                          </div>
+                              {/* Title Column */}
+                              <td className="py-2 px-3">
+                                {isSuccess ? (
+                                  <input
+                                    type="text"
+                                    value={entry.editTitle ?? ''}
+                                    onChange={(e) => handleBulkEditTitle(idx, e.target.value)}
+                                    className="w-full bg-bg-base text-text-primary border border-border-premium rounded-lg py-1.5 px-2.5 text-xs font-sans focus:border-accent focus:outline-none"
+                                  />
+                                ) : (
+                                  <div className="font-mono text-[10px] truncate max-w-[280px]" title={entry.url}>
+                                    {entry.url}
+                                  </div>
+                                )}
+                              </td>
 
-                          {/* Image selector */}
-                          {entry.images && entry.images.length > 0 && (
-                            <div className="space-y-1.5">
-                              <span className="text-[10px] font-mono text-text-secondary uppercase tracking-widest">
-                                Select Images ({(entry.selectedImages || []).length}/{entry.images.length} selected):
-                              </span>
-                              <div className="flex flex-wrap gap-2">
-                                {entry.images.map((img, imgIdx) => {
-                                  const isSelected = (entry.selectedImages || []).includes(img);
-                                  return (
-                                    <div
-                                      key={imgIdx}
-                                      onClick={() => handleBulkToggleImage(idx, img)}
-                                      className={`w-14 h-14 rounded-lg overflow-hidden border-2 cursor-pointer transition relative group ${
-                                        isSelected ? 'border-accent ring-1 ring-accent' : 'border-border-premium hover:border-gray-500'
-                                      }`}
-                                    >
-                                      <img src={img} alt="" className="w-full h-full object-cover" />
-                                      <div className={`absolute inset-0 bg-accent/25 flex items-center justify-center transition ${
-                                        isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-50'
-                                      }`}>
-                                        <Check className="w-4 h-4 text-white" />
+                              {/* Category Column */}
+                              <td className="py-2 px-3">
+                                {isSuccess ? (
+                                  <select
+                                    value={entry.editCategory || entry.product?.category || ''}
+                                    onChange={(e) => handleBulkEditCategory(idx, e.target.value)}
+                                    className="w-full bg-bg-base text-text-primary border border-border-premium rounded-lg py-1.5 px-2.5 text-xs font-sans focus:border-accent focus:outline-none cursor-pointer"
+                                  >
+                                    {categories.map((c) => (
+                                      <option key={c.name} value={c.name}>{c.name}</option>
+                                    ))}
+                                  </select>
+                                ) : (
+                                  <span className="text-text-muted/40 font-mono">-</span>
+                                )}
+                              </td>
+
+                              {/* Price Column */}
+                              <td className="py-2 px-3">
+                                {isSuccess ? (
+                                  <div className="relative">
+                                    <span className="absolute left-2 top-1/2 -translate-y-1/2 text-accent font-bold text-xs">a</span>
+                                    <input
+                                      type="number"
+                                      step="1"
+                                      min="0"
+                                      value={entry.editPrice ?? ''}
+                                      onChange={(e) => handleBulkEditPrice(idx, e.target.value)}
+                                      className="w-full bg-bg-base text-text-primary border border-border-premium rounded-lg py-1.5 pl-5 pr-2 text-xs font-mono focus:border-accent focus:outline-none"
+                                    />
+                                  </div>
+                                ) : (
+                                  <span className="text-text-muted/40 font-mono">-</span>
+                                )}
+                              </td>
+
+                              {/* Status Column */}
+                              <td className="py-2 px-3 text-center">
+                                <div className="flex items-center justify-center">
+                                  {entry.status === 'loading' && <Loader2 className="w-4.5 h-4.5 text-blue-400 animate-spin" />}
+                                  {entry.status === 'success' && <CircleCheck className="w-4.5 h-4.5 text-emerald-400" title="Ready to import" />}
+                                  {entry.status === 'error' && <CircleX className="w-4.5 h-4.5 text-red-400" title={entry.error} />}
+                                  {entry.status === 'duplicate' && <AlertTriangle className="w-4.5 h-4.5 text-amber-400" title={entry.error} />}
+                                  {entry.status === 'pending' && <div className="w-4.5 h-4.5 rounded-full border border-border-premium" />}
+                                </div>
+                              </td>
+
+                              {/* Config Actions Column */}
+                              <td className="py-2 px-3 text-center">
+                                {isSuccess ? (
+                                  <button
+                                    onClick={() => setExpandedRowIdx(isExpanded ? null : idx)}
+                                    className={`px-2.5 py-1 rounded-md text-[10px] font-mono border transition cursor-pointer ${
+                                      isExpanded
+                                        ? 'bg-accent/15 border-accent text-accent font-bold'
+                                        : 'bg-bg-elevated border-border-premium text-text-secondary hover:border-gray-500 hover:text-text-primary'
+                                    }`}
+                                  >
+                                    {isExpanded ? 'Hide' : 'Media/Tags'}
+                                  </button>
+                                ) : (
+                                  <span className="text-text-muted/40 font-mono">-</span>
+                                )}
+                              </td>
+                            </tr>
+
+                            {/* Error messages row if failed */}
+                            {(entry.status === 'error' || entry.status === 'duplicate') && entry.error && (
+                              <tr className="bg-red-500/5">
+                                <td colSpan={7} className="py-2 px-4 border-b border-border-premium/20">
+                                  <p className="text-[10px] font-mono text-red-400/80 leading-relaxed">
+                                    Gn+ Scraper Error: {entry.error}
+                                  </p>
+                                </td>
+                              </tr>
+                            )}
+
+                            {/* Expanded Details Row (Tags and Image Selectors) */}
+                            {isSuccess && isExpanded && (
+                              <tr className="bg-bg-base/30 border-b border-border-premium/50 animate-fade-in">
+                                <td colSpan={7} className="p-4 space-y-4">
+                                  <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+                                    {/* Tags block */}
+                                    <div className="md:col-span-4 space-y-1.5 text-left">
+                                      <label className="block text-[10px] font-mono text-text-secondary uppercase tracking-widest">
+                                        Tags (comma-separated):
+                                      </label>
+                                      <input
+                                        type="text"
+                                        value={entry.editTags ?? ''}
+                                        onChange={(e) => handleBulkEditTags(idx, e.target.value)}
+                                        placeholder="e.g. flexi, articulated, cat"
+                                        className="w-full bg-bg-base text-text-primary border border-border-premium rounded-lg py-2 px-3 text-xs font-mono focus:border-accent focus:outline-none"
+                                      />
+                                    </div>
+
+                                    {/* Images block */}
+                                    <div className="md:col-span-8 space-y-2 text-left">
+                                      <span className="text-[10px] font-mono text-text-secondary uppercase tracking-widest block">
+                                        Select Gallery Showcase Images ({(entry.selectedImages || []).length}/{(entry.images || []).length} selected):
+                                      </span>
+                                      <div className="flex flex-wrap gap-2">
+                                        {(entry.images || []).map((img, imgIdx) => {
+                                          const isSelected = (entry.selectedImages || []).includes(img);
+                                          return (
+                                            <div
+                                              key={imgIdx}
+                                              onClick={() => handleBulkToggleImage(idx, img)}
+                                              className={`w-12 h-12 rounded-lg overflow-hidden border-2 cursor-pointer transition relative group ${
+                                                isSelected ? 'border-accent ring-1 ring-accent' : 'border-border-premium hover:border-gray-500'
+                                              }`}
+                                            >
+                                              <img src={img} alt="" className="w-full h-full object-cover" />
+                                              <div className={`absolute inset-0 bg-accent/25 flex items-center justify-center transition ${
+                                                isSelected ? 'opacity-100' : 'opacity-0 group-hover:opacity-50'
+                                              }`}>
+                                                <Check className="w-4 h-4 text-white" />
+                                              </div>
+                                            </div>
+                                          );
+                                        })}
                                       </div>
                                     </div>
-                                  );
-                                })}
-                              </div>
-                            </div>
-                          )}
-
-                        </div>
-                      )}
-                    </div>
-                  ))}
+                                  </div>
+                                </td>
+                              </tr>
+                            )}
+                          </React.Fragment>
+                        );
+                      })}
+                    </tbody>
+                  </table>
                 </div>
               </div>
             )}
@@ -1546,16 +2525,20 @@ Colors suited: Burnt Orange with Matte Slate eyes or Chalk White body.`);
 
                   <div>
                     <label className="block text-[10px] font-mono text-text-secondary uppercase tracking-widest mb-1">
-                      MSRP Selling Price ($ USD):
+                      MSRP Selling Price (BDT):
                     </label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      required
-                      value={newPrice}
-                      onChange={(e) => setNewPrice(e.target.value)}
-                      className="w-full bg-bg-base text-text-primary border border-border-premium rounded-xl py-2.5 px-3.5 text-xs focus:border-accent font-mono font-bold"
-                    />
+                    <div className="relative">
+                      <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-accent font-bold text-xs">a</span>
+                      <input
+                        type="number"
+                        step="1"
+                        placeholder="1200"
+                        required
+                        value={newPrice}
+                        onChange={(e) => setNewPrice(e.target.value)}
+                        className="w-full bg-bg-base text-text-primary border border-border-premium rounded-xl py-2.5 pl-8 pr-3.5 text-xs focus:border-accent font-mono font-bold"
+                      />
+                    </div>
                   </div>
                 </div>
 
@@ -1566,21 +2549,32 @@ Colors suited: Burnt Orange with Matte Slate eyes or Chalk White body.`);
                     </label>
                     <select
                       value={newCategory}
-                      onChange={(e) => setNewCategory(e.target.value)}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setNewCategory(val);
+                        if (val === "NEW_CATEGORY_TRIGGER") {
+                          setShowCustomCategoryInput(true);
+                        } else {
+                          setShowCustomCategoryInput(false);
+                        }
+                      }}
                       className="w-full bg-bg-base text-text-primary border border-border-premium rounded-xl py-2.5 px-3 text-xs focus:border-accent cursor-pointer"
                     >
-                      <option value="Keychains">Keychains</option>
-                      <option value="Home Decor">Home Decor</option>
-                      <option value="Desk Accessories">Desk Accessories</option>
-                      <option value="Gaming Accessories">Gaming Accessories</option>
-                      <option value="Figures & Collectibles">Figures &amp; Collectibles</option>
-                      <option value="Business Merchandise">Business Merchandise</option>
-                      <option value="Custom Orders">Custom Orders</option>
-                      <option value="Functional Prints">Functional Prints</option>
-                      <option value="Imported Goods">Imported Goods</option>
-                      <option value="A1 Mini Mods">A1 Mini Mods</option>
-                      <option value="Hotends">Hotends</option>
+                      {categories.map((c) => (
+                        <option key={c.name} value={c.name}>{c.name}</option>
+                      ))}
+                      <option value="NEW_CATEGORY_TRIGGER">Add new category...</option>
                     </select>
+                    {showCustomCategoryInput && (
+                      <input
+                        type="text"
+                        placeholder="Enter custom category..."
+                        required
+                        value={customCategoryName}
+                        onChange={(e) => setCustomCategoryName(e.target.value)}
+                        className="w-full bg-bg-base text-text-primary border border-accent rounded-xl py-2 px-3 mt-2 text-xs focus:outline-none font-mono"
+                      />
+                    )}
                   </div>
 
                   <div>
@@ -1683,6 +2677,37 @@ Colors suited: Burnt Orange with Matte Slate eyes or Chalk White body.`);
                   )}
                 </div>
 
+                {/* Resin Add-on Configuration Toggle */}
+                <div className="space-y-3 bg-bg-surface/50 border border-border-premium rounded-xl p-4">
+                  <label className="flex items-center space-x-2.5 text-xs text-text-primary font-bold cursor-pointer">
+                    <input 
+                      type="checkbox"
+                      checked={newResinEnabled}
+                      onChange={(e) => setNewResinEnabled(e.target.checked)}
+                      className="rounded border-border-premium text-accent focus:ring-accent accent-accent"
+                    />
+                    <span>Enable Resin Add-on?</span>
+                  </label>
+
+                  {newResinEnabled && (
+                    <div className="pt-2 border-t border-border-premium/50 animate-fade-in font-mono text-xs">
+                      <div>
+                        <label className="block text-[9px] text-text-secondary uppercase mb-1">Resin Surcharge Price (BDT):</label>
+                        <input 
+                          type="number"
+                          step="1"
+                          required
+                          min="0"
+                          value={newResinPrice}
+                          onChange={(e) => setNewResinPrice(e.target.value)}
+                          placeholder="e.g. 250"
+                          className="w-full bg-bg-base text-text-primary border border-border-premium rounded-lg p-2 text-xs"
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+
                 {/* Materials Checker */}
                 <div className="space-y-1">
                   <label className="block text-[10px] font-mono text-text-secondary uppercase tracking-widest">
@@ -1776,6 +2801,208 @@ Colors suited: Burnt Orange with Matte Slate eyes or Chalk White body.`);
                     placeholder="Sourced directly from certified STL file parameters. Fully waterproof and solid design..."
                     className="w-full bg-bg-base text-text-primary border border-border-premium rounded-xl py-2 px-3 text-xs focus:border-accent resize-none font-sans"
                   />
+                </div>
+
+                {/* --- MATERIAL RECIPE SECTION --- */}
+                <div className="space-y-4 bg-bg-surface/50 border border-border-premium rounded-xl p-4.5">
+                  <div className="flex items-center space-x-2 text-accent font-bold text-xs uppercase tracking-wider">
+                    <BrainCircuit className="w-4 h-4" />
+                    <span>Material Cost Recipe (Optional Floor Pricing)</span>
+                  </div>
+                  
+                  <p className="text-text-secondary text-[11px] leading-relaxed">
+                    Set a material recipe to automatically calculate the recommended floor price based on filament, resin, and accessories.
+                  </p>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-[9px] font-mono text-text-secondary uppercase tracking-widest mb-1">
+                        Select Filament Spool:
+                      </label>
+                      <select
+                        value={newRecipeFilamentName}
+                        onChange={(e) => setNewRecipeFilamentName(e.target.value)}
+                        className="w-full bg-bg-base text-text-primary border border-border-premium rounded-xl py-2 px-3 text-xs focus:border-accent cursor-pointer"
+                      >
+                        <option value="">-- No Filament (Manual Price Only) --</option>
+                        {Array.from(new Set(filaments.map(f => f.name))).map(name => (
+                          <option key={name} value={name}>{name}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {newRecipeFilamentName && (
+                      <div>
+                        <label className="block text-[9px] font-mono text-text-secondary uppercase tracking-widest mb-1">
+                          Filament Print Weight (Grams):
+                        </label>
+                        <input
+                          type="number"
+                          step="any"
+                          required
+                          value={newRecipeFilamentGrams}
+                          onChange={(e) => setNewRecipeFilamentGrams(e.target.value)}
+                          placeholder="e.g. 45"
+                          className="w-full bg-bg-base text-text-primary border border-border-premium rounded-xl py-2 px-3 text-xs focus:border-accent font-mono"
+                        />
+                      </div>
+                    )}
+                  </div>
+
+                  {newRecipeFilamentName && (
+                    <>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-[9px] font-mono text-text-secondary uppercase tracking-widest mb-1">
+                            Print Time (Decimal Hours):
+                          </label>
+                          <input
+                            type="number"
+                            step="0.1"
+                            required
+                            value={newRecipePrintHours}
+                            onChange={(e) => setNewRecipePrintHours(e.target.value)}
+                            placeholder="e.g. 3.5"
+                            className="w-full bg-bg-base text-text-primary border border-border-premium rounded-xl py-2 px-3 text-xs focus:border-accent font-mono"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-[9px] font-mono text-text-secondary uppercase tracking-widest mb-1">
+                            Target Margin % (Optional Override):
+                          </label>
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="number"
+                              min="0"
+                              max="99"
+                              value={newRecipeTargetMargin}
+                              onChange={(e) => setNewRecipeTargetMargin(e.target.value)}
+                              placeholder={`Default: ${hubSettings.default_target_margin || '50'}%`}
+                              className="w-full bg-bg-base text-text-primary border border-border-premium rounded-xl py-2 px-3 text-xs focus:border-accent font-mono"
+                            />
+                            {newRecipeTargetMargin && (
+                              <button
+                                type="button"
+                                onClick={() => setNewRecipeTargetMargin('')}
+                                className="text-[10px] text-accent hover:underline whitespace-nowrap bg-transparent border-0 cursor-pointer"
+                              >
+                                Reset to Default
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* UV Resin Finish Toggle */}
+                      <div className="space-y-2 border-t border-border-premium/50 pt-3">
+                        <label className="flex items-center space-x-2.5 text-xs text-text-primary font-bold cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={newRecipeHasUvFinish}
+                            onChange={(e) => setNewRecipeHasUvFinish(e.target.checked)}
+                            className="rounded border-border-premium text-accent focus:ring-accent accent-accent"
+                          />
+                          <span>Apply UV Resin Finish?</span>
+                        </label>
+                        {newRecipeHasUvFinish && (
+                          <div className="w-1/2">
+                            <label className="block text-[9px] font-mono text-text-secondary uppercase tracking-widest mb-1">
+                              Resin Amount (Grams):
+                            </label>
+                            <input
+                              type="number"
+                              step="any"
+                              value={newRecipeResinGrams}
+                              onChange={(e) => setNewRecipeResinGrams(e.target.value)}
+                              className="w-full bg-bg-base text-text-primary border border-border-premium rounded-xl py-2 px-3 text-xs focus:border-accent font-mono"
+                            />
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Accessories Selection */}
+                      <div className="space-y-2 border-t border-border-premium/50 pt-3">
+                        <label className="block text-[9px] font-mono text-text-secondary uppercase tracking-widest mb-1">
+                          Select Accessories Used:
+                        </label>
+                        <div className="flex flex-wrap gap-3 bg-bg-base border border-border-premium rounded-xl p-3">
+                          {accessories.map((acc) => (
+                            <label key={acc.id} className="flex items-center space-x-2 text-xs text-text-secondary cursor-pointer hover:text-text-primary">
+                              <input
+                                type="checkbox"
+                                checked={newRecipeAccessories.includes(acc.name)}
+                                onChange={(e) => {
+                                  const checked = e.target.checked;
+                                  setNewRecipeAccessories(prev =>
+                                    checked ? [...prev, acc.name] : prev.filter(name => name !== acc.name)
+                                  );
+                                }}
+                                className="rounded border-border-premium text-accent focus:ring-accent accent-accent"
+                              />
+                              <span>{acc.name} (+a{acc.cost_per_unit_bdt})</span>
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Live Floor Price Preview */}
+                      {(() => {
+                        try {
+                          const filamentCostPerGram = getFilamentCostPerGram(newRecipeFilamentName);
+                          const resinAccessory = accessories.find(a => a.name === "UV Resin");
+                          const resinCostPerGram = resinAccessory ? resinAccessory.cost_per_unit_bdt : 10;
+                          
+                          const accCosts: Record<string, number> = {};
+                          accessories.forEach(a => {
+                            accCosts[a.name] = a.cost_per_unit_bdt;
+                          });
+                          
+                          const settingsObj = {
+                            default_target_margin: parseFloat(hubSettings.default_target_margin) || 50,
+                            electricity_cost_per_hour: parseFloat(hubSettings.electricity_cost_per_hour) || 3,
+                            depreciation_cost_per_hour: parseFloat(hubSettings.depreciation_cost_per_hour) || 20,
+                            packaging_cost_flat: parseFloat(hubSettings.packaging_cost_flat) || 40,
+                            platform_fee_percent: parseFloat(hubSettings.platform_fee_percent) || 3
+                          };
+
+                          const tempRecipe = {
+                            filament_name: newRecipeFilamentName,
+                            filament_grams: parseFloat(newRecipeFilamentGrams) || 0,
+                            print_hours: parseFloat(newRecipePrintHours) || 0,
+                            has_uv_finish: newRecipeHasUvFinish,
+                            resin_grams: newRecipeHasUvFinish ? (parseFloat(newRecipeResinGrams) || 0) : 0,
+                            accessories: newRecipeAccessories,
+                            target_margin: newRecipeTargetMargin ? parseFloat(newRecipeTargetMargin) : null
+                          };
+
+                          const calc = calculateFloorPrice(tempRecipe, filamentCostPerGram, resinCostPerGram, accCosts, settingsObj);
+                          const isWarning = (parseFloat(newPrice) || 0) < calc.floor_price_bdt;
+                          
+                          return (
+                            <div className={`p-4 rounded-xl border font-mono text-xs ${isWarning ? 'bg-orange-500/10 border-orange-500/30 text-orange-400' : 'bg-green-500/10 border-green-500/30 text-green-400'}`}>
+                              <div className="flex justify-between font-bold">
+                                <span>RECOMMENDED FLOOR PRICE:</span>
+                                <span>a{calc.floor_price_bdt}</span>
+                              </div>
+                              <div className="flex justify-between mt-1 text-[11px] text-text-secondary">
+                                <span>Total Cost Base: a{calc.cost_breakdown.total_cost}</span>
+                                <span>Your Selling Price: a{newPrice || '0'}</span>
+                              </div>
+                              {isWarning && (
+                                <div className="mt-2 text-[10px] font-sans flex items-center space-x-1.5">
+                                  <AlertTriangle className="w-3.5 h-3.5 animate-pulse" />
+                                  <span>Selling price is below floor price. Warning flag will be set.</span>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        } catch (err) {
+                          return null;
+                        }
+                      })()}
+                    </>
+                  )}
                 </div>
 
               </div>
@@ -1919,16 +3146,20 @@ Colors suited: Burnt Orange with Matte Slate eyes or Chalk White body.`);
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-[10px] font-mono text-text-secondary uppercase tracking-widest mb-1">
-                      Price ($ USD):
+                      Price (BDT):
                     </label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      required
-                      value={editingProduct.price}
-                      onChange={(e) => setEditingProduct({ ...editingProduct, price: parseFloat(e.target.value) || 0 })}
-                      className="w-full bg-bg-base text-text-primary border border-border-premium rounded-xl py-2.5 px-3.5 text-xs focus:border-accent font-mono font-bold"
-                    />
+                    <div className="relative">
+                      <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-accent font-bold text-xs">a</span>
+                      <input
+                        type="number"
+                        step="1"
+                        placeholder="1200"
+                        required
+                        value={editingProduct.price}
+                        onChange={(e) => setEditingProduct({ ...editingProduct, price: Math.round(parseFloat(e.target.value)) || 0 })}
+                        className="w-full bg-bg-base text-text-primary border border-border-premium rounded-xl py-2.5 pl-8 pr-3.5 text-xs focus:border-accent font-mono font-bold"
+                      />
+                    </div>
                   </div>
 
                   <div>
@@ -1936,22 +3167,33 @@ Colors suited: Burnt Orange with Matte Slate eyes or Chalk White body.`);
                       Category:
                     </label>
                     <select
-                      value={editingProduct.category}
-                      onChange={(e) => setEditingProduct({ ...editingProduct, category: e.target.value as any })}
+                      value={showEditCustomCategoryInput ? "NEW_CATEGORY_TRIGGER" : editingProduct.category}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        if (val === "NEW_CATEGORY_TRIGGER") {
+                          setShowEditCustomCategoryInput(true);
+                        } else {
+                          setShowEditCustomCategoryInput(false);
+                          setEditingProduct({ ...editingProduct, category: val });
+                        }
+                      }}
                       className="w-full bg-bg-base text-text-primary border border-border-premium rounded-xl py-2.5 px-3 text-xs focus:border-accent cursor-pointer"
                     >
-                      <option value="Keychains">Keychains</option>
-                      <option value="Home Decor">Home Decor</option>
-                      <option value="Desk Accessories">Desk Accessories</option>
-                      <option value="Gaming Accessories">Gaming Accessories</option>
-                      <option value="Figures & Collectibles">Figures &amp; Collectibles</option>
-                      <option value="Business Merchandise">Business Merchandise</option>
-                      <option value="Custom Orders">Custom Orders</option>
-                      <option value="Functional Prints">Functional Prints</option>
-                      <option value="Imported Goods">Imported Goods</option>
-                      <option value="A1 Mini Mods">A1 Mini Mods</option>
-                      <option value="Hotends">Hotends</option>
+                      {categories.map((c) => (
+                        <option key={c.name} value={c.name}>{c.name}</option>
+                      ))}
+                      <option value="NEW_CATEGORY_TRIGGER">Add new category...</option>
                     </select>
+                    {showEditCustomCategoryInput && (
+                      <input
+                        type="text"
+                        placeholder="Enter custom category..."
+                        required
+                        value={editCustomCategoryName}
+                        onChange={(e) => setEditCustomCategoryName(e.target.value)}
+                        className="w-full bg-bg-base text-text-primary border border-accent rounded-xl py-2 px-3 mt-2 text-xs focus:outline-none font-mono"
+                      />
+                    )}
                   </div>
                 </div>
 
@@ -2136,6 +3378,231 @@ Colors suited: Burnt Orange with Matte Slate eyes or Chalk White body.`);
                     className="w-full bg-bg-base text-text-primary border border-border-premium rounded-xl py-2 px-3 text-xs focus:border-accent resize-none font-sans"
                   />
                 </div>
+
+                {/* Resin Add-on Configuration Toggle */}
+                <div className="bg-bg-base border border-border-premium rounded-xl p-4 space-y-3">
+                  <label className="flex items-center space-x-2.5 text-xs text-text-primary font-bold cursor-pointer">
+                    <input 
+                      type="checkbox"
+                      checked={!!editingProduct.resin_enabled}
+                      onChange={(e) => setEditingProduct({ ...editingProduct, resin_enabled: e.target.checked })}
+                      className="rounded border-border-premium text-accent focus:ring-accent accent-accent"
+                    />
+                    <div>
+                      <span className="font-bold block text-text-primary">Enable Resin Add-on</span>
+                      <span className="text-[10px] text-text-secondary block mt-0.5">
+                        Allows customers to select premium resin coating as a surcharge on checkout.
+                      </span>
+                    </div>
+                  </label>
+
+                  {editingProduct.resin_enabled && (
+                    <div className="pt-2 border-t border-border-premium/50 animate-fade-in font-mono text-xs">
+                      <div>
+                        <label className="block text-[9px] text-text-secondary uppercase mb-1">Resin Surcharge Price (BDT):</label>
+                        <input 
+                          type="number"
+                          step="1"
+                          required
+                          min="0"
+                          value={editingProduct.resin_price === null || editingProduct.resin_price === undefined ? '' : editingProduct.resin_price}
+                          onChange={(e) => setEditingProduct({ ...editingProduct, resin_price: e.target.value === '' ? null : Math.round(parseFloat(e.target.value)) })}
+                          placeholder="e.g. 250"
+                          className="w-full bg-bg-base text-text-primary border border-border-premium rounded-lg p-2 text-xs"
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* --- EDIT MATERIAL RECIPE SECTION --- */}
+                <div className="space-y-4 bg-bg-surface/50 border border-border-premium rounded-xl p-4.5">
+                  <div className="flex items-center space-x-2 text-accent font-bold text-xs uppercase tracking-wider">
+                    <BrainCircuit className="w-4 h-4" />
+                    <span>Material Cost Recipe (Optional Floor Pricing)</span>
+                  </div>
+                  
+                  <p className="text-text-secondary text-[11px] leading-relaxed">
+                    Set a material recipe to automatically calculate the recommended floor price based on filament, resin, and accessories.
+                  </p>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-[9px] font-mono text-text-secondary uppercase tracking-widest mb-1">
+                        Select Filament Spool:
+                      </label>
+                      <select
+                        value={editRecipe.filament_name || ''}
+                        onChange={(e) => updateEditRecipeField('filament_name', e.target.value)}
+                        className="w-full bg-bg-base text-text-primary border border-border-premium rounded-xl py-2 px-3 text-xs focus:border-accent cursor-pointer"
+                      >
+                        <option value="">-- No Filament (Manual Price Only) --</option>
+                        {Array.from(new Set(filaments.map(f => f.name))).map(name => (
+                          <option key={name} value={name}>{name}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {editRecipe.filament_name && (
+                      <div>
+                        <label className="block text-[9px] font-mono text-text-secondary uppercase tracking-widest mb-1">
+                          Filament Print Weight (Grams):
+                        </label>
+                        <input
+                          type="number"
+                          step="any"
+                          required
+                          value={editRecipe.filament_grams || ''}
+                          onChange={(e) => updateEditRecipeField('filament_grams', parseFloat(e.target.value) || 0)}
+                          placeholder="e.g. 45"
+                          className="w-full bg-bg-base text-text-primary border border-border-premium rounded-xl py-2 px-3 text-xs focus:border-accent font-mono"
+                        />
+                      </div>
+                    )}
+                  </div>
+
+                  {editRecipe.filament_name && (
+                    <>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-[9px] font-mono text-text-secondary uppercase tracking-widest mb-1">
+                            Print Time (Decimal Hours):
+                          </label>
+                          <input
+                            type="number"
+                            step="0.1"
+                            required
+                            value={editRecipe.print_hours || ''}
+                            onChange={(e) => updateEditRecipeField('print_hours', parseFloat(e.target.value) || 0)}
+                            placeholder="e.g. 3.5"
+                            className="w-full bg-bg-base text-text-primary border border-border-premium rounded-xl py-2 px-3 text-xs focus:border-accent font-mono"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-[9px] font-mono text-text-secondary uppercase tracking-widest mb-1">
+                            Target Margin % (Optional Override):
+                          </label>
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="number"
+                              min="0"
+                              max="99"
+                              value={editRecipe.target_margin === null || editRecipe.target_margin === undefined ? '' : editRecipe.target_margin}
+                              onChange={(e) => updateEditRecipeField('target_margin', e.target.value === '' ? null : parseFloat(e.target.value))}
+                              placeholder={`Default: ${hubSettings.default_target_margin || '50'}%`}
+                              className="w-full bg-bg-base text-text-primary border border-border-premium rounded-xl py-2 px-3 text-xs focus:border-accent font-mono"
+                            />
+                            {editRecipe.target_margin !== null && editRecipe.target_margin !== undefined && (
+                              <button
+                                type="button"
+                                onClick={() => updateEditRecipeField('target_margin', null)}
+                                className="text-[10px] text-accent hover:underline whitespace-nowrap bg-transparent border-0 cursor-pointer"
+                              >
+                                Reset to Default
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* UV Resin Finish Toggle */}
+                      <div className="space-y-2 border-t border-border-premium/50 pt-3">
+                        <label className="flex items-center space-x-2.5 text-xs text-text-primary font-bold cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={!!editRecipe.has_uv_finish}
+                            onChange={(e) => updateEditRecipeField('has_uv_finish', e.target.checked)}
+                            className="rounded border-border-premium text-accent focus:ring-accent accent-accent"
+                          />
+                          <span>Apply UV Resin Finish?</span>
+                        </label>
+                        {editRecipe.has_uv_finish && (
+                          <div className="w-1/2">
+                            <label className="block text-[9px] font-mono text-text-secondary uppercase tracking-widest mb-1">
+                              Resin Amount (Grams):
+                            </label>
+                            <input
+                              type="number"
+                              step="any"
+                              value={editRecipe.resin_grams === undefined ? 2 : editRecipe.resin_grams}
+                              onChange={(e) => updateEditRecipeField('resin_grams', parseFloat(e.target.value) || 0)}
+                              className="w-full bg-bg-base text-text-primary border border-border-premium rounded-xl py-2 px-3 text-xs focus:border-accent font-mono"
+                            />
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Accessories Selection */}
+                      <div className="space-y-2 border-t border-border-premium/50 pt-3">
+                        <label className="block text-[9px] font-mono text-text-secondary uppercase tracking-widest mb-1">
+                          Select Accessories Used:
+                        </label>
+                        <div className="flex flex-wrap gap-3 bg-bg-base border border-border-premium rounded-xl p-3">
+                          {accessories.map((acc) => (
+                            <label key={acc.id} className="flex items-center space-x-2 text-xs text-text-secondary cursor-pointer hover:text-text-primary">
+                              <input
+                                type="checkbox"
+                                checked={editRecipe.accessories?.includes(acc.name) || false}
+                                onChange={(e) => {
+                                  toggleEditRecipeAccessory(acc.name);
+                                }}
+                                className="rounded border-border-premium text-accent focus:ring-accent accent-accent"
+                              />
+                              <span>{acc.name} (+a{acc.cost_per_unit_bdt})</span>
+                            </label>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Live Floor Price Preview */}
+                      {(() => {
+                        try {
+                          const filamentCostPerGram = getFilamentCostPerGram(editRecipe.filament_name);
+                          const resinAccessory = accessories.find(a => a.name === "UV Resin");
+                          const resinCostPerGram = resinAccessory ? resinAccessory.cost_per_unit_bdt : 10;
+                          
+                          const accCosts: Record<string, number> = {};
+                          accessories.forEach(a => {
+                            accCosts[a.name] = a.cost_per_unit_bdt;
+                          });
+                          
+                          const settingsObj = {
+                            default_target_margin: parseFloat(hubSettings.default_target_margin) || 50,
+                            electricity_cost_per_hour: parseFloat(hubSettings.electricity_cost_per_hour) || 3,
+                            depreciation_cost_per_hour: parseFloat(hubSettings.depreciation_cost_per_hour) || 20,
+                            packaging_cost_flat: parseFloat(hubSettings.packaging_cost_flat) || 40,
+                            platform_fee_percent: parseFloat(hubSettings.platform_fee_percent) || 3
+                          };
+
+                          const calc = calculateFloorPrice(editRecipe, filamentCostPerGram, resinCostPerGram, accCosts, settingsObj);
+                          const isWarning = (editingProduct.price || 0) < calc.floor_price_bdt;
+                          
+                          return (
+                            <div className={`p-4 rounded-xl border font-mono text-xs ${isWarning ? 'bg-orange-500/10 border-orange-500/30 text-orange-400' : 'bg-green-500/10 border-green-500/30 text-green-400'}`}>
+                              <div className="flex justify-between font-bold">
+                                <span>RECOMMENDED FLOOR PRICE:</span>
+                                <span>a{calc.floor_price_bdt}</span>
+                              </div>
+                              <div className="flex justify-between mt-1 text-[11px] text-text-secondary">
+                                <span>Total Cost Base: a{calc.cost_breakdown.total_cost}</span>
+                                <span>Your Selling Price: a{editingProduct.price || '0'}</span>
+                              </div>
+                              {isWarning && (
+                                <div className="mt-2 text-[10px] font-sans flex items-center space-x-1.5">
+                                  <AlertTriangle className="w-3.5 h-3.5 animate-pulse" />
+                                  <span>Selling price is below floor price. Warning flag will be set.</span>
+                                </div>
+                              )}
+                            </div>
+                          );
+                        } catch (err) {
+                          return null;
+                        }
+                      })()}
+                    </>
+                  )}
+                </div>
               </div>
 
               {/* Right Image Organizer */}
@@ -2291,7 +3758,7 @@ Colors suited: Burnt Orange with Matte Slate eyes or Chalk White body.`);
                         onChange={(e) => setBulkPriceAction(e.target.value as any)}
                         className="bg-bg-surface text-text-primary border border-border-premium rounded-lg p-1.5 text-xs focus:border-accent"
                       >
-                        <option value="flat">Set Flat Price ($)</option>
+                        <option value="flat">Set Flat Price (a)</option>
                         <option value="percent_increase">Increase by %</option>
                         <option value="percent_decrease">Decrease by %</option>
                       </select>
@@ -2457,13 +3924,20 @@ Colors suited: Burnt Orange with Matte Slate eyes or Chalk White body.`);
                           />
                         </td>
                         <td className="p-4 font-bold text-accent">{item.id}</td>
-                        <td className="p-4 font-sans font-bold text-text-primary">{item.title}</td>
+                        <td className="p-4 font-sans font-bold text-text-primary">
+                          <div className="flex items-center gap-1.5">
+                            <span>{item.title}</span>
+                            {item.featured_carousel && (
+                              <Star className="w-3.5 h-3.5 text-accent fill-accent" title="Featured in Carousel" />
+                            )}
+                          </div>
+                        </td>
                         <td className="p-4">
                           <span className="px-2 py-0.5 rounded text-[10px] bg-bg-surface border border-border-premium text-accent font-semibold uppercase font-mono">
                             {item.category}
                           </span>
                         </td>
-                        <td className="p-4 text-accent font-bold">${item.price.toFixed(2)}</td>
+                        <td className="p-4 text-accent font-bold">{formatPrice(item.price)}</td>
                         <td className="p-4 text-text-secondary">
                           {item.weightGrams}g • {item.printTime} // {item.infill}
                         </td>
@@ -2570,26 +4044,28 @@ Colors suited: Burnt Orange with Matte Slate eyes or Chalk White body.`);
                         onChange={(e) => setPreorderCategory(e.target.value)}
                         className="w-full bg-bg-base text-text-primary border border-border-premium rounded-lg p-2 focus:outline-none focus:border-accent cursor-pointer"
                       >
-                        <option value="Premium Hardware">Premium Hardware</option>
-                        <option value="Exotic Filaments">Exotic Filaments</option>
-                        <option value="A1 Mini Mods">A1 Mini Mods</option>
-                        <option value="Hotends">Hotends</option>
-                        <option value="Imported Goods">Imported Goods</option>
+                        {categories.map((c) => (
+                          <option key={c.name} value={c.name}>{c.name}</option>
+                        ))}
                       </select>
                     </div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-3">
                     <div className="space-y-1">
-                      <label className="block text-[9px] font-mono text-text-secondary uppercase">Price (USD)</label>
-                      <input 
-                        type="number" 
-                        step="0.01" 
-                        required
-                        value={preorderPrice}
-                        onChange={(e) => setPreorderPrice(parseFloat(e.target.value) || 0)}
-                        className="w-full bg-bg-base text-text-primary border border-border-premium rounded-lg p-2 font-mono"
-                      />
+                      <label className="block text-[9px] font-mono text-text-secondary uppercase">Price (BDT)</label>
+                      <div className="relative">
+                        <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-accent font-bold text-[11px]">a</span>
+                        <input 
+                          type="number" 
+                          step="1" 
+                          placeholder="1200"
+                          required
+                          value={preorderPrice}
+                          onChange={(e) => setPreorderPrice(parseFloat(e.target.value) || 0)}
+                          className="w-full bg-bg-base text-text-primary border border-border-premium rounded-lg py-2 pl-6 pr-2 font-mono text-xs focus:outline-none focus:border-accent"
+                        />
+                      </div>
                     </div>
                     <div className="space-y-1">
                       <label className="block text-[9px] font-mono text-text-secondary uppercase">Deposit (%)</label>
@@ -2801,26 +4277,28 @@ Colors suited: Burnt Orange with Matte Slate eyes or Chalk White body.`);
                             onChange={(e) => setPreorderCategory(e.target.value)}
                             className="w-full bg-bg-base text-text-primary border border-border-premium rounded-lg p-2 focus:outline-none focus:border-accent cursor-pointer"
                           >
-                            <option value="Premium Hardware">Premium Hardware</option>
-                            <option value="Exotic Filaments">Exotic Filaments</option>
-                            <option value="A1 Mini Mods">A1 Mini Mods</option>
-                            <option value="Hotends">Hotends</option>
-                            <option value="Imported Goods">Imported Goods</option>
+                            {categories.map((c) => (
+                              <option key={c.name} value={c.name}>{c.name}</option>
+                            ))}
                           </select>
                         </div>
                       </div>
 
                       <div className="grid grid-cols-2 gap-3">
                         <div className="space-y-1">
-                          <label className="block text-[9px] font-mono text-text-secondary uppercase">Price (USD)</label>
-                          <input 
-                            type="number" 
-                            step="0.01" 
-                            required
-                            value={preorderPrice}
-                            onChange={(e) => setPreorderPrice(parseFloat(e.target.value) || 0)}
-                            className="w-full bg-bg-base text-text-primary border border-border-premium rounded-lg p-2 font-mono"
-                          />
+                          <label className="block text-[9px] font-mono text-text-secondary uppercase">Price (BDT)</label>
+                          <div className="relative">
+                            <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-accent font-bold text-[11px]">a</span>
+                            <input 
+                              type="number" 
+                              step="1" 
+                              placeholder="1200"
+                              required
+                              value={preorderPrice}
+                              onChange={(e) => setPreorderPrice(parseFloat(e.target.value) || 0)}
+                              className="w-full bg-bg-base text-text-primary border border-border-premium rounded-lg py-2 pl-6 pr-2 font-mono text-xs focus:outline-none focus:border-accent"
+                            />
+                          </div>
                         </div>
                         <div className="space-y-1">
                           <label className="block text-[9px] font-mono text-text-secondary uppercase">Deposit (%)</label>
@@ -3078,10 +4556,10 @@ Colors suited: Burnt Orange with Matte Slate eyes or Chalk White body.`);
                       <div className="mt-5.5 pt-4.5 border-t border-border-premium flex items-center justify-between">
                         <div>
                           <div className="flex items-center text-[9px] font-mono text-text-muted tracking-wider">
-                            <span>TOTAL VALUE: ${p.price.toFixed(2)}</span>
+                            <span>TOTAL VALUE: {formatPrice(p.price)}</span>
                           </div>
                           <div className="flex items-end space-x-1 mt-0.5">
-                            <span className="text-xl font-mono font-extrabold text-accent">${depositPrice.toFixed(2)}</span>
+                            <span className="text-xl font-mono font-extrabold text-accent">{formatPrice(depositPrice)}</span>
                             <span className="text-[10px] font-mono text-text-secondary mb-0.5">({p.depositPercentage || 50}% DEPOSIT)</span>
                           </div>
                         </div>
@@ -3090,6 +4568,166 @@ Colors suited: Burnt Orange with Matte Slate eyes or Chalk White body.`);
                   </div>
                 );
               })}
+            </div>
+          </div>
+        )}
+
+        {activeSubTab === 'carousel' && !editingProduct && (
+          <div id="carousel-curator-submodule" className="bg-bg-surface border border-border-premium rounded-2xl p-6 overflow-hidden shadow-2xl space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border-premium pb-4">
+              <div className="text-left font-mono">
+                <h3 className="font-display font-extrabold text-base text-text-primary uppercase tracking-wide">Hero Carousel Management</h3>
+                <p className="text-[10px] text-text-secondary mt-1">
+                  CURATED PRODUCTS: <span className="text-accent font-bold">{products.filter(p => p.featured_carousel).length}</span> G Drag and drop to manually order slides.
+                </p>
+              </div>
+              <button
+                onClick={handleCarouselRemix}
+                className="px-4 py-2.5 rounded-xl bg-accent-secondary hover:bg-accent-hover text-white font-bold text-xs cursor-pointer flex items-center space-x-2 transition shadow-lg"
+              >
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>Remix Carousel</span>
+              </button>
+            </div>
+
+            {/* Draggable Tiles Grid */}
+            <div>
+              {products.filter(p => p.featured_carousel).length === 0 ? (
+                <div className="text-center py-10 border border-dashed border-border-premium rounded-xl">
+                  <p className="text-text-secondary text-xs font-mono">No products featured in the hero carousel. Use the inventory tab to feature products, or click Remix.</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                  {products
+                    .filter(p => p.featured_carousel)
+                    .sort((a, b) => {
+                      const valA = a.carousel_order !== undefined ? a.carousel_order : 999999;
+                      const valB = b.carousel_order !== undefined ? b.carousel_order : 999999;
+                      if (valA !== valB) return valA - valB;
+                      const timeA = a.updated_at ? new Date(a.updated_at).getTime() : 0;
+                      const timeB = b.updated_at ? new Date(b.updated_at).getTime() : 0;
+                      return timeB - timeA;
+                    })
+                    .map((item, idx) => (
+                      <div
+                        key={item.id}
+                        draggable
+                        onDragStart={(e) => handleCarouselDragStart(e, idx)}
+                        onDragOver={(e) => handleCarouselDragOver(e, idx)}
+                        onDrop={(e) => handleCarouselDrop(e, idx)}
+                        className={`group relative bg-bg-base border ${
+                          draggedCarouselIdx === idx ? 'border-accent border-dashed opacity-50 scale-95' : 'border-border-premium hover:border-accent/40'
+                        } rounded-xl p-3 flex flex-col justify-between transition-all duration-200 cursor-move shadow-md`}
+                      >
+                        <div className="flex gap-3">
+                          {/* Drag handle & thumbnail */}
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            <GripVertical className="w-4 h-4 text-text-muted cursor-grab group-hover:text-accent transition" />
+                            <div className="w-12 h-12 rounded-lg bg-bg-surface overflow-hidden border border-border-premium shrink-0">
+                              <img
+                                src={item.images[0] || '/images/placeholder.png'}
+                                alt={item.title}
+                                className="w-full h-full object-cover"
+                                onError={(e) => {
+                                  e.currentTarget.src = '/images/placeholder.png';
+                                }}
+                              />
+                            </div>
+                          </div>
+
+                          {/* Info */}
+                          <div className="flex-1 min-w-0">
+                            <h4 className="text-xs font-bold text-text-primary truncate" title={item.title}>
+                              {item.title}
+                            </h4>
+                            <p className="text-[9px] font-mono text-text-secondary uppercase mt-0.5">{item.category}</p>
+                            <p className="text-[10px] font-mono font-bold text-accent mt-1">{formatPrice(item.price)}</p>
+                          </div>
+                        </div>
+
+                        {/* Order badge & action */}
+                        <div className="mt-3 pt-2 border-t border-border-premium/50 flex items-center justify-between">
+                          <span className="text-[9px] font-mono font-semibold text-text-muted uppercase">
+                            Slide Order: <span className="text-accent font-bold">#{(item.carousel_order ?? 0) + 1}</span>
+                          </span>
+                          <button
+                            onClick={() => {
+                              const updated = products.map(p => {
+                                if (p.id === item.id) {
+                                  return { ...p, featured_carousel: false, updated_at: new Date().toISOString() };
+                                }
+                                return p;
+                              });
+                              onUpdateProducts(updated);
+                            }}
+                            className="p-1 rounded hover:bg-red-500/10 text-text-muted hover:text-red-500 transition cursor-pointer"
+                            title="Remove from Carousel"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              )}
+            </div>
+            
+            {/* Curation Quick Add/Management Catalog */}
+            <div className="border-t border-border-premium pt-6 space-y-4">
+              <h4 className="font-mono text-xs font-bold text-text-primary uppercase tracking-wide">Catalog Curation Panel</h4>
+              <p className="text-[10px] text-text-secondary">
+                Search or toggle featured status directly on any catalog product below to add it to the carousel:
+              </p>
+              
+              <div className="max-h-72 overflow-y-auto border border-border-premium rounded-xl divide-y divide-border-premium bg-bg-base">
+                {products.map((item) => (
+                  <div key={item.id} className="p-3 flex items-center justify-between hover:bg-bg-surface/20 transition">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="w-8 h-8 rounded bg-bg-surface overflow-hidden border border-border-premium shrink-0">
+                        <img
+                          src={item.images[0] || '/images/placeholder.png'}
+                          alt={item.title}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            e.currentTarget.src = '/images/placeholder.png';
+                          }}
+                        />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-xs font-semibold text-text-primary truncate">{item.title}</p>
+                        <p className="text-[9px] font-mono text-text-secondary uppercase">{item.category} G {formatPrice(item.price)}</p>
+                      </div>
+                    </div>
+                    
+                    <button
+                      onClick={() => {
+                        const updated = products.map(p => {
+                          if (p.id === item.id) {
+                            const newFeatured = !p.featured_carousel;
+                            return { 
+                              ...p, 
+                              featured_carousel: newFeatured, 
+                              // if newly featured, assign order at the end
+                              carousel_order: newFeatured ? products.filter(x => x.featured_carousel).length : 0,
+                              updated_at: new Date().toISOString() 
+                            };
+                          }
+                          return p;
+                        });
+                        onUpdateProducts(updated);
+                      }}
+                      className={`px-3 py-1.5 rounded-lg border font-mono text-[10px] font-bold uppercase transition flex items-center space-x-1.5 cursor-pointer ${
+                        item.featured_carousel
+                          ? 'border-accent/40 bg-accent/10 text-accent hover:bg-accent/20'
+                          : 'border-border-premium text-text-secondary hover:text-text-primary hover:border-gray-500'
+                      }`}
+                    >
+                      <Star className={`w-3 h-3 ${item.featured_carousel ? 'fill-current' : ''}`} />
+                      <span>{item.featured_carousel ? 'Featured' : 'Add to Carousel'}</span>
+                    </button>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         )}
@@ -3157,7 +4795,7 @@ Colors suited: Burnt Orange with Matte Slate eyes or Chalk White body.`);
                           </ul>
                         </td>
                         <td className="p-4 align-top">
-                          <div className="text-accent font-bold text-sm">${order.totalCost.toFixed(2)}</div>
+                          <div className="text-accent font-bold text-sm">{formatPrice(order.totalCost)}</div>
                           <div className="text-[10px] text-text-muted mt-0.5">{order.totalWeight} grams</div>
                         </td>
                         <td className="p-4 align-top">
@@ -3262,6 +4900,250 @@ Colors suited: Burnt Orange with Matte Slate eyes or Chalk White body.`);
           </div>
         )}
 
+        {/* GG COUPON MANAGER TAB GG */}
+        {activeSubTab === 'coupons' && (
+          <div className="space-y-8">
+
+            {/* Header */}
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="font-display font-bold text-lg text-text-primary flex items-center space-x-2">
+                  <Tag className="w-5 h-5 text-accent" />
+                  <span>Coupon Manager</span>
+                </h3>
+                <p className="text-text-secondary text-xs mt-1">Create and manage influencer/creator promo codes.</p>
+              </div>
+              <button
+                onClick={fetchCoupons}
+                className="flex items-center space-x-1.5 px-3 py-2 rounded-lg bg-bg-elevated border border-border-premium text-text-secondary hover:text-text-primary hover:border-accent text-xs transition"
+              >
+                <RefreshCw className="w-3.5 h-3.5" />
+                <span>Refresh</span>
+              </button>
+            </div>
+
+            {/* Create Coupon Form */}
+            <div className="p-5 bg-bg-elevated border border-border-premium rounded-2xl space-y-4">
+              <h4 className="font-display font-semibold text-sm text-text-primary flex items-center space-x-2">
+                <Ticket className="w-4 h-4 text-accent" />
+                <span>Create New Coupon</span>
+              </h4>
+
+              <form onSubmit={handleCreateCoupon} className="grid grid-cols-2 gap-3">
+                {/* Code */}
+                <div className="space-y-1">
+                  <label className="block text-[10px] font-mono text-text-secondary uppercase">Coupon Code *</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. BELVIA20"
+                    value={couponFormCode}
+                    onChange={e => setCouponFormCode(e.target.value.toUpperCase())}
+                    className="w-full bg-bg-base border border-border-premium rounded-xl p-2.5 text-xs font-mono text-text-primary focus:outline-none focus:border-accent placeholder:normal-case"
+                  />
+                </div>
+
+                {/* Creator Name */}
+                <div className="space-y-1">
+                  <label className="block text-[10px] font-mono text-text-secondary uppercase">Creator / Influencer</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Rahim TechBD"
+                    value={couponFormCreatedBy}
+                    onChange={e => setCouponFormCreatedBy(e.target.value)}
+                    className="w-full bg-bg-base border border-border-premium rounded-xl p-2.5 text-xs text-text-primary focus:outline-none focus:border-accent"
+                  />
+                </div>
+
+                {/* Discount Type */}
+                <div className="space-y-1">
+                  <label className="block text-[10px] font-mono text-text-secondary uppercase">Discount Type *</label>
+                  <select
+                    value={couponFormType}
+                    onChange={e => setCouponFormType(e.target.value as 'percent' | 'flat')}
+                    className="w-full bg-bg-base border border-border-premium rounded-xl p-2.5 text-xs text-text-primary focus:outline-none focus:border-accent"
+                  >
+                    <option value="percent">Percentage (%)</option>
+                    <option value="flat">Flat Amount (a)</option>
+                  </select>
+                </div>
+
+                {/* Value */}
+                <div className="space-y-1">
+                  <label className="block text-[10px] font-mono text-text-secondary uppercase">
+                    Value * {couponFormType === 'percent' ? '(%)' : '(a)'}
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    placeholder={couponFormType === 'percent' ? '20' : '250'}
+                    value={couponFormValue}
+                    onChange={e => setCouponFormValue(e.target.value)}
+                    className="w-full bg-bg-base border border-border-premium rounded-xl p-2.5 text-xs text-text-primary focus:outline-none focus:border-accent"
+                  />
+                </div>
+
+                {/* Max Uses */}
+                <div className="space-y-1">
+                  <label className="block text-[10px] font-mono text-text-secondary uppercase">Max Uses (blank = unlimited)</label>
+                  <input
+                    type="number"
+                    min="1"
+                    placeholder="e.g. 100"
+                    value={couponFormMaxUses}
+                    onChange={e => setCouponFormMaxUses(e.target.value)}
+                    className="w-full bg-bg-base border border-border-premium rounded-xl p-2.5 text-xs text-text-primary focus:outline-none focus:border-accent"
+                  />
+                </div>
+
+                {/* Valid Until */}
+                <div className="space-y-1">
+                  <label className="block text-[10px] font-mono text-text-secondary uppercase">Expires On (blank = no expiry)</label>
+                  <input
+                    type="datetime-local"
+                    value={couponFormValidUntil}
+                    onChange={e => setCouponFormValidUntil(e.target.value)}
+                    className="w-full bg-bg-base border border-border-premium rounded-xl p-2.5 text-xs text-text-primary focus:outline-none focus:border-accent"
+                  />
+                </div>
+
+                {/* Feedback + Submit */}
+                <div className="col-span-2 space-y-2">
+                  {couponFormError && (
+                    <p className="text-red-400 text-[10px] flex items-center space-x-1">
+                      <CircleX className="w-3 h-3 shrink-0" /><span>{couponFormError}</span>
+                    </p>
+                  )}
+                  {couponFormSuccess && (
+                    <p className="text-green-400 text-[10px] flex items-center space-x-1">
+                      <CircleCheck className="w-3 h-3 shrink-0" /><span>{couponFormSuccess}</span>
+                    </p>
+                  )}
+                  <button
+                    type="submit"
+                    disabled={isCreatingCoupon}
+                    className="w-full py-2.5 rounded-xl bg-gradient-to-r from-accent to-accent-secondary text-text-on-accent font-bold text-xs cursor-pointer hover:from-accent-hover hover:to-accent-secondary-lt transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+                  >
+                    {isCreatingCoupon ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Tag className="w-3.5 h-3.5" />}
+                    <span>{isCreatingCoupon ? 'Creating...' : 'Create Coupon'}</span>
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            {/* Coupon List */}
+            <div className="space-y-3">
+              <h4 className="text-sm font-semibold text-text-primary font-display">Active Coupons ({coupons.length})</h4>
+
+              {isCouponsLoading ? (
+                <div className="flex items-center justify-center py-16 text-text-secondary">
+                  <Loader2 className="w-6 h-6 animate-spin mr-2" />
+                  <span className="text-xs">Loading coupons...</span>
+                </div>
+              ) : coupons.length === 0 ? (
+                <div className="py-16 text-center text-text-secondary text-xs">
+                  <Tag className="w-8 h-8 mx-auto mb-3 opacity-30" />
+                  <p>No coupons yet. Create one above.</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto rounded-xl border border-border-premium">
+                  <table className="w-full text-xs font-mono">
+                    <thead className="bg-bg-elevated border-b border-border-premium">
+                      <tr>
+                        <th className="p-3 text-left text-[10px] text-text-secondary uppercase tracking-wider">Code</th>
+                        <th className="p-3 text-left text-[10px] text-text-secondary uppercase tracking-wider">Discount</th>
+                        <th className="p-3 text-left text-[10px] text-text-secondary uppercase tracking-wider">Uses</th>
+                        <th className="p-3 text-left text-[10px] text-text-secondary uppercase tracking-wider">Creator</th>
+                        <th className="p-3 text-left text-[10px] text-text-secondary uppercase tracking-wider">Expires</th>
+                        <th className="p-3 text-left text-[10px] text-text-secondary uppercase tracking-wider">Status</th>
+                        <th className="p-3 text-right text-[10px] text-text-secondary uppercase tracking-wider">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border-premium/50">
+                      {coupons.map(coupon => {
+                        const usePct = coupon.max_uses ? (coupon.uses_count / coupon.max_uses) * 100 : 0;
+                        const isExpired = coupon.valid_until ? new Date(coupon.valid_until) < new Date() : false;
+                        return (
+                          <tr key={coupon.id} className={`transition hover:bg-bg-elevated/50 ${!coupon.is_active || isExpired ? 'opacity-50' : ''}`}>
+                            {/* Code + creator */}
+                            <td className="p-3">
+                              <span className="px-2 py-0.5 bg-accent/10 border border-accent/20 rounded text-accent font-bold tracking-widest">{coupon.code}</span>
+                            </td>
+
+                            {/* Discount value */}
+                            <td className="p-3 text-text-primary font-bold">
+                              {coupon.type === 'percent' ? `${coupon.value}%` : `a${coupon.value}`}
+                              <span className="ml-1 text-text-muted font-normal">{coupon.type === 'percent' ? 'off' : 'flat'}</span>
+                            </td>
+
+                            {/* Uses with progress bar */}
+                            <td className="p-3">
+                              <div className="space-y-1">
+                                <span className="text-text-primary">
+                                  {coupon.uses_count}{coupon.max_uses ? `/${coupon.max_uses}` : ''}
+                                </span>
+                                {coupon.max_uses && (
+                                  <div className="w-20 h-1 bg-bg-base rounded-full overflow-hidden">
+                                    <div
+                                      className={`h-full rounded-full transition-all ${
+                                        usePct >= 100 ? 'bg-red-500' : usePct >= 80 ? 'bg-amber-500' : 'bg-accent'
+                                      }`}
+                                      style={{ width: `${Math.min(usePct, 100)}%` }}
+                                    />
+                                  </div>
+                                )}
+                              </div>
+                            </td>
+
+                            {/* Creator */}
+                            <td className="p-3 text-text-secondary">{coupon.created_by || 'G'}</td>
+
+                            {/* Expiry */}
+                            <td className="p-3">
+                              {coupon.valid_until ? (
+                                <span className={isExpired ? 'text-red-400' : 'text-text-secondary'}>
+                                  {new Date(coupon.valid_until).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: '2-digit' })}
+                                </span>
+                              ) : (
+                                <span className="text-text-muted">No expiry</span>
+                              )}
+                            </td>
+
+                            {/* Active toggle */}
+                            <td className="p-3">
+                              <button
+                                onClick={() => handleToggleCouponActive(coupon)}
+                                className={`flex items-center space-x-1 px-2 py-0.5 rounded-full text-[10px] font-bold border transition ${
+                                  coupon.is_active && !isExpired
+                                    ? 'bg-green-500/10 border-green-500/30 text-green-400 hover:bg-red-500/10 hover:border-red-500/30 hover:text-red-400'
+                                    : 'bg-red-500/10 border-red-500/30 text-red-400 hover:bg-green-500/10 hover:border-green-500/30 hover:text-green-400'
+                                }`}
+                              >
+                                {coupon.is_active && !isExpired ? <CircleCheck className="w-3 h-3" /> : <CircleX className="w-3 h-3" />}
+                                <span>{coupon.is_active && !isExpired ? 'Active' : isExpired ? 'Expired' : 'Inactive'}</span>
+                              </button>
+                            </td>
+
+                            {/* Delete */}
+                            <td className="p-3 text-right">
+                              <button
+                                onClick={() => handleDeleteCoupon(coupon)}
+                                className="p-1.5 rounded-lg hover:bg-red-500/10 text-text-muted hover:text-red-400 transition"
+                                title="Delete coupon permanently"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
       </div>
 
       {lightboxUrl && (
@@ -3288,6 +5170,862 @@ Colors suited: Burnt Orange with Matte Slate eyes or Chalk White body.`);
           </div>
         </div>
       )}
+        {/* GG FESTIVAL DISCOUNTS TAB GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG */}
+        {activeSubTab === 'festivals' && (
+          <div className="space-y-6">
+            {/* Revenue Discount Impact Dashboard */}
+            {orders.length > 0 && (() => {
+              const now = new Date();
+              const thisMonth = orders.filter(o => {
+                const d = new Date(o.createdAt || o.created_at || '');
+                return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
+              });
+              const byType: Record<string, number> = { coupon: 0, festival: 0, loyalty: 0, new_user: 0 };
+              let totalDisc = 0;
+              for (const o of thisMonth) {
+                const da = Number(o.discountAmount || o.discount_amount || 0);
+                const dt = o.discountType || o.discount_type;
+                if (da > 0 && dt && dt in byType) { byType[dt] += da; totalDisc += da; }
+                else if (da > 0 && o.couponCode) { byType.coupon += da; totalDisc += da; }
+              }
+              if (totalDisc === 0) return null;
+              return (
+                <div className="bg-[#070b13] border border-bg-elevated rounded-2xl p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <h3 className="font-display font-black text-white">Discount Impact G This Month</h3>
+                      <p className="text-gray-400 text-xs mt-0.5">Revenue offset by discount type</p>
+                    </div>
+                    <span className="font-mono text-lg font-black text-red-400">-a{totalDisc.toLocaleString()}</span>
+                  </div>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    {[
+                      { key: 'coupon', label: 'Coupons', color: '#22c55e' },
+                      { key: 'festival', label: 'Festivals', color: '#a855f7' },
+                      { key: 'loyalty', label: 'Loyalty', color: '#d4af37' },
+                      { key: 'new_user', label: 'New User', color: '#f59e0b' },
+                    ].map(({ key, label, color }) => (
+                      <div key={key} className="bg-bg-base rounded-xl p-3 border border-bg-elevated">
+                        <div className="text-[10px] font-mono text-gray-500 uppercase tracking-widest mb-1">{label}</div>
+                        <div className="font-black text-sm" style={{ color }}>-a{(byType[key] || 0).toLocaleString()}</div>
+                        <div className="mt-1.5 h-1 bg-bg-elevated rounded-full overflow-hidden">
+                          <div className="h-full rounded-full" style={{ width: `${totalDisc > 0 ? Math.round((byType[key]/totalDisc)*100) : 0}%`, background: color }} />
+                        </div>
+                        <div className="text-[9px] font-mono text-gray-600 mt-0.5">
+                          {totalDisc > 0 ? Math.round((byType[key]/totalDisc)*100) : 0}%
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })()}
+
+            {/* Create / Edit Festival Form */}
+            <div className="bg-[#070b13] border border-bg-elevated rounded-2xl p-6">
+              <h3 className="font-display font-black text-white mb-4">
+                {festEditId ? 'Gn+ Edit Festival' : 'n+ Create Festival Discount'}
+              </h3>
+              <form onSubmit={handleCreateFestival} className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="space-y-1 md:col-span-2">
+                  <label className="block text-[10px] font-mono text-gray-500 uppercase tracking-widest">Festival Name *</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Eid Sale 2026"
+                    value={festFormName}
+                    onChange={e => setFestFormName(e.target.value)}
+                    className="w-full bg-bg-base text-gray-200 px-3.5 py-2.5 rounded-xl border border-bg-elevated focus:border-accent focus:outline-none text-xs font-mono"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="block text-[10px] font-mono text-gray-500 uppercase tracking-widest">Discount % *</label>
+                  <input
+                    type="number"
+                    required
+                    min="1" max="100"
+                    placeholder="e.g. 20"
+                    value={festFormPercent}
+                    onChange={e => setFestFormPercent(e.target.value)}
+                    className="w-full bg-bg-base text-gray-200 px-3.5 py-2.5 rounded-xl border border-bg-elevated focus:border-accent focus:outline-none text-xs font-mono"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="block text-[10px] font-mono text-gray-500 uppercase tracking-widest">Category (blank = site-wide)</label>
+                  <select
+                    value={festFormCategory}
+                    onChange={e => setFestFormCategory(e.target.value)}
+                    className="w-full bg-bg-base text-gray-200 px-3.5 py-2.5 rounded-xl border border-bg-elevated focus:outline-none text-xs font-mono"
+                  >
+                    <option value="">Site-wide (all categories)</option>
+                    {['Keychains','Home Decor','Desk Accessories','Gaming Accessories','Figures & Collectibles','Business Merchandise','Custom Orders','Functional Prints'].map(cat => (
+                      <option key={cat} value={cat}>{cat}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="space-y-1">
+                  <label className="block text-[10px] font-mono text-gray-500 uppercase tracking-widest">Start Date & Time *</label>
+                  <input
+                    type="datetime-local"
+                    required
+                    value={festFormStart}
+                    onChange={e => setFestFormStart(e.target.value)}
+                    className="w-full bg-bg-base text-gray-200 px-3.5 py-2.5 rounded-xl border border-bg-elevated focus:border-accent focus:outline-none text-xs font-mono"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="block text-[10px] font-mono text-gray-500 uppercase tracking-widest">End Date & Time *</label>
+                  <input
+                    type="datetime-local"
+                    required
+                    value={festFormEnd}
+                    onChange={e => setFestFormEnd(e.target.value)}
+                    className="w-full bg-bg-base text-gray-200 px-3.5 py-2.5 rounded-xl border border-bg-elevated focus:border-accent focus:outline-none text-xs font-mono"
+                  />
+                </div>
+                {festFormError && (
+                  <p className="md:col-span-2 text-red-400 text-[11px] font-mono">{festFormError}</p>
+                )}
+                {festFormSuccess && (
+                  <p className="md:col-span-2 text-green-400 text-[11px] font-mono">{festFormSuccess}</p>
+                )}
+                <div className="md:col-span-2 flex items-center space-x-2">
+                  <button
+                    type="submit"
+                    disabled={isCreatingFestival}
+                    className="px-5 py-2.5 bg-gradient-to-r from-accent to-accent-secondary text-text-on-accent font-black text-xs rounded-xl font-mono cursor-pointer disabled:opacity-50 transition"
+                  >
+                    {isCreatingFestival ? 'Saving...' : festEditId ? 'Update Festival' : 'Create Festival'}
+                  </button>
+                  {festEditId && (
+                    <button
+                      type="button"
+                      onClick={() => { setFestEditId(null); setFestFormName(''); setFestFormPercent(''); setFestFormCategory(''); setFestFormStart(''); setFestFormEnd(''); setFestFormError(''); setFestFormSuccess(''); }}
+                      className="px-4 py-2.5 border border-bg-elevated text-gray-400 hover:text-white font-mono text-xs rounded-xl cursor-pointer transition"
+                    >
+                      Cancel Edit
+                    </button>
+                  )}
+                </div>
+              </form>
+            </div>
+
+            {/* Festival List */}
+            <div className="bg-[#070b13] border border-bg-elevated rounded-2xl overflow-hidden">
+              <div className="px-6 py-4 border-b border-bg-elevated flex items-center justify-between">
+                <h3 className="font-display font-black text-white">Festival Discounts ({festivals.length})</h3>
+                <button onClick={fetchFestivals} className="text-[10px] font-mono text-gray-400 hover:text-accent cursor-pointer transition">
+                  G+ Refresh
+                </button>
+              </div>
+              {isFestivalsLoading ? (
+                <div className="p-8 text-center text-gray-400 font-mono text-xs">Loading festivals...</div>
+              ) : festivals.length === 0 ? (
+                <div className="p-8 text-center text-gray-500 font-mono text-xs">No festival discounts created yet.</div>
+              ) : (
+                <div className="divide-y divide-bg-elevated">
+                  {festivals.map((fest) => {
+                    const now = new Date();
+                    const start = new Date(fest.start_date);
+                    const end = new Date(fest.end_date);
+                    const isLive = fest.is_active && start <= now && end > now;
+                    const isUpcoming = fest.is_active && start > now;
+                    const isEnded = end <= now;
+                    const statusColor = isLive ? '#22c55e' : isUpcoming ? '#f59e0b' : '#6b7280';
+                    const statusLabel = isLive ? 'LIVE' : isUpcoming ? 'UPCOMING' : 'ENDED';
+                    return (
+                      <div key={fest.id} className="px-6 py-4 flex flex-wrap items-center gap-3">
+                        <div className="flex-1 min-w-[200px]">
+                          <div className="flex items-center space-x-2">
+                            <span className="font-display font-bold text-white">{fest.name}</span>
+                            <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-black" style={{ background: statusColor + '22', color: statusColor }}>
+                              {statusLabel}
+                            </span>
+                          </div>
+                          <div className="flex flex-wrap items-center gap-2 mt-1">
+                            <span className="text-[10px] font-mono text-accent font-bold">{fest.percent}% OFF</span>
+                            <span className="text-[10px] font-mono text-gray-500">{fest.category || 'Site-wide'}</span>
+                            <span className="text-[10px] font-mono text-gray-600">
+                              {new Date(fest.start_date).toLocaleDateString()} G {new Date(fest.end_date).toLocaleDateString()}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-2 shrink-0">
+                          <button
+                            onClick={() => handleToggleFestivalActive(fest)}
+                            className={`px-3 py-1 rounded-lg text-[10px] font-mono font-bold border cursor-pointer transition ${
+                              fest.is_active
+                                ? 'bg-green-500/10 border-green-500/30 text-green-400 hover:bg-red-500/10 hover:border-red-500/30 hover:text-red-400'
+                                : 'bg-bg-surface border-bg-elevated text-gray-500 hover:border-accent hover:text-accent'
+                            }`}
+                          >
+                            {fest.is_active ? 'Active' : 'Inactive'}
+                          </button>
+                          <button
+                            onClick={() => handleEditFestival(fest)}
+                            className="px-3 py-1 rounded-lg text-[10px] font-mono border border-bg-elevated text-gray-400 hover:text-accent hover:border-accent cursor-pointer transition"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => handleDeleteFestival(fest)}
+                            className="px-3 py-1 rounded-lg text-[10px] font-mono border border-bg-elevated text-gray-400 hover:text-red-400 hover:border-red-500/30 cursor-pointer transition"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* GG FILAMENTS & STOCK TAB GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG */}
+        {activeSubTab === 'filaments' && !editingProduct && (
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+              
+              {/* Spool Form & Accessories Form */}
+              <div className="lg:col-span-5 space-y-6">
+                
+                {/* Spool Creator Form */}
+                <div className="bg-[#070b13] border border-border-premium rounded-2xl p-6 space-y-4">
+                  <h3 className="font-display font-black text-white text-sm uppercase tracking-wider">
+                    n+ Add Filament Spool
+                  </h3>
+                  <form onSubmit={handleCreateSpool} className="space-y-3 text-xs">
+                    <div>
+                      <label className="block text-[10px] font-mono text-gray-500 uppercase tracking-widest mb-1">Spool Name *</label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="e.g. PLA Black"
+                        value={spoolName}
+                        onChange={e => setSpoolName(e.target.value)}
+                        className="w-full bg-bg-base text-gray-200 px-3 py-2 rounded-xl border border-border-premium focus:border-accent focus:outline-none"
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-[10px] font-mono text-gray-500 tracking-widest mb-1">Type *</label>
+                        <select
+                          value={spoolType}
+                          onChange={e => setSpoolType(e.target.value)}
+                          className="w-full bg-bg-base text-gray-200 px-3 py-2 rounded-xl border border-border-premium focus:outline-none"
+                        >
+                          <option value="PLA">PLA</option>
+                          <option value="PETG">PETG</option>
+                          <option value="TPU">TPU</option>
+                          <option value="Resin">Resin</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-mono text-gray-500 tracking-widest mb-1">Color</label>
+                        <input
+                          type="text"
+                          placeholder="e.g. matte-black"
+                          value={spoolColor}
+                          onChange={e => setSpoolColor(e.target.value)}
+                          className="w-full bg-bg-base text-gray-200 px-3 py-2 rounded-xl border border-border-premium focus:border-accent focus:outline-none"
+                        />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-[10px] font-mono text-gray-500 tracking-widest mb-1">Brand</label>
+                        <input
+                          type="text"
+                          placeholder="e.g. Bambu Lab"
+                          value={spoolBrand}
+                          onChange={e => setSpoolBrand(e.target.value)}
+                          className="w-full bg-bg-base text-gray-200 px-3 py-2 rounded-xl border border-border-premium focus:border-accent focus:outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-mono text-gray-500 tracking-widest mb-1">Spool Weight (Grams)</label>
+                        <input
+                          type="number"
+                          required
+                          value={spoolWeight}
+                          onChange={e => setSpoolWeight(e.target.value)}
+                          className="w-full bg-bg-base text-gray-200 px-3 py-2 rounded-xl border border-border-premium focus:border-accent focus:outline-none font-mono"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-mono text-gray-500 tracking-widest mb-1">Purchase Price (BDT) *</label>
+                      <input
+                        type="number"
+                        required
+                        placeholder="e.g. 1200"
+                        value={spoolPrice}
+                        onChange={e => setSpoolPrice(e.target.value)}
+                        className="w-full bg-bg-base text-gray-200 px-3 py-2 rounded-xl border border-border-premium focus:border-accent focus:outline-none font-mono"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-mono text-gray-500 tracking-widest mb-1">Notes</label>
+                      <textarea
+                        placeholder="e.g. Spool #3, purchased from local distributor"
+                        value={spoolNotes}
+                        onChange={e => setSpoolNotes(e.target.value)}
+                        rows={2}
+                        className="w-full bg-bg-base text-gray-200 px-3 py-2 rounded-xl border border-border-premium focus:border-accent focus:outline-none resize-none"
+                      />
+                    </div>
+                    {spoolError && <p className="text-red-400 font-mono text-[10px]">{spoolError}</p>}
+                    {spoolSuccess && <p className="text-green-400 font-mono text-[10px]">{spoolSuccess}</p>}
+                    <button
+                      type="submit"
+                      disabled={isCreatingSpool}
+                      className="w-full py-2.5 rounded-xl bg-accent-secondary hover:bg-accent text-white font-bold transition disabled:opacity-50"
+                    >
+                      {isCreatingSpool ? 'Adding...' : 'Add Filament Spool'}
+                    </button>
+                  </form>
+                </div>
+
+                {/* Accessory Creator / Editor Form */}
+                <div className="bg-[#070b13] border border-border-premium rounded-2xl p-6 space-y-4">
+                  <h3 className="font-display font-black text-white text-sm uppercase tracking-wider">
+                    n+ Create / Update Accessory
+                  </h3>
+                  <form onSubmit={handleSaveAccessory} className="space-y-3 text-xs">
+                    <div>
+                      <label className="block text-[10px] font-mono text-gray-500 uppercase tracking-widest mb-1">Accessory Name *</label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="e.g. Keychain Ring"
+                        value={accFormName}
+                        onChange={e => setAccFormName(e.target.value)}
+                        className="w-full bg-bg-base text-gray-200 px-3 py-2 rounded-xl border border-border-premium focus:border-accent focus:outline-none"
+                      />
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-[10px] font-mono text-gray-500 tracking-widest mb-1">Unit *</label>
+                        <select
+                          value={accFormUnit}
+                          onChange={e => setAccFormUnit(e.target.value)}
+                          className="w-full bg-bg-base text-gray-200 px-3 py-2 rounded-xl border border-border-premium focus:outline-none"
+                        >
+                          <option value="piece">piece</option>
+                          <option value="ml">ml</option>
+                          <option value="gram">gram</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-mono text-gray-500 tracking-widest mb-1">Cost Per Unit (BDT) *</label>
+                        <input
+                          type="number"
+                          step="any"
+                          required
+                          placeholder="e.g. 5"
+                          value={accFormCost}
+                          onChange={e => setAccFormCost(e.target.value)}
+                          className="w-full bg-bg-base text-gray-200 px-3 py-2 rounded-xl border border-border-premium focus:border-accent focus:outline-none font-mono"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-mono text-gray-500 tracking-widest mb-1">Stock Count</label>
+                      <input
+                        type="number"
+                        required
+                        value={accFormStock}
+                        onChange={e => setAccFormStock(e.target.value)}
+                        className="w-full bg-bg-base text-gray-200 px-3 py-2 rounded-xl border border-border-premium focus:border-accent focus:outline-none font-mono"
+                      />
+                    </div>
+                    {accFormError && <p className="text-red-400 font-mono text-[10px]">{accFormError}</p>}
+                    {accFormSuccess && <p className="text-green-400 font-mono text-[10px]">{accFormSuccess}</p>}
+                    <button
+                      type="submit"
+                      disabled={isSavingAccessory}
+                      className="w-full py-2.5 rounded-xl bg-accent-secondary hover:bg-accent text-white font-bold transition disabled:opacity-50"
+                    >
+                      {isSavingAccessory ? 'Saving...' : 'Save Accessory'}
+                    </button>
+                  </form>
+                </div>
+
+              </div>
+
+              {/* Filament List Table & Accessories List Table */}
+              <div className="lg:col-span-7 space-y-6">
+                
+                {/* Spools Inventory table */}
+                <div className="bg-[#070b13] border border-border-premium rounded-2xl overflow-hidden">
+                  <div className="px-6 py-4 border-b border-border-premium flex items-center justify-between">
+                    <h3 className="font-display font-black text-white">Filament Spools</h3>
+                    <button onClick={fetchFilaments} className="text-[10px] font-mono text-gray-400 hover:text-accent cursor-pointer transition">
+                      G+ Refresh
+                    </button>
+                  </div>
+                  {isFilamentsLoading ? (
+                    <div className="p-8 text-center text-gray-400 font-mono text-xs">Loading spools...</div>
+                  ) : (
+                    <div className="overflow-x-auto bg-bg-base">
+                      <table className="w-full text-left border-collapse text-xs font-mono">
+                        <thead>
+                          <tr className="bg-bg-surface border-b border-border-premium text-text-secondary uppercase tracking-wider text-[10px]">
+                            <th className="p-3">Spool Name</th>
+                            <th className="p-3">Type</th>
+                            <th className="p-3">Color</th>
+                            <th className="p-3">Brand</th>
+                            <th className="p-3">Grams Remaining</th>
+                            <th className="p-3">Price</th>
+                            <th className="p-3">Status</th>
+                            <th className="p-3">Actions</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-border-premium text-text-secondary">
+                          {filaments.length === 0 ? (
+                            <tr>
+                              <td colSpan={8} className="p-6 text-center text-text-muted italic">No filament spools registered.</td>
+                            </tr>
+                          ) : (
+                            filaments.map(s => (
+                              <tr key={s.id} className={`hover:bg-bg-elevated/40 ${s.is_empty ? 'opacity-50' : ''}`}>
+                                <td className="p-3 font-bold text-text-primary">{s.name}</td>
+                                <td className="p-3">{s.type}</td>
+                                <td className="p-3">{s.color || 'G'}</td>
+                                <td className="p-3">{s.brand || 'G'}</td>
+                                <td className="p-3">
+                                  {s.is_empty ? '0g' : `${s.grams_remaining}g / ${s.spool_weight_grams}g`}
+                                </td>
+                                <td className="p-3 text-accent font-bold">a{s.purchase_price_bdt}</td>
+                                <td className="p-3">
+                                  <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${s.is_empty ? 'bg-red-500/10 text-red-400 border border-red-500/20' : 'bg-green-500/10 text-green-400 border border-green-500/20'}`}>
+                                    {s.is_empty ? 'EMPTY' : 'ACTIVE'}
+                                  </span>
+                                </td>
+                                <td className="p-3">
+                                  <div className="flex space-x-2">
+                                    {!s.is_empty && (
+                                      <button
+                                        onClick={() => handleMarkSpoolEmpty(s.id)}
+                                        className="px-2 py-1 rounded bg-orange-500/10 hover:bg-orange-600 text-orange-400 hover:text-white border border-orange-500/20 text-[10px] transition cursor-pointer"
+                                      >
+                                        Mark Empty
+                                      </button>
+                                    )}
+                                    <button
+                                      onClick={() => handleDeleteSpool(s.id)}
+                                      className="p-1 rounded hover:bg-red-500/10 text-text-muted hover:text-red-400 transition cursor-pointer"
+                                    >
+                                      <Trash2 className="w-3.5 h-3.5" />
+                                    </button>
+                                  </div>
+                                </td>
+                              </tr>
+                            ))
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+
+                {/* Weighted Average Cost per gram for each unique filament name */}
+                <div className="bg-[#070b13] border border-border-premium rounded-2xl p-6 space-y-4">
+                  <h4 className="font-display font-bold text-sm text-text-primary uppercase tracking-wider">
+                    Weighted Average Cost per Gram
+                  </h4>
+                  <p className="text-text-secondary text-xs">
+                    These are the calculated weighted averages used as input costs in floor pricing.
+                  </p>
+                  <div className="overflow-x-auto border border-border-premium rounded-xl bg-bg-base">
+                    <table className="w-full text-left border-collapse text-xs font-mono">
+                      <thead>
+                        <tr className="bg-bg-surface border-b border-border-premium text-text-secondary uppercase tracking-wider text-[10px]">
+                          <th className="p-3">Filament Name</th>
+                          <th className="p-3">Type</th>
+                          <th className="p-3">Color</th>
+                          <th className="p-3">Brand</th>
+                          <th className="p-3">Active Spools</th>
+                          <th className="p-3">Cost per Gram</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-border-premium text-text-secondary">
+                        {(() => {
+                          const activeSpools = filaments.filter(s => !s.is_empty);
+                          const groups: Record<string, { totalCost: number; totalWeight: number; type: string; color: string; brand: string; count: number }> = {};
+                          activeSpools.forEach(s => {
+                            if (!groups[s.name]) {
+                              groups[s.name] = { totalCost: 0, totalWeight: 0, type: s.type, color: s.color || '', brand: s.brand || '', count: 0 };
+                            }
+                            groups[s.name].totalCost += Number(s.purchase_price_bdt);
+                            groups[s.name].totalWeight += Number(s.spool_weight_grams);
+                            groups[s.name].count += 1;
+                          });
+
+                          const entries = Object.entries(groups);
+                          if (entries.length === 0) {
+                            return (
+                              <tr>
+                                <td colSpan={6} className="p-3 text-center text-text-muted italic">No active spools to compute averages.</td>
+                              </tr>
+                            );
+                          }
+
+                          return entries.map(([name, data]) => {
+                            const costPerGram = data.totalWeight > 0 ? (data.totalCost / data.totalWeight) : 0;
+                            return (
+                              <tr key={name} className="hover:bg-bg-elevated/40">
+                                <td className="p-3 font-bold text-text-primary">{name}</td>
+                                <td className="p-3">{data.type}</td>
+                                <td className="p-3">{data.color || 'G'}</td>
+                                <td className="p-3">{data.brand || 'G'}</td>
+                                <td className="p-3">{data.count}</td>
+                                <td className="p-3 text-accent font-bold">a{costPerGram.toFixed(3)}/g</td>
+                              </tr>
+                            );
+                          });
+                        })()}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                {/* Accessories stock count & cost manager */}
+                <div className="bg-[#070b13] border border-border-premium rounded-2xl overflow-hidden">
+                  <div className="px-6 py-4 border-b border-border-premium flex items-center justify-between">
+                    <h3 className="font-display font-black text-white">Accessories Inventory</h3>
+                    <button onClick={fetchAccessories} className="text-[10px] font-mono text-gray-400 hover:text-accent cursor-pointer transition">
+                      G+ Refresh
+                    </button>
+                  </div>
+                  {isAccessoriesLoading ? (
+                    <div className="p-8 text-center text-gray-400 font-mono text-xs">Loading accessories...</div>
+                  ) : (
+                    <div className="overflow-x-auto bg-bg-base">
+                      <table className="w-full text-left border-collapse text-xs font-mono">
+                        <thead>
+                          <tr className="bg-bg-surface border-b border-border-premium text-text-secondary uppercase tracking-wider text-[10px]">
+                            <th className="p-3">Accessory Name</th>
+                            <th className="p-3">Unit</th>
+                            <th className="p-3">Cost per Unit</th>
+                            <th className="p-3">Stock Count</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-border-premium text-text-secondary">
+                          {accessories.length === 0 ? (
+                            <tr>
+                              <td colSpan={4} className="p-6 text-center text-text-muted italic">No accessories registered.</td>
+                            </tr>
+                          ) : (
+                            accessories.map(a => (
+                              <tr
+                                key={a.id}
+                                onClick={() => {
+                                  setAccFormName(a.name);
+                                  setAccFormUnit(a.unit);
+                                  setAccFormCost(String(a.cost_per_unit_bdt));
+                                  setAccFormStock(String(a.stock_count));
+                                }}
+                                className="hover:bg-bg-elevated/40 cursor-pointer"
+                                title="Click to edit accessory details"
+                              >
+                                <td className="p-3 font-bold text-text-primary">{a.name}</td>
+                                <td className="p-3">{a.unit}</td>
+                                <td className="p-3 text-accent font-bold">a{a.cost_per_unit_bdt}</td>
+                                <td className="p-3">{a.stock_count}</td>
+                              </tr>
+                            ))
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+
+              </div>
+
+            </div>
+          </div>
+        )}
+
+        {/* GG PRICE HEALTH TAB GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG */}
+        {activeSubTab === 'pricehealth' && !editingProduct && (
+          <div className="space-y-6">
+            <div className="bg-[#070b13] border border-border-premium rounded-2xl p-6 overflow-hidden">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border-premium pb-4 mb-4">
+                <div className="text-left font-mono">
+                  <h3 className="font-display font-extrabold text-base text-text-primary uppercase tracking-wide">
+                    Gn+ Price Health Dashboard
+                  </h3>
+                  <p className="text-[10px] text-text-secondary mt-1">
+                    Products flagged with <span className="text-orange-400 font-bold">needs_price_review = true</span> (selling price is below the recommended floor price).
+                  </p>
+                </div>
+                {products.some(p => p.needs_price_review) && (
+                  <button
+                    onClick={handleBulkUpdateToRecommended}
+                    className="px-4 py-2 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-bold text-xs transition border-0 cursor-pointer"
+                  >
+                    Bulk Update All Flagged
+                  </button>
+                )}
+              </div>
+
+              <div className="overflow-x-auto bg-bg-base border border-border-premium rounded-xl">
+                <table className="w-full text-left border-collapse text-xs font-mono">
+                  <thead>
+                    <tr className="bg-bg-surface border-b border-border-premium text-text-secondary uppercase tracking-wider text-[10px]">
+                      <th className="p-3">SKU / ID</th>
+                      <th className="p-3">Product Title</th>
+                      <th className="p-3">Category</th>
+                      <th className="p-3">Current Price</th>
+                      <th className="p-3">Recommended Floor</th>
+                      <th className="p-3">Margin Gap</th>
+                      <th className="p-3">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border-premium text-text-secondary">
+                    {(() => {
+                      const flagged = products.filter(p => p.needs_price_review);
+                      if (flagged.length === 0) {
+                        return (
+                          <tr>
+                            <td colSpan={7} className="p-8 text-center text-green-400 font-bold">
+                              G All products are financially healthy! No price updates required.
+                            </td>
+                          </tr>
+                        );
+                      }
+                      return flagged.map(p => {
+                        const gap = (p.floor_price_bdt || 0) - p.price;
+                        return (
+                          <tr key={p.id} className="hover:bg-bg-elevated/40">
+                            <td className="p-3 font-bold text-accent">{p.id}</td>
+                            <td className="p-3 font-sans font-bold text-text-primary">{p.title}</td>
+                            <td className="p-3">{p.category}</td>
+                            <td className="p-3 text-red-400 font-bold">a{p.price}</td>
+                            <td className="p-3 text-green-400 font-bold">a{p.floor_price_bdt}</td>
+                            <td className="p-3 text-orange-400 font-bold">a{gap} below floor</td>
+                            <td className="p-3">
+                              <button
+                                onClick={() => handleUpdateToRecommended(p)}
+                                className="px-3 py-1 rounded bg-accent-secondary hover:bg-accent text-white font-bold text-[10px] transition cursor-pointer"
+                              >
+                                Set to Recommended
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      });
+                    })()}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* GG STORE SETTINGS TAB GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG */}
+        {activeSubTab === 'settings' && !editingProduct && (
+          <div className="space-y-6">
+            <div className="bg-[#070b13] border border-border-premium rounded-2xl p-6">
+              <h3 className="font-display font-black text-white text-base mb-4 flex items-center space-x-2">
+                <Settings className="w-5 h-5 text-accent" />
+                <span>Store Settings</span>
+              </h3>
+              <p className="text-text-secondary text-xs mb-6">
+                Edit global pricing engine variables. These settings are applied when calculating product floor prices if specific override margin settings are not set.
+              </p>
+
+              {isSettingsLoading ? (
+                <div className="p-8 text-center text-gray-400 font-mono text-xs">Loading settings...</div>
+              ) : (
+                <form onSubmit={handleSaveHubSettings} className="space-y-4 max-w-xl text-xs text-left">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-[10px] font-mono text-gray-500 uppercase tracking-widest mb-1">
+                        Default Profit Margin (%)
+                      </label>
+                      <input
+                        type="number"
+                        min="0"
+                        max="99"
+                        required
+                        value={hubSettings.default_target_margin || ''}
+                        onChange={e => setHubSettings({ ...hubSettings, default_target_margin: e.target.value })}
+                        className="w-full bg-bg-base text-gray-200 px-3.5 py-2.5 rounded-xl border border-border-premium focus:border-accent focus:outline-none font-mono"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-mono text-gray-500 uppercase tracking-widest mb-1">
+                        Platform Referral Fee (%)
+                      </label>
+                      <input
+                        type="number"
+                        step="any"
+                        required
+                        value={hubSettings.platform_fee_percent || ''}
+                        onChange={e => setHubSettings({ ...hubSettings, platform_fee_percent: e.target.value })}
+                        className="w-full bg-bg-base text-gray-200 px-3.5 py-2.5 rounded-xl border border-border-premium focus:border-accent focus:outline-none font-mono"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-[10px] font-mono text-gray-500 uppercase tracking-widest mb-1">
+                        Electricity Cost (a/hr)
+                      </label>
+                      <input
+                        type="number"
+                        step="any"
+                        required
+                        value={hubSettings.electricity_cost_per_hour || ''}
+                        onChange={e => setHubSettings({ ...hubSettings, electricity_cost_per_hour: e.target.value })}
+                        className="w-full bg-bg-base text-gray-200 px-3.5 py-2.5 rounded-xl border border-border-premium focus:border-accent focus:outline-none font-mono"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-mono text-gray-500 uppercase tracking-widest mb-1">
+                        Printer Depreciation (a/hr)
+                      </label>
+                      <input
+                        type="number"
+                        step="any"
+                        required
+                        value={hubSettings.depreciation_cost_per_hour || ''}
+                        onChange={e => setHubSettings({ ...hubSettings, depreciation_cost_per_hour: e.target.value })}
+                        className="w-full bg-bg-base text-gray-200 px-3.5 py-2.5 rounded-xl border border-border-premium focus:border-accent focus:outline-none font-mono"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-mono text-gray-500 uppercase tracking-widest mb-1">
+                        Flat Packaging Cost (a)
+                      </label>
+                      <input
+                        type="number"
+                        step="any"
+                        required
+                        value={hubSettings.packaging_cost_flat || ''}
+                        onChange={e => setHubSettings({ ...hubSettings, packaging_cost_flat: e.target.value })}
+                        className="w-full bg-bg-base text-gray-200 px-3.5 py-2.5 rounded-xl border border-border-premium focus:border-accent focus:outline-none font-mono"
+                      />
+                    </div>
+                  </div>
+
+                  {settingsError && <p className="text-red-400 font-mono">{settingsError}</p>}
+                  {settingsSuccess && <p className="text-green-400 font-mono">{settingsSuccess}</p>}
+
+                  <button
+                    type="submit"
+                    disabled={isSavingSettings}
+                    className="px-6 py-2.5 bg-accent-secondary hover:bg-accent text-white font-bold rounded-xl transition disabled:opacity-50 cursor-pointer"
+                  >
+                    {isSavingSettings ? 'Saving...' : 'Save Settings'}
+                  </button>
+                </form>
+              )}
+            </div>
+          </div>
+        )}
+
+        {activeSubTab === 'support-logs' && !editingProduct && (
+          <div className="space-y-6">
+            <div className="bg-[#070b13] border border-border-premium rounded-2xl p-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border-premium pb-4 mb-6">
+                <div className="text-left font-mono">
+                  <h3 className="font-display font-black text-white text-base flex items-center space-x-2">
+                    <MessageSquare className="w-5 h-5 text-accent" />
+                    <span>Unmatched Customer Support Queries</span>
+                  </h3>
+                  <p className="text-[10px] text-text-secondary mt-1">
+                    TOTAL LOGGED FAILURES: <span className="text-accent font-bold">{unmatchedQuestions.length}</span> ITEMS
+                  </p>
+                </div>
+
+                <div className="flex gap-2">
+                  <button
+                    onClick={fetchUnmatchedQuestions}
+                    disabled={isUnmatchedLoading}
+                    className="px-3.5 py-2 rounded-lg bg-bg-surface border border-border-premium hover:border-gray-500 text-text-primary text-xs font-semibold cursor-pointer disabled:opacity-50 transition"
+                  >
+                    Refresh Logs
+                  </button>
+                  <button
+                    onClick={handleClearUnmatched}
+                    disabled={isUnmatchedLoading || unmatchedQuestions.length === 0}
+                    className="px-3.5 py-2 rounded-lg bg-red-950/15 border border-red-500/20 text-red-400 hover:bg-red-950/30 text-xs font-semibold cursor-pointer disabled:opacity-50 transition"
+                  >
+                    Clear All Logs
+                  </button>
+                </div>
+              </div>
+
+              {unmatchedError && (
+                <div className="p-4 bg-red-950/15 border border-red-500/20 text-red-400 font-mono text-xs rounded-xl mb-4 text-left">
+                  {unmatchedError}
+                </div>
+              )}
+
+              {unmatchedSuccess && (
+                <div className="p-4 bg-green-950/15 border border-green-500/20 text-green-400 font-mono text-xs rounded-xl mb-4 text-left">
+                  {unmatchedSuccess}
+                </div>
+              )}
+
+              {isUnmatchedLoading ? (
+                <div className="py-12 text-center text-text-muted font-mono text-xs flex flex-col items-center justify-center gap-3">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-accent" />
+                  <span>Fetching unmatched support query logs from server...</span>
+                </div>
+              ) : unmatchedQuestions.length === 0 ? (
+                <div className="py-16 text-center text-text-muted border border-dashed border-border-premium rounded-xl text-xs space-y-2">
+                  <CheckCircle className="w-8 h-8 text-green-500/40 mx-auto" />
+                  <p className="font-bold text-text-primary">No unmatched questions logged!</p>
+                  <p className="max-w-xs mx-auto text-[11px] leading-relaxed">
+                    The support chatbot has matched all customer queries, or the logs have been cleared.
+                  </p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto border border-border-premium rounded-xl">
+                  <table className="w-full text-left border-collapse text-xs">
+                    <thead>
+                      <tr className="bg-bg-elevated/45 text-[10px] font-mono text-text-secondary uppercase tracking-wider border-b border-border-premium">
+                        <th className="p-3 w-40">Timestamp</th>
+                        <th className="p-3 w-32">Log ID</th>
+                        <th className="p-3">Unmatched Customer Query</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border-premium text-text-secondary">
+                      {unmatchedQuestions.map((q) => (
+                        <tr key={q.id} className="hover:bg-bg-elevated/20 font-mono text-[11px]">
+                          <td className="p-3 text-text-muted">
+                            {new Date(q.timestamp).toLocaleString('en-US', {
+                              year: 'numeric',
+                              month: 'short',
+                              day: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit',
+                              second: '2-digit'
+                            })}
+                          </td>
+                          <td className="p-3 text-accent font-bold">{q.id}</td>
+                          <td className="p-3 font-sans text-xs text-text-primary bg-bg-base/30 whitespace-pre-wrap leading-relaxed">
+                            {q.message}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
     </section>
+
   );
 }

@@ -7,6 +7,8 @@ interface ChatMessage {
   sender: 'user' | 'bot';
   text: string;
   timestamp: string;
+  unmatched?: boolean;
+  originalQuestion?: string;
 }
 
 export default function SupportChat() {
@@ -77,6 +79,8 @@ export default function SupportChat() {
             sender: 'bot',
             text: data.reply,
             timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            unmatched: data.unmatched,
+            originalQuestion: textToSend,
           },
         ]);
       } else {
@@ -195,6 +199,22 @@ export default function SupportChat() {
                           : 'bg-accent-secondary text-text-on-accent rounded-tr-none shadow-md shadow-accent-secondary/10'
                       }`}>
                         {m.text}
+
+                        {isBot && m.unmatched && m.originalQuestion && (
+                          <div className="mt-3 pt-2 border-t border-border-premium/50">
+                            <a
+                              href={`https://wa.me/8801607062907?text=${encodeURIComponent(m.originalQuestion)}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center space-x-2 px-3 py-1.5 bg-bg-surface hover:bg-bg-elevated border border-green-500/20 hover:border-green-500/40 text-green-400 hover:text-green-300 rounded-lg text-[10px] font-mono font-bold transition shadow-sm hover:shadow-[0_0_8px_rgba(34,197,94,0.08)] cursor-pointer select-none"
+                            >
+                              <svg className="w-3.5 h-3.5 fill-current text-green-400" viewBox="0 0 24 24">
+                                <path d="M12.012 2c-5.506 0-9.989 4.478-9.99 9.984a9.96 9.96 0 0 0 1.333 4.982L2 22l5.233-1.372a9.948 9.948 0 0 0 4.777 1.22h.005c5.505 0 9.988-4.478 9.989-9.985a9.966 9.966 0 0 0-2.926-7.062A9.97 9.97 0 0 0 12.012 2zm5.727 14.13c-.25.706-1.443 1.282-1.996 1.37-.51.082-1.18.15-3.41-.774-2.85-1.18-4.683-4.08-4.825-4.27-.14-.19-1.146-1.524-1.146-2.907 0-1.383.722-2.062 1.002-2.344.28-.28.61-.35.81-.35h.583c.18 0 .43.01.62.46.21.51.72 1.76.78 1.88.06.12.1.26.02.43-.08.17-.18.28-.3.43-.12.15-.26.3-.37.45-.11.12-.24.26-.1.5.14.24.63 1.04 1.36 1.69.93.83 1.72 1.09 1.96 1.21.24.12.38.1.52-.06.14-.17.62-.72.79-.97.17-.25.34-.21.57-.12.24.09 1.5.71 1.76.84.26.13.43.19.5.3.06.12.06.69-.19 1.4z" />
+                              </svg>
+                              <span>CHAT ON WHATSAPP</span>
+                            </a>
+                          </div>
+                        )}
                       </div>
                       <span className={`block text-[8px] font-mono text-text-muted ${isBot ? 'text-left' : 'text-right'}`}>
                         {m.timestamp}

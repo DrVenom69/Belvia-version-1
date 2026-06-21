@@ -7,3 +7,14 @@ node_modules/
 dist/
 belvia-3d-studio/
 belvia-3d-studio.zip
+
+# Data files with sensitive content — moved out of public/ to root data/
+# These contain real customer PII and should NOT be served as public static files.
+*.bak
+
+# Local database files
+data/orders.json
+data/settings.json
+data/unmatched_questions.json
+
+.vercel

@@ -41,25 +41,44 @@ const PORT = 3000;
 // Middleware
 app.use(express.json({ limit: "10mb" }));
 
-// Protect private data directory from static/direct requests
-app.use("/data", (req, res) => {
-  res.status(404).send("Not Found");
+// ── Block all HTTP methods on /data/* ──────────────────────────────────────
+// Explicitly returns 404 for any request to /data/ regardless of method.
+// This is an active route — not passive middleware — so it is independent
+// of whether the data/ directory is ever registered as a static folder.
+app.all("/data/*path", (_req: express.Request, res: express.Response) => {
+  res.status(404).end();
 });
 
 // ── Admin API Key Authentication Middleware ──────────────────────────────
 // Protects admin write endpoints. Clients must send x-admin-key header
 // matching the ADMIN_SECRET_KEY environment variable.
 const ADMIN_SECRET_KEY = process.env.ADMIN_SECRET_KEY || "";
+const ADMIN_KEY_DEFAULT_PLACEHOLDER = "change-this-to-a-random-secret-key";
+const IS_PRODUCTION = process.env.NODE_ENV === "production";
 
-// Warn on startup if the secret is still the default or empty
-if (!ADMIN_SECRET_KEY) {
-  console.warn("⚠️  ADMIN_SECRET_KEY is not set! Admin endpoints have no authentication.");
-} else if (ADMIN_SECRET_KEY === "change-this-to-a-random-secret-key") {
-  console.warn("⚠️  ADMIN_SECRET_KEY is still the default! Generate a strong random key.");
+// ── Production startup guard ────────────────────────────────────────────────
+// In production, an empty or placeholder ADMIN_SECRET_KEY is a critical
+// misconfiguration. We refuse to start rather than silently open admin access.
+if (IS_PRODUCTION) {
+  if (!ADMIN_SECRET_KEY || ADMIN_SECRET_KEY === ADMIN_KEY_DEFAULT_PLACEHOLDER) {
+    throw new Error(
+      "[FATAL] ADMIN_SECRET_KEY is not set or is still the default placeholder. " +
+      "Set a strong, randomly-generated secret in your environment variables before deploying to production. " +
+      "The server will not start until this is resolved."
+    );
+  }
+} else {
+  // Development: passive warnings only — do not block startup.
+  if (!ADMIN_SECRET_KEY) {
+    console.warn("⚠️  ADMIN_SECRET_KEY is not set! Admin endpoints have no authentication in development.");
+  } else if (ADMIN_SECRET_KEY === ADMIN_KEY_DEFAULT_PLACEHOLDER) {
+    console.warn("⚠️  ADMIN_SECRET_KEY is still the default placeholder! Generate a strong random key before deploying.");
+  }
 }
 
 function requireAdminAuth(req: express.Request, res: express.Response, next: express.NextFunction): void {
-  // If no secret is configured, skip auth (dev/convenience mode)
+  // In production the startup guard above ensures ADMIN_SECRET_KEY is always set,
+  // so this branch can only be reached in development. Skip auth for convenience.
   if (!ADMIN_SECRET_KEY) {
     next();
     return;
@@ -152,6 +171,7 @@ app.get("/api/get-products", async (_req: express.Request, res: express.Response
         carousel_order: item.carousel_order || 0,
         resin_enabled: item.resin_enabled || false,
         resin_price: item.resin_price !== undefined && item.resin_price !== null ? (typeof item.resin_price === 'number' ? item.resin_price : parseFloat(item.resin_price) || 0) : null,
+        is_trendy: item.is_trendy || false,
         specifications: {
           dimensions: item.dimensions || "",
           layerHeight: "0.16mm",
@@ -204,7 +224,9 @@ app.get("/api/get-categories", async (_req: express.Request, res: express.Respon
         { name: "Premium Hardware", parent_group: "Custom & Other" },
         { name: "Imported Goods", parent_group: "Custom & Other" },
         { name: "A1 Mini Mods", parent_group: "Custom & Other" },
-        { name: "Hotends", parent_group: "Custom & Other" }
+        { name: "Hotends", parent_group: "Custom & Other" },
+        { name: "League of Legends", parent_group: null },
+        { name: "Skeleton", parent_group: "Figures & Collectibles" }
       ];
       await fs.promises.writeFile(dbPath, JSON.stringify(fallbackCategories, null, 2), "utf-8");
       res.json(fallbackCategories);
@@ -243,7 +265,7 @@ app.post("/api/save-products", requireAdminAuth, async (req: express.Request, re
               .maybeSingle();
 
             if (!existingCat) {
-              let parent_group = "Custom & Other"; // fallback parent group
+              let parent_group: string | null = null; // fallback to top-level
               if (["Keychains", "Business Merchandise"].includes(catName)) parent_group = "Accessories & Merch";
               else if (["Home Decor", "Figures & Collectibles"].includes(catName)) parent_group = "Art & Sculptures";
               else if (["Desk Accessories", "Functional Prints"].includes(catName)) parent_group = "Desk & Organisation";
@@ -276,7 +298,9 @@ app.post("/api/save-products", requireAdminAuth, async (req: express.Request, re
               { name: "Premium Hardware", parent_group: "Custom & Other" },
               { name: "Imported Goods", parent_group: "Custom & Other" },
               { name: "A1 Mini Mods", parent_group: "Custom & Other" },
-              { name: "Hotends", parent_group: "Custom & Other" }
+              { name: "Hotends", parent_group: "Custom & Other" },
+              { name: "League of Legends", parent_group: null },
+              { name: "Skeleton", parent_group: "Figures & Collectibles" }
             ];
           }
 
@@ -284,7 +308,7 @@ app.post("/api/save-products", requireAdminAuth, async (req: express.Request, re
           for (const catName of uniqueCategories) {
             const exists = currentCategories.some((c: any) => c.name.toLowerCase() === catName.toLowerCase());
             if (!exists) {
-              let parent_group = "Custom & Other";
+              let parent_group: string | null = null;
               if (["Keychains", "Business Merchandise"].includes(catName)) parent_group = "Accessories & Merch";
               else if (["Home Decor", "Figures & Collectibles"].includes(catName)) parent_group = "Art & Sculptures";
               else if (["Desk Accessories", "Functional Prints"].includes(catName)) parent_group = "Desk & Organisation";
@@ -346,6 +370,7 @@ app.post("/api/save-products", requireAdminAuth, async (req: express.Request, re
           carousel_order: typeof item.carousel_order === 'number' ? item.carousel_order : parseInt(item.carousel_order) || 0,
           resin_enabled: item.resin_enabled || false,
           resin_price: item.resin_price !== undefined && item.resin_price !== null ? (typeof item.resin_price === 'number' ? item.resin_price : parseFloat(item.resin_price) || 0) : null,
+          is_trendy: item.is_trendy || false,
           updated_at: new Date().toISOString()
         };
       });
@@ -407,6 +432,7 @@ app.post("/api/save-products", requireAdminAuth, async (req: express.Request, re
         carousel_order: typeof item.carousel_order === 'number' ? item.carousel_order : parseInt(item.carousel_order) || 0,
         resin_enabled: item.resin_enabled || false,
         resin_price: item.resin_price !== undefined && item.resin_price !== null ? (typeof item.resin_price === 'number' ? item.resin_price : parseFloat(item.resin_price) || 0) : null,
+        is_trendy: item.is_trendy || false,
         specifications: {
           dimensions: item.dimensions || "",
           layerHeight: item.layerHeight || "0.16mm",
@@ -445,7 +471,7 @@ app.post("/api/admin/create-category", requireAdminAuth, async (req: express.Req
       return;
     }
     const cleanName = name.trim();
-    const resolvedParentGroup = parent_group && typeof parent_group === "string" ? parent_group.trim() : "Custom & Other";
+    const resolvedParentGroup = parent_group && typeof parent_group === "string" && parent_group.trim() !== "" ? parent_group.trim() : null;
 
     if (isSupabaseConfigured) {
       const { data: existing } = await supabaseAdmin!
@@ -491,7 +517,9 @@ app.post("/api/admin/create-category", requireAdminAuth, async (req: express.Req
         { name: "Premium Hardware", parent_group: "Custom & Other" },
         { name: "Imported Goods", parent_group: "Custom & Other" },
         { name: "A1 Mini Mods", parent_group: "Custom & Other" },
-        { name: "Hotends", parent_group: "Custom & Other" }
+        { name: "Hotends", parent_group: "Custom & Other" },
+        { name: "League of Legends", parent_group: null },
+        { name: "Skeleton", parent_group: "Figures & Collectibles" }
       ];
     }
 
@@ -509,6 +537,94 @@ app.post("/api/admin/create-category", requireAdminAuth, async (req: express.Req
   } catch (err: any) {
     console.error("Failed to create category:", err);
     res.status(500).json({ error: "Failed to create category: " + err.message });
+  }
+});
+
+// DELETE category endpoint
+app.delete("/api/admin/categories/:name", requireAdminAuth, async (req: express.Request, res: express.Response): Promise<void> => {
+  const { name } = req.params;
+  if (!name) {
+    res.status(400).json({ error: "Category name is required" });
+    return;
+  }
+  const targetName = name.trim();
+
+  try {
+    // 1. Check whether any products currently reference this category by name
+    let productCount = 0;
+    if (isSupabaseConfigured) {
+      const { count, error: countError } = await supabaseAdmin!
+        .from("products")
+        .select("*", { count: "exact", head: true })
+        .eq("category", targetName);
+
+      if (countError) throw new Error(countError.message);
+      productCount = count || 0;
+    } else {
+      const prodDbPath = path.join(process.cwd(), "data", "products.json");
+      if (fs.existsSync(prodDbPath)) {
+        const raw = await fs.promises.readFile(prodDbPath, "utf-8");
+        const products = JSON.parse(raw);
+        productCount = products.filter((p: any) => p.category === targetName).length;
+      }
+    }
+
+    if (productCount > 0) {
+      res.status(400).json({
+        error: `Cannot delete — ${productCount} product${productCount > 1 ? "s" : ""} still use${productCount === 1 ? "s" : ""} this category.`
+      });
+      return;
+    }
+
+    // 2. Check whether any other categories have this category set as their parent_group
+    let subCategoryCount = 0;
+    if (isSupabaseConfigured) {
+      const { count, error: countError } = await supabaseAdmin!
+        .from("categories")
+        .select("*", { count: "exact", head: true })
+        .eq("parent_group", targetName);
+
+      if (countError) throw new Error(countError.message);
+      subCategoryCount = count || 0;
+    } else {
+      const catDbPath = path.join(process.cwd(), "data", "categories.json");
+      if (fs.existsSync(catDbPath)) {
+        const raw = await fs.promises.readFile(catDbPath, "utf-8");
+        const categories = JSON.parse(raw);
+        subCategoryCount = categories.filter((c: any) => c.parent_group === targetName).length;
+      }
+    }
+
+    if (subCategoryCount > 0) {
+      res.status(400).json({
+        error: `Cannot delete — ${subCategoryCount} sub-categor${subCategoryCount > 1 ? "ies are" : "y is"} nested under this category.`
+      });
+      return;
+    }
+
+    // 3. Remove the category
+    if (isSupabaseConfigured) {
+      const { error } = await supabaseAdmin!
+        .from("categories")
+        .delete()
+        .eq("name", targetName);
+
+      if (error) throw new Error(error.message);
+    }
+
+    // Always sync filesystem fallback
+    const catDbPath = path.join(process.cwd(), "data", "categories.json");
+    if (fs.existsSync(catDbPath)) {
+      const raw = await fs.promises.readFile(catDbPath, "utf-8");
+      const categories = JSON.parse(raw);
+      const filtered = categories.filter((c: any) => c.name !== targetName);
+      await fs.promises.writeFile(catDbPath, JSON.stringify(filtered, null, 2), "utf-8");
+    }
+
+    res.json({ success: true, message: `Category "${targetName}" successfully deleted.` });
+  } catch (err: any) {
+    console.error("Failed to delete category:", err);
+    res.status(500).json({ error: "Failed to delete category: " + err.message });
   }
 });
 

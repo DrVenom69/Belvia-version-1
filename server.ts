@@ -76,6 +76,56 @@ if (IS_PRODUCTION) {
   }
 }
 
+// ── Admin Auth Rate Limiter ─────────────────────────────────────────────────
+// Tracks consecutive failures per IP in a rolling 15-minute window.
+// After RATE_LIMIT_MAX_FAILURES the IP is locked out for RATE_LIMIT_LOCKOUT_MS.
+// A correct key immediately clears the IP's failure counter.
+const RATE_LIMIT_MAX_FAILURES = 5;
+const RATE_LIMIT_WINDOW_MS    = 15 * 60 * 1000; // 15 minutes
+const RATE_LIMIT_LOCKOUT_MS   = 15 * 60 * 1000; // 15-minute cooldown
+
+interface IpRecord {
+  failures:    number;
+  windowStart: number; // ms since epoch when the current window opened
+  lockedUntil: number; // 0 = not locked
+}
+const authFailureMap = new Map<string, IpRecord>();
+
+// In-memory audit log — newest first, capped at 500 entries.
+interface AuthFailEntry {
+  id:        string;
+  timestamp: string; // ISO-8601
+  ip:        string;
+  path:      string;
+  reason:    'missing_key' | 'invalid_key' | 'rate_limited';
+}
+const authFailLog: AuthFailEntry[] = [];
+const AUTH_FAIL_LOG_MAX = 500;
+
+function recordAuthFailure(
+  ip: string,
+  path: string,
+  reason: AuthFailEntry['reason']
+): void {
+  const entry: AuthFailEntry = {
+    id:        `afl-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+    timestamp: new Date().toISOString(),
+    ip,
+    path,
+    reason
+  };
+  authFailLog.unshift(entry);
+  if (authFailLog.length > AUTH_FAIL_LOG_MAX) authFailLog.length = AUTH_FAIL_LOG_MAX;
+  console.warn(`[Auth] Failed attempt — ip=${ip} path=${path} reason=${reason}`);
+}
+
+function getClientIp(req: express.Request): string {
+  // Honour standard reverse-proxy headers; fall back to socket address.
+  const forwarded = req.headers['x-forwarded-for'];
+  if (typeof forwarded === 'string') return forwarded.split(',')[0].trim();
+  return req.socket?.remoteAddress || 'unknown';
+}
+
 function requireAdminAuth(req: express.Request, res: express.Response, next: express.NextFunction): void {
   // In production the startup guard above ensures ADMIN_SECRET_KEY is always set,
   // so this branch can only be reached in development. Skip auth for convenience.
@@ -84,18 +134,58 @@ function requireAdminAuth(req: express.Request, res: express.Response, next: exp
     return;
   }
 
-  const providedKey = req.headers["x-admin-key"] as string | undefined;
+  const ip  = getClientIp(req);
+  const now = Date.now();
+
+  // ── Check / initialise the IP record ──
+  let record = authFailureMap.get(ip);
+  if (!record) {
+    record = { failures: 0, windowStart: now, lockedUntil: 0 };
+    authFailureMap.set(ip, record);
+  }
+
+  // ── Hard lockout check ──
+  if (record.lockedUntil > now) {
+    const secsLeft = Math.ceil((record.lockedUntil - now) / 1000);
+    recordAuthFailure(ip, req.path, 'rate_limited');
+    res.status(429).json({
+      error: `Too many failed attempts. Try again in ${secsLeft} seconds.`,
+      retryAfterSeconds: secsLeft
+    });
+    return;
+  }
+
+  // ── Rolling window reset ──
+  if (now - record.windowStart > RATE_LIMIT_WINDOW_MS) {
+    record.failures    = 0;
+    record.windowStart = now;
+    record.lockedUntil = 0;
+  }
+
+  const providedKey = req.headers['x-admin-key'] as string | undefined;
 
   if (!providedKey) {
-    res.status(401).json({ error: "Unauthorized. Missing x-admin-key header." });
+    record.failures++;
+    if (record.failures >= RATE_LIMIT_MAX_FAILURES) {
+      record.lockedUntil = now + RATE_LIMIT_LOCKOUT_MS;
+    }
+    recordAuthFailure(ip, req.path, 'missing_key');
+    res.status(401).json({ error: 'Unauthorized. Missing x-admin-key header.' });
     return;
   }
 
   if (providedKey !== ADMIN_SECRET_KEY) {
-    res.status(401).json({ error: "Unauthorized. Invalid admin key." });
+    record.failures++;
+    if (record.failures >= RATE_LIMIT_MAX_FAILURES) {
+      record.lockedUntil = now + RATE_LIMIT_LOCKOUT_MS;
+    }
+    recordAuthFailure(ip, req.path, 'invalid_key');
+    res.status(401).json({ error: 'Unauthorized. Invalid admin key.' });
     return;
   }
 
+  // ── Success — clear failure record for this IP ──
+  authFailureMap.delete(ip);
   next();
 }
 
@@ -126,6 +216,17 @@ app.get("/api/health", (req, res) => {
 
 app.post("/api/verify-admin-key", requireAdminAuth, (req, res) => {
   res.json({ success: true });
+});
+
+// GET /api/admin/auth-fail-logs — returns the in-memory failed-attempt log
+app.get("/api/admin/auth-fail-logs", requireAdminAuth, (_req: express.Request, res: express.Response) => {
+  res.json({ success: true, logs: authFailLog, total: authFailLog.length });
+});
+
+// POST /api/admin/auth-fail-logs/clear — wipes the in-memory log
+app.post("/api/admin/auth-fail-logs/clear", requireAdminAuth, (_req: express.Request, res: express.Response) => {
+  authFailLog.length = 0;
+  res.json({ success: true, message: "Auth failure log cleared." });
 });
 
 // GET /api/get-products — returns products from Supabase, falls back to seed data

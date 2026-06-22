@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { 
   Sparkles, 
   Upload, 
@@ -27,11 +27,13 @@ import {
   GripVertical,
   Globe,
   Save,
+  Flame,
   Star,
   Tag,
   Ticket,
   Settings,
-  MessageSquare
+  MessageSquare,
+  ShieldAlert
 } from 'lucide-react';
 import { Product, Order, Coupon, Filament, Accessory } from '../types';
 import { formatPrice } from '../utils/format';
@@ -66,12 +68,25 @@ export default function SellerHub({
   categories,
   onRefreshCategories
 }: SellerHubProps) {
-  const [activeSubTab, setActiveSubTab] = useState<'ai' | 'bulk' | 'manual' | 'inventory' | 'orders' | 'preorders' | 'carousel' | 'coupons' | 'festivals' | 'filaments' | 'pricehealth' | 'settings' | 'support-logs'>('ai');
+  const topLevelGroups = useMemo(() => {
+    const groups = new Set<string>();
+    categories.forEach(c => {
+      if (!c.parent_group || c.parent_group === c.name) {
+        groups.add(c.name);
+      } else {
+        groups.add(c.parent_group);
+      }
+    });
+    return Array.from(groups).sort();
+  }, [categories]);
+
+  const [activeSubTab, setActiveSubTab] = useState<'ai' | 'bulk' | 'manual' | 'inventory' | 'orders' | 'preorders' | 'carousel' | 'coupons' | 'festivals' | 'filaments' | 'pricehealth' | 'settings' | 'support-logs' | 'security-logs'>('ai');
 
   // --- EDIT MODE STATE ---
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [showEditCustomCategoryInput, setShowEditCustomCategoryInput] = useState<boolean>(false);
   const [editCustomCategoryName, setEditCustomCategoryName] = useState<string>('');
+  const [editCustomCategoryParentGroup, setEditCustomCategoryParentGroup] = useState<string>('');
   const [editImageInput, setEditImageInput] = useState<string>('');
 
   const editRecipe = editingProduct?.material_recipe || {
@@ -117,6 +132,12 @@ export default function SellerHub({
   const [settingsError, setSettingsError] = useState('');
   const [settingsSuccess, setSettingsSuccess] = useState('');
   const [isSavingSettings, setIsSavingSettings] = useState(false);
+
+  // Category management states (inline delete system)
+  const [deletingCategoryName, setDeletingCategoryName] = useState<string | null>(null);
+  const [categoryActionError, setCategoryActionError] = useState<string | null>(null);
+  const [categoryActionSuccess, setCategoryActionSuccess] = useState<string | null>(null);
+  const [isDeletingCategory, setIsDeletingCategory] = useState<boolean>(false);
 
   // Product Recipe Costing State (for Add Product Form)
   const [newRecipeFilamentName, setNewRecipeFilamentName] = useState('');
@@ -190,6 +211,66 @@ export default function SellerHub({
       setUnmatchedError(err.message || 'Failed to clear unmatched questions.');
     } finally {
       setIsUnmatchedLoading(false);
+    }
+  };
+
+
+  // --- AUTH FAILURE LOGS STATE & HANDLERS ---
+  const [authFailLogs, setAuthFailLogs] = useState<any[]>([]);
+  const [isAuthLogsLoading, setIsAuthLogsLoading] = useState(false);
+  const [authLogsError, setAuthLogsError] = useState('');
+  const [authLogsSuccess, setAuthLogsSuccess] = useState('');
+
+  const fetchAuthFailLogs = async () => {
+    setIsAuthLogsLoading(true);
+    setAuthLogsError('');
+    try {
+      const res = await fetch('/api/admin/auth-fail-logs', {
+        headers: getAdminHeaders()
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && Array.isArray(data.logs)) {
+          setAuthFailLogs(data.logs);
+        } else {
+          setAuthLogsError(data.error || 'Failed to fetch auth failure logs.');
+        }
+      } else {
+        setAuthLogsError('Server returned status ' + res.status);
+      }
+    } catch (err: any) {
+      setAuthLogsError(err.message || 'Failed to fetch auth failure logs.');
+    } finally {
+      setIsAuthLogsLoading(false);
+    }
+  };
+
+  const handleClearAuthLogs = async () => {
+    if (!confirm('Clear all auth failure logs? This cannot be undone.')) return;
+    setIsAuthLogsLoading(true);
+    setAuthLogsError('');
+    setAuthLogsSuccess('');
+    try {
+      const res = await fetch('/api/admin/auth-fail-logs/clear', {
+        method: 'POST',
+        headers: getAdminHeaders()
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success) {
+          setAuthFailLogs([]);
+          setAuthLogsSuccess('Auth failure log cleared.');
+          setTimeout(() => setAuthLogsSuccess(''), 3000);
+        } else {
+          setAuthLogsError(data.error || 'Failed to clear log.');
+        }
+      } else {
+        setAuthLogsError('Server returned status ' + res.status);
+      }
+    } catch (err: any) {
+      setAuthLogsError(err.message || 'Failed to clear log.');
+    } finally {
+      setIsAuthLogsLoading(false);
     }
   };
 
@@ -412,6 +493,9 @@ export default function SellerHub({
     }
     if (activeSubTab === 'support-logs') {
       fetchUnmatchedQuestions();
+    }
+    if (activeSubTab === 'security-logs') {
+      fetchAuthFailLogs();
     }
   }, [activeSubTab, editingProduct]);
 
@@ -980,6 +1064,7 @@ export default function SellerHub({
   const [newCategory, setNewCategory] = useState<string>('Desk Accessories');
   const [showCustomCategoryInput, setShowCustomCategoryInput] = useState<boolean>(false);
   const [customCategoryName, setCustomCategoryName] = useState<string>('');
+  const [customCategoryParentGroup, setCustomCategoryParentGroup] = useState<string>('');
   const [newPrice, setNewPrice] = useState<string>('19.99');
   const [selectedNewColors, setSelectedNewColors] = useState<string[]>(['Matte Slate', 'Chalk White']);
   const [selectedNewMaterials, setSelectedNewMaterials] = useState<string[]>(['PLA (Matte)']);
@@ -994,6 +1079,7 @@ export default function SellerHub({
   const [newEstimatedArrival, setNewEstimatedArrival] = useState<string>('Arriving June 26 via Air Cargo');
   const [newDepositPercentage, setNewDepositPercentage] = useState<number>(30);
   const [newOriginalImportCountry, setNewOriginalImportCountry] = useState<string>('Germany');
+  const [newIsTrendy, setNewIsTrendy] = useState<boolean>(false);
 
   // --- MAKERWORLD SCRAPER VARIABLES ---
   const [makerworldUrl, setMakerworldUrl] = useState<string>('');
@@ -1028,6 +1114,9 @@ Colors suited: Burnt Orange with Matte Slate eyes or Chalk White body.`);
     editCategory?: string; // user-editable category override
     selected?: boolean;   // user-selectable import status
     error?: string;
+    showCustomCategoryInput?: boolean;
+    customCategoryName?: string;
+    customCategoryParentGroup?: string;
   }
   const [bulkUrlText, setBulkUrlText] = useState<string>('');
   const [bulkEntries, setBulkEntries] = useState<BulkUrlEntry[]>([]);
@@ -1248,7 +1337,7 @@ Colors suited: Burnt Orange with Matte Slate eyes or Chalk White body.`);
   };
 
   // --- MANUAL SAVER HANDLER ---
-  const handleManualSave = (e: React.FormEvent) => {
+  const handleManualSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newTitle.trim()) return;
 
@@ -1263,9 +1352,12 @@ Colors suited: Burnt Orange with Matte Slate eyes or Chalk White body.`);
     }
 
     const finalCategory = newCategory === "NEW_CATEGORY_TRIGGER" ? customCategoryName.trim() : newCategory;
-    if (newCategory === "NEW_CATEGORY_TRIGGER" && !finalCategory) {
-      alert("Please enter a custom category name.");
-      return;
+    if (newCategory === "NEW_CATEGORY_TRIGGER") {
+      if (!finalCategory) {
+        alert("Please enter a custom category name.");
+        return;
+      }
+      await createCategoryIfNeeded(finalCategory, customCategoryParentGroup);
     }
 
     // Build Material Recipe
@@ -1355,13 +1447,15 @@ Colors suited: Burnt Orange with Matte Slate eyes or Chalk White body.`);
       floor_price_bdt: initialFloorPrice,
       needs_price_review: initialNeedsReview,
       resin_enabled: newResinEnabled,
-      resin_price: newResinEnabled && newResinPrice ? Math.round(parseFloat(newResinPrice)) || 0 : null
+      resin_price: newResinEnabled && newResinPrice ? Math.round(parseFloat(newResinPrice)) || 0 : null,
+      is_trendy: newIsTrendy
     };
 
     onAddProduct(readyProduct);
     setManualSuccessMsg(true);
     setShowCustomCategoryInput(false);
     setCustomCategoryName('');
+    setCustomCategoryParentGroup('');
 
     // Reset Fields
     setNewTitle('');
@@ -1370,6 +1464,7 @@ Colors suited: Burnt Orange with Matte Slate eyes or Chalk White body.`);
     setSelectedNewColors(['Matte Slate', 'Chalk White']);
     setSelectedNewMaterials(['PLA (Matte)']);
     setNewIsPreOrder(false);
+    setNewIsTrendy(false);
     setNewEstimatedArrival('Arriving June 26 via Air Cargo');
     setNewDepositPercentage(30);
     setNewOriginalImportCountry('Germany');
@@ -1484,14 +1579,29 @@ Colors suited: Burnt Orange with Matte Slate eyes or Chalk White body.`);
   };
 
   const handleBulkEditCategory = (entryIdx: number, value: string) => {
-    setBulkEntries(prev => prev.map((e, i) => i === entryIdx ? { ...e, editCategory: value } : e));
+    setBulkEntries(prev => prev.map((e, i) => {
+      if (i !== entryIdx) return e;
+      if (value === "NEW_CATEGORY_TRIGGER") {
+        return { ...e, showCustomCategoryInput: true, editCategory: value };
+      } else {
+        return { ...e, showCustomCategoryInput: false, editCategory: value };
+      }
+    }));
+  };
+
+  const handleBulkEditCustomCategoryName = (entryIdx: number, value: string) => {
+    setBulkEntries(prev => prev.map((e, i) => i === entryIdx ? { ...e, customCategoryName: value } : e));
+  };
+
+  const handleBulkEditCustomCategoryParent = (entryIdx: number, value: string) => {
+    setBulkEntries(prev => prev.map((e, i) => i === entryIdx ? { ...e, customCategoryParentGroup: value } : e));
   };
 
   const handleBulkEditTitle = (entryIdx: number, value: string) => {
     setBulkEntries(prev => prev.map((e, i) => i === entryIdx ? { ...e, editTitle: value } : e));
   };
 
-  const handleBulkCommit = () => {
+  const handleBulkCommit = async () => {
     const readyEntries = bulkEntries.filter(e => e.status === 'success' && e.product && e.selected !== false);
     if (readyEntries.length === 0) {
       alert('No selected products to commit.');
@@ -1500,6 +1610,7 @@ Colors suited: Burnt Orange with Matte Slate eyes or Chalk White body.`);
 
     const existingIds = new Set(products.map(p => p.id));
     const toAdd: Product[] = [];
+    const precreatedInBatch = new Set<string>();
 
     for (const entry of readyEntries) {
       const p = entry.product!;
@@ -1508,6 +1619,16 @@ Colors suited: Burnt Orange with Matte Slate eyes or Chalk White body.`);
       const computedId = 'belvia-' + cleanTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-');
       if (existingIds.has(computedId)) continue;
       existingIds.add(computedId);
+
+      // Resolve custom category if selected
+      let finalCategory = entry.editCategory || p.category || 'Desk Accessories';
+      if (entry.showCustomCategoryInput && entry.customCategoryName) {
+        finalCategory = entry.customCategoryName.trim();
+        if (finalCategory && !precreatedInBatch.has(finalCategory.toLowerCase())) {
+          precreatedInBatch.add(finalCategory.toLowerCase());
+          await createCategoryIfNeeded(finalCategory, entry.customCategoryParentGroup || "");
+        }
+      }
 
       // Use user-edited price if provided and valid, else fall back to scraped price
       const resolvedPrice = entry.editPrice && !isNaN(parseFloat(entry.editPrice))
@@ -1523,7 +1644,7 @@ Colors suited: Burnt Orange with Matte Slate eyes or Chalk White body.`);
         id: computedId,
         title: cleanTitle,
         description: p.description || 'Imported via Bulk MakerWorld URL.',
-        category: entry.editCategory || p.category || 'Desk Accessories',
+        category: finalCategory,
         price: resolvedPrice,
         colors: p.colors || ['Chalk White', 'Matte Slate'],
         materials: p.materials || ['PLA (Matte)'],
@@ -1650,13 +1771,68 @@ Colors suited: Burnt Orange with Matte Slate eyes or Chalk White body.`);
   };
 
   // --- EDIT PRODUCT ACTIONS ---
+  const createCategoryIfNeeded = async (name: string, parentGroup: string) => {
+    const cleanName = name.trim();
+    if (!cleanName) return;
+    
+    const exists = categories.some(c => c.name.toLowerCase() === cleanName.toLowerCase());
+    if (exists) return;
+
+    try {
+      const res = await fetch('/api/admin/create-category', {
+        method: 'POST',
+        headers: getAdminHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify({ name: cleanName, parent_group: parentGroup || null })
+      });
+      if (res.ok) {
+        onRefreshCategories();
+      } else {
+        console.error("Failed to pre-create category");
+      }
+    } catch (err) {
+      console.error("Network error pre-creating category:", err);
+    }
+  };
+
+  const confirmDeleteCategory = async (catName: string) => {
+    setCategoryActionError(null);
+    setCategoryActionSuccess(null);
+    setIsDeletingCategory(true);
+
+    try {
+      const res = await fetch(`/api/admin/categories/${encodeURIComponent(catName)}`, {
+        method: 'DELETE',
+        headers: getAdminHeaders()
+      });
+
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setCategoryActionSuccess(data.message || `Category "${catName}" deleted successfully.`);
+        onRefreshCategories();
+        // Clear message after 4s
+        setTimeout(() => setCategoryActionSuccess(null), 4000);
+      } else {
+        setCategoryActionError(data.error || "Failed to delete category.");
+        setTimeout(() => setCategoryActionError(null), 5000);
+      }
+    } catch (err: any) {
+      console.error("Failed to communicate with server:", err);
+      setCategoryActionError("Failed to communicate with server: " + err.message);
+      setTimeout(() => setCategoryActionError(null), 5000);
+    } finally {
+      setIsDeletingCategory(false);
+      setDeletingCategoryName(null);
+    }
+  };
+
   const handleStartEdit = (product: Product) => {
     setEditingProduct({ ...product });
     setShowEditCustomCategoryInput(false);
     setEditCustomCategoryName("");
+    setEditCustomCategoryParentGroup("");
   };
 
-  const handleSaveEdit = () => {
+  const handleSaveEdit = async () => {
     if (!editingProduct) return;
     if (!editingProduct.title.trim()) {
       alert("Product title cannot be empty.");
@@ -1664,9 +1840,12 @@ Colors suited: Burnt Orange with Matte Slate eyes or Chalk White body.`);
     }
 
     const finalCategory = showEditCustomCategoryInput ? editCustomCategoryName.trim() : editingProduct.category;
-    if (showEditCustomCategoryInput && !finalCategory) {
-      alert("Please enter a custom category name.");
-      return;
+    if (showEditCustomCategoryInput) {
+      if (!finalCategory) {
+        alert("Please enter a custom category name.");
+        return;
+      }
+      await createCategoryIfNeeded(finalCategory, editCustomCategoryParentGroup);
     }
 
     let updatedProduct = {
@@ -1938,7 +2117,8 @@ Colors suited: Burnt Orange with Matte Slate eyes or Chalk White body.`);
             { id: 'filaments', name: 'Filaments & Stock', icon: Layers },
             { id: 'pricehealth', name: 'Price Health', icon: AlertTriangle },
             { id: 'settings', name: 'Store Settings', icon: Settings },
-            { id: 'support-logs', name: 'Chat Support Logs', icon: MessageSquare }
+            { id: 'support-logs', name: 'Chat Support Logs', icon: MessageSquare },
+            { id: 'security-logs', name: 'Security Logs', icon: ShieldAlert }
           ].map((tab) => {
             const Icon = tab.icon;
             return (
@@ -2362,15 +2542,40 @@ Colors suited: Burnt Orange with Matte Slate eyes or Chalk White body.`);
                               {/* Category Column */}
                               <td className="py-2 px-3">
                                 {isSuccess ? (
-                                  <select
-                                    value={entry.editCategory || entry.product?.category || ''}
-                                    onChange={(e) => handleBulkEditCategory(idx, e.target.value)}
-                                    className="w-full bg-bg-base text-text-primary border border-border-premium rounded-lg py-1.5 px-2.5 text-xs font-sans focus:border-accent focus:outline-none cursor-pointer"
-                                  >
-                                    {categories.map((c) => (
-                                      <option key={c.name} value={c.name}>{c.name}</option>
-                                    ))}
-                                  </select>
+                                  <div className="space-y-2">
+                                    <select
+                                      value={entry.editCategory || entry.product?.category || ''}
+                                      onChange={(e) => handleBulkEditCategory(idx, e.target.value)}
+                                      className="w-full bg-bg-base text-text-primary border border-border-premium rounded-lg py-1.5 px-2.5 text-xs font-sans focus:border-accent focus:outline-none cursor-pointer"
+                                    >
+                                      {categories.map((c) => (
+                                        <option key={c.name} value={c.name}>{c.name}</option>
+                                      ))}
+                                      <option value="NEW_CATEGORY_TRIGGER">Add new category...</option>
+                                    </select>
+                                    {entry.showCustomCategoryInput && (
+                                      <div className="space-y-1.5">
+                                        <input
+                                          type="text"
+                                          placeholder="Category name..."
+                                          required
+                                          value={entry.customCategoryName || ''}
+                                          onChange={(e) => handleBulkEditCustomCategoryName(idx, e.target.value)}
+                                          className="w-full bg-bg-base text-text-primary border border-accent rounded-lg py-1 px-2 text-xs focus:outline-none font-mono"
+                                        />
+                                        <select
+                                          value={entry.customCategoryParentGroup || ''}
+                                          onChange={(e) => handleBulkEditCustomCategoryParent(idx, e.target.value)}
+                                          className="w-full bg-bg-base text-text-primary border border-border-premium rounded-lg py-1 px-2 text-xs focus:border-accent cursor-pointer font-mono"
+                                        >
+                                          <option value="">None (Top-Level)</option>
+                                          {topLevelGroups.map((g) => (
+                                            <option key={g} value={g}>Nest under: {g}</option>
+                                          ))}
+                                        </select>
+                                      </div>
+                                    )}
+                                  </div>
                                 ) : (
                                   <span className="text-text-muted/40 font-mono">-</span>
                                 )}
@@ -2566,14 +2771,26 @@ Colors suited: Burnt Orange with Matte Slate eyes or Chalk White body.`);
                       <option value="NEW_CATEGORY_TRIGGER">Add new category...</option>
                     </select>
                     {showCustomCategoryInput && (
-                      <input
-                        type="text"
-                        placeholder="Enter custom category..."
-                        required
-                        value={customCategoryName}
-                        onChange={(e) => setCustomCategoryName(e.target.value)}
-                        className="w-full bg-bg-base text-text-primary border border-accent rounded-xl py-2 px-3 mt-2 text-xs focus:outline-none font-mono"
-                      />
+                      <div className="space-y-2 mt-2">
+                        <input
+                          type="text"
+                          placeholder="Enter custom category..."
+                          required
+                          value={customCategoryName}
+                          onChange={(e) => setCustomCategoryName(e.target.value)}
+                          className="w-full bg-bg-base text-text-primary border border-accent rounded-xl py-2 px-3 text-xs focus:outline-none font-mono"
+                        />
+                        <select
+                          value={customCategoryParentGroup}
+                          onChange={(e) => setCustomCategoryParentGroup(e.target.value)}
+                          className="w-full bg-bg-base text-text-primary border border-border-premium rounded-xl py-2.5 px-3 text-xs focus:border-accent cursor-pointer font-mono"
+                        >
+                          <option value="">None (Make Top-Level Category)</option>
+                          {topLevelGroups.map((g) => (
+                            <option key={g} value={g}>Nest under: {g}</option>
+                          ))}
+                        </select>
+                      </div>
                     )}
                   </div>
 
@@ -2675,6 +2892,19 @@ Colors suited: Burnt Orange with Matte Slate eyes or Chalk White body.`);
                       </div>
                     </div>
                   )}
+                </div>
+
+                {/* Trendy Product Configuration Toggle */}
+                <div className="space-y-3 bg-bg-surface/50 border border-border-premium rounded-xl p-4">
+                  <label className="flex items-center space-x-2.5 text-xs text-text-primary font-bold cursor-pointer">
+                    <input 
+                      type="checkbox"
+                      checked={newIsTrendy}
+                      onChange={(e) => setNewIsTrendy(e.target.checked)}
+                      className="rounded border-border-premium text-accent focus:ring-accent accent-accent"
+                    />
+                    <span>Mark as Trendy? (Prioritizes at top of default storefront listing)</span>
+                  </label>
                 </div>
 
                 {/* Resin Add-on Configuration Toggle */}
@@ -3185,14 +3415,26 @@ Colors suited: Burnt Orange with Matte Slate eyes or Chalk White body.`);
                       <option value="NEW_CATEGORY_TRIGGER">Add new category...</option>
                     </select>
                     {showEditCustomCategoryInput && (
-                      <input
-                        type="text"
-                        placeholder="Enter custom category..."
-                        required
-                        value={editCustomCategoryName}
-                        onChange={(e) => setEditCustomCategoryName(e.target.value)}
-                        className="w-full bg-bg-base text-text-primary border border-accent rounded-xl py-2 px-3 mt-2 text-xs focus:outline-none font-mono"
-                      />
+                      <div className="space-y-2 mt-2">
+                        <input
+                          type="text"
+                          placeholder="Enter custom category..."
+                          required
+                          value={editCustomCategoryName}
+                          onChange={(e) => setEditCustomCategoryName(e.target.value)}
+                          className="w-full bg-bg-base text-text-primary border border-accent rounded-xl py-2 px-3 text-xs focus:outline-none font-mono"
+                        />
+                        <select
+                          value={editCustomCategoryParentGroup}
+                          onChange={(e) => setEditCustomCategoryParentGroup(e.target.value)}
+                          className="w-full bg-bg-base text-text-primary border border-border-premium rounded-xl py-2.5 px-3 text-xs focus:border-accent cursor-pointer font-mono"
+                        >
+                          <option value="">None (Make Top-Level Category)</option>
+                          {topLevelGroups.map((g) => (
+                            <option key={g} value={g}>Nest under: {g}</option>
+                          ))}
+                        </select>
+                      </div>
                     )}
                   </div>
                 </div>
@@ -3377,6 +3619,24 @@ Colors suited: Burnt Orange with Matte Slate eyes or Chalk White body.`);
                     onChange={(e) => setEditingProduct({ ...editingProduct, description: e.target.value })}
                     className="w-full bg-bg-base text-text-primary border border-border-premium rounded-xl py-2 px-3 text-xs focus:border-accent resize-none font-sans"
                   />
+                </div>
+
+                {/* Trendy Product Configuration Toggle */}
+                <div className="bg-bg-base border border-border-premium rounded-xl p-4 space-y-3 mb-4">
+                  <label className="flex items-center space-x-2.5 text-xs text-text-primary font-bold cursor-pointer">
+                    <input 
+                      type="checkbox"
+                      checked={!!editingProduct.is_trendy}
+                      onChange={(e) => setEditingProduct({ ...editingProduct, is_trendy: e.target.checked })}
+                      className="rounded border-border-premium text-accent focus:ring-accent accent-accent"
+                    />
+                    <div>
+                      <span className="font-bold block text-text-primary">Mark as Trendy</span>
+                      <span className="text-[10px] text-text-secondary block mt-0.5">
+                        Trendy products appear at the top of the storefront listing by default.
+                      </span>
+                    </div>
+                  </label>
                 </div>
 
                 {/* Resin Add-on Configuration Toggle */}
@@ -3907,6 +4167,7 @@ Colors suited: Burnt Orange with Matte Slate eyes or Chalk White body.`);
                     <th className="p-4">Category</th>
                     <th className="p-4">Price</th>
                     <th className="p-4">Specification</th>
+                    <th className="p-4 text-center">Trendy</th>
                     <th className="p-4">Action</th>
                   </tr>
                 </thead>
@@ -3941,6 +4202,23 @@ Colors suited: Burnt Orange with Matte Slate eyes or Chalk White body.`);
                         <td className="p-4 text-text-secondary">
                           {item.weightGrams}g • {item.printTime} // {item.infill}
                         </td>
+                        <td className="p-4 text-center">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const updated = products.map(p => p.id === item.id ? { ...p, is_trendy: !p.is_trendy } : p);
+                              onUpdateProducts(updated);
+                            }}
+                            className={`p-1.5 rounded-lg border transition-all cursor-pointer ${
+                              item.is_trendy 
+                                ? 'bg-amber-500/10 border-amber-500/30 text-amber-500 hover:bg-amber-500/20' 
+                                : 'bg-bg-surface border-border-premium text-text-secondary hover:text-text-primary hover:bg-bg-elevated'
+                            }`}
+                            title={item.is_trendy ? "Remove from Trending" : "Mark as Trending"}
+                          >
+                            <Flame className={`w-4 h-4 ${item.is_trendy ? 'fill-current' : ''}`} />
+                          </button>
+                        </td>
                         <td className="p-4">
                           <div className="flex space-x-2">
                             <button
@@ -3965,7 +4243,7 @@ Colors suited: Burnt Orange with Matte Slate eyes or Chalk White body.`);
                   })}
                   {products.length === 0 && (
                     <tr>
-                      <td colSpan={7} className="p-10 text-center text-text-secondary">
+                      <td colSpan={8} className="p-10 text-center text-text-secondary">
                         No product inventory loaded. Fill custom creation rows.
                       </td>
                     </tr>
@@ -5928,6 +6206,88 @@ Colors suited: Burnt Orange with Matte Slate eyes or Chalk White body.`);
                 </form>
               )}
             </div>
+
+            {/* Category Management Card */}
+            <div className="bg-[#070b13] border border-border-premium rounded-2xl p-6 text-left">
+              <h3 className="font-display font-black text-white text-base mb-4 flex items-center space-x-2">
+                <Layers className="w-5 h-5 text-accent" />
+                <span>Category Management</span>
+              </h3>
+              <p className="text-text-secondary text-xs mb-6">
+                View all registered categories and delete any that are unused and have no nested sub-categories.
+              </p>
+
+              <div className="max-w-xl text-xs">
+                {categoryActionError && (
+                  <div className="mb-4 p-3 bg-red-500/10 border border-red-500/30 text-red-400 rounded-xl font-mono text-[11px] flex items-center space-x-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse" />
+                    <span>{categoryActionError}</span>
+                  </div>
+                )}
+                {categoryActionSuccess && (
+                  <div className="mb-4 p-3 bg-green-500/10 border border-green-500/30 text-green-400 rounded-xl font-mono text-[11px] flex items-center space-x-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+                    <span>{categoryActionSuccess}</span>
+                  </div>
+                )}
+
+                {categories.length === 0 ? (
+                  <p className="text-text-muted font-mono">No categories registered.</p>
+                ) : (
+                  <div className="divide-y divide-border-premium/30 border border-border-premium/50 rounded-xl overflow-hidden bg-bg-surface/5">
+                    {categories.map((c) => {
+                      return (
+                        <div key={c.name} className="flex items-center justify-between p-3 hover:bg-bg-elevated/10 transition">
+                          <div>
+                            <span className="font-bold text-white font-mono">{c.name}</span>
+                            {c.parent_group && c.parent_group !== c.name && (
+                              <span className="text-[10px] text-text-secondary ml-2 font-mono">
+                                (nested under: {c.parent_group})
+                              </span>
+                            )}
+                          </div>
+                          {deletingCategoryName === c.name ? (
+                            <div className="flex items-center space-x-2 font-mono text-[10px]">
+                              <span className="text-text-secondary animate-pulse">Delete?</span>
+                              <button
+                                type="button"
+                                onClick={() => confirmDeleteCategory(c.name)}
+                                disabled={isDeletingCategory}
+                                className="px-2 py-0.5 bg-red-500 hover:bg-red-600 text-white font-bold rounded cursor-pointer transition disabled:opacity-50"
+                              >
+                                Yes
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setDeletingCategoryName(null)}
+                                disabled={isDeletingCategory}
+                                className="px-2 py-0.5 bg-bg-elevated hover:bg-bg-elevated/80 text-gray-300 font-bold rounded cursor-pointer transition disabled:opacity-50"
+                              >
+                                No
+                              </button>
+                            </div>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setDeletingCategoryName(c.name);
+                                setCategoryActionError(null);
+                                setCategoryActionSuccess(null);
+                              }}
+                              className="p-1.5 rounded-lg hover:bg-red-500/10 text-text-secondary hover:text-red-400 border border-transparent hover:border-red-500/20 cursor-pointer transition"
+                              title={`Delete category: ${c.name}`}
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            </div>
+
           </div>
         )}
 
@@ -6015,6 +6375,113 @@ Colors suited: Burnt Orange with Matte Slate eyes or Chalk White body.`);
                           <td className="p-3 font-sans text-xs text-text-primary bg-bg-base/30 whitespace-pre-wrap leading-relaxed">
                             {q.message}
                           </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {activeSubTab === 'security-logs' && !editingProduct && (
+          <div className="space-y-6">
+            <div className="bg-[#070b13] border border-border-premium rounded-2xl p-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border-premium pb-4 mb-6">
+                <div className="text-left font-mono">
+                  <h3 className="font-display font-black text-white text-base flex items-center space-x-2">
+                    <ShieldAlert className="w-5 h-5 text-red-400" />
+                    <span>Admin Auth Failure Log</span>
+                  </h3>
+                  <p className="text-[10px] text-text-secondary mt-1">
+                    TOTAL LOGGED FAILURES: <span className="text-red-400 font-bold">{authFailLogs.length}</span> ITEMS &nbsp;·&nbsp;
+                    Capped at 500 entries · Resets on server restart · Key values are never stored
+                  </p>
+                </div>
+
+                <div className="flex gap-2">
+                  <button
+                    onClick={fetchAuthFailLogs}
+                    disabled={isAuthLogsLoading}
+                    className="px-3.5 py-2 rounded-lg bg-bg-surface border border-border-premium hover:border-gray-500 text-text-primary text-xs font-semibold cursor-pointer disabled:opacity-50 transition"
+                  >
+                    Refresh Logs
+                  </button>
+                  <button
+                    onClick={handleClearAuthLogs}
+                    disabled={isAuthLogsLoading || authFailLogs.length === 0}
+                    className="px-3.5 py-2 rounded-lg bg-red-950/15 border border-red-500/20 text-red-400 hover:bg-red-950/30 text-xs font-semibold cursor-pointer disabled:opacity-50 transition"
+                  >
+                    Clear All Logs
+                  </button>
+                </div>
+              </div>
+
+              {authLogsError && (
+                <div className="p-4 bg-red-950/15 border border-red-500/20 text-red-400 font-mono text-xs rounded-xl mb-4 text-left">
+                  {authLogsError}
+                </div>
+              )}
+
+              {authLogsSuccess && (
+                <div className="p-4 bg-green-950/15 border border-green-500/20 text-green-400 font-mono text-xs rounded-xl mb-4 text-left">
+                  {authLogsSuccess}
+                </div>
+              )}
+
+              {isAuthLogsLoading ? (
+                <div className="py-12 text-center text-text-muted font-mono text-xs flex flex-col items-center justify-center gap-3">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-red-400" />
+                  <span>Fetching auth failure logs from server...</span>
+                </div>
+              ) : authFailLogs.length === 0 ? (
+                <div className="py-16 text-center text-text-muted border border-dashed border-border-premium rounded-xl text-xs space-y-2">
+                  <CheckCircle className="w-8 h-8 text-green-500/40 mx-auto" />
+                  <p className="font-bold text-text-primary">No failed auth attempts logged.</p>
+                  <p className="max-w-xs mx-auto text-[11px] leading-relaxed">
+                    All admin requests have used a valid key, or the log has been cleared.
+                  </p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto border border-border-premium rounded-xl">
+                  <table className="w-full text-left border-collapse text-xs">
+                    <thead>
+                      <tr className="bg-bg-elevated/45 text-[10px] font-mono text-text-secondary uppercase tracking-wider border-b border-border-premium">
+                        <th className="p-3 w-44">Timestamp</th>
+                        <th className="p-3 w-36">IP Address</th>
+                        <th className="p-3 w-36">Reason</th>
+                        <th className="p-3">Endpoint</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border-premium text-text-secondary">
+                      {authFailLogs.map((entry) => (
+                        <tr key={entry.id} className="hover:bg-bg-elevated/20 font-mono text-[11px]">
+                          <td className="p-3 text-text-muted">
+                            {new Date(entry.timestamp).toLocaleString('en-US', {
+                              year: 'numeric',
+                              month: 'short',
+                              day: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit',
+                              second: '2-digit'
+                            })}
+                          </td>
+                          <td className="p-3 text-accent font-bold">{entry.ip}</td>
+                          <td className="p-3">
+                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${
+                              entry.reason === 'rate_limited'
+                                ? 'bg-orange-500/10 text-orange-400 border-orange-500/20'
+                                : entry.reason === 'invalid_key'
+                                  ? 'bg-red-500/10 text-red-400 border-red-500/20'
+                                  : 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20'
+                            }`}>
+                              {entry.reason === 'rate_limited' ? 'RATE LIMITED'
+                                : entry.reason === 'invalid_key' ? 'BAD KEY'
+                                : 'MISSING KEY'}
+                            </span>
+                          </td>
+                          <td className="p-3 text-text-secondary font-sans">{entry.path}</td>
                         </tr>
                       ))}
                     </tbody>

@@ -33,7 +33,8 @@ import {
   Ticket,
   Settings,
   MessageSquare,
-  ShieldAlert
+  ShieldAlert,
+  LogOut
 } from 'lucide-react';
 import { Product, Order, Coupon, Filament, Accessory } from '../types';
 import { formatPrice } from '../utils/format';
@@ -56,6 +57,7 @@ interface SellerHubProps {
   onUpdateProducts: (products: Product[]) => void;
   categories: any[];
   onRefreshCategories: () => void;
+  onLogout: () => void;
 }
 
 export default function SellerHub({ 
@@ -66,7 +68,8 @@ export default function SellerHub({
   onResetCatalog,
   onUpdateProducts,
   categories,
-  onRefreshCategories
+  onRefreshCategories,
+  onLogout
 }: SellerHubProps) {
   const topLevelGroups = useMemo(() => {
     const groups = new Set<string>();
@@ -2098,6 +2101,15 @@ Colors suited: Burnt Orange with Matte Slate eyes or Chalk White body.`);
             >
               <Download className="w-4 h-4 text-accent" />
               <span>Export Catalog JSON</span>
+            </button>
+            <button
+              id="admin-logout-btn"
+              onClick={onLogout}
+              className="px-4.5 py-3 rounded-xl bg-red-950/20 border border-red-500/20 hover:bg-red-950/35 hover:border-red-500/40 text-red-400 hover:text-red-300 transition flex items-center space-x-2 text-xs font-semibold cursor-pointer shadow-sm"
+              title="Clear admin key and return to login screen"
+            >
+              <LogOut className="w-4 h-4" />
+              <span>Log Out</span>
             </button>
           </div>
         </div>

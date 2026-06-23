@@ -822,16 +822,16 @@ export default function MyAccountHub({
                         <div className="flex items-center space-x-2">
                           <Bell className={`w-4 h-4 ${isSubscribed ? 'text-accent animate-bounce' : 'text-gray-400'}`} />
                           <h4 className="font-display font-black text-sm text-white uppercase tracking-wider">
-                            Live Additive Telemetry Feed
+                            Get Notified About Your Order
                           </h4>
                           {isSubscribed && (
                             <span className="inline-flex items-center px-2 py-0.5 rounded text-[8px] font-mono font-black bg-accent/15 text-accent border border-accent/20 uppercase tracking-widest">
-                              ● Connected
+                              ● Subscribed
                             </span>
                           )}
                         </div>
                         <p className="text-gray-400 text-xs leading-relaxed font-sans">
-                          Receive instant, hardware-level push alerts when your printing beds become active, slicing profiles compile, or shipping carriers dispatch your cargo.
+                          Receive instant push notifications on your device when printing begins, payments are verified, or your package ships.
                         </p>
                         
                         {/* Error state */}
@@ -844,8 +844,8 @@ export default function MyAccountHub({
                         {/* iOS / Browser limitations note */}
                         {!isSubscribed && (
                           <div className="text-[10px] text-gray-500 font-mono space-y-1 mt-2 border-t border-gray-900 pt-2">
-                            <p>💡 Subscriptions are anchored to your normalized phone number: <code className="text-gray-300 font-bold">{phone || 'None (Set in settings)'}</code></p>
-                            <p className="text-accent/80">📱 iOS Safari: Tap the Share menu and select "Add to Home Screen" first, then launch Belvia from your home screen to authorize push connection.</p>
+                            <p>💡 Subscriptions are linked to your phone number: <code className="text-gray-300 font-bold">{phone || 'None (Set in settings)'}</code></p>
+                            <p className="text-accent/80">📱 iOS Safari: Tap the Share menu and select "Add to Home Screen" first, then launch Belvia from your home screen to enable push connection.</p>
                           </div>
                         )}
                       </div>
@@ -858,7 +858,7 @@ export default function MyAccountHub({
                             onClick={() => unsubscribePush()}
                             className="px-4 py-2 bg-slate-900 hover:bg-red-950/20 text-gray-400 hover:text-red-400 border border-gray-850 hover:border-red-900/30 rounded-xl font-bold font-mono text-[10px] transition cursor-pointer disabled:opacity-50"
                           >
-                            {isPushLoading ? 'DISCONNECTING...' : 'DISCONNECT FEED'}
+                            {isPushLoading ? 'DISCONNECTING...' : 'DISABLE NOTIFICATIONS'}
                           </button>
                         ) : (
                           <button
@@ -867,7 +867,7 @@ export default function MyAccountHub({
                             onClick={() => subscribePush({ phone, email: authEmail })}
                             className="px-5 py-2.5 bg-gradient-to-r from-accent to-accent-secondary hover:from-accent-hover hover:to-accent-secondary-lt text-text-on-accent rounded-xl font-black font-mono text-[10px] tracking-wider transition cursor-pointer shadow-lg shadow-accent/10 disabled:opacity-50 disabled:cursor-not-allowed uppercase"
                           >
-                            {isPushLoading ? 'CONNECTING...' : 'CONNECT TELEMETRY'}
+                            {isPushLoading ? 'CONNECTING...' : 'ENABLE NOTIFICATIONS'}
                           </button>
                         )}
                       </div>

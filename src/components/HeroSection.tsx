@@ -1,14 +1,16 @@
 import React from 'react';
 import { ArrowRight } from 'lucide-react';
+import { Product } from '../types';
 import HeroCarousel from './HeroCarousel';
 
 interface HeroSectionProps {
+  products: Product[];
   onStartShopping: () => void;
   onGoToCustom: () => void;
   onCategoryClick?: (category: string) => void;
 }
 
-export default function HeroSection({ onStartShopping, onGoToCustom, onCategoryClick }: HeroSectionProps) {
+export default function HeroSection({ products, onStartShopping, onGoToCustom, onCategoryClick }: HeroSectionProps) {
   return (
     <section
       id="belvia-hero"
@@ -83,6 +85,7 @@ export default function HeroSection({ onStartShopping, onGoToCustom, onCategoryC
       {/* ── Infinite Carousel – single row ── */}
       <div className="relative z-10">
         <HeroCarousel
+          products={products}
           onCategoryClick={(cat) => {
             if (onCategoryClick) {
               onCategoryClick(cat);

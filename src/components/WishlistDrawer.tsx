@@ -1,6 +1,7 @@
 import React from 'react';
 import { X, Heart, ShoppingCart, Trash2 } from 'lucide-react';
 import { Product } from '../types';
+import { formatPrice } from '../utils/format';
 
 interface WishlistDrawerProps {
   isOpen: boolean;
@@ -60,7 +61,15 @@ export default function WishlistDrawer({
               >
                 {/* Thumbnail */}
                 <div className="w-16 h-16 bg-bg-surface rounded-lg overflow-hidden shrink-0">
-                  <img referrerPolicy="no-referrer" src={product.images[0]} alt="Wishlist thumb" className="w-full h-full object-cover" />
+                  <img 
+                    referrerPolicy="no-referrer" 
+                    src={product.images[0]} 
+                    alt="Wishlist thumb" 
+                    className="w-full h-full object-cover" 
+                    onError={(e) => {
+                      e.currentTarget.src = '/images/placeholder.png';
+                    }}
+                  />
                 </div>
 
                 {/* Info details */}
@@ -79,7 +88,7 @@ export default function WishlistDrawer({
 
                   <div className="flex items-center justify-between mt-2 pt-2 border-t border-border-premium">
                     <span className="font-mono text-xs font-bold text-text-primary">
-                      ${product.price.toFixed(2)}
+                      {formatPrice(product.isPreOrder ? product.price : (product.price - Math.round(product.price * 0.12)))}
                     </span>
 
                     <div className="flex items-center space-x-2">

@@ -43,7 +43,16 @@ def get_product_data_from_makerworld(url):
 def optimize_image(raw_url, product_id):
     out_dir = "public/images/products"
     os.makedirs(out_dir, exist_ok=True)
-    out_path = f"{out_dir}/{product_id}.webp"
+    
+    # Check if raw_url points to a GIF
+    is_gif = False
+    if raw_url:
+        import urllib.parse
+        parsed = urllib.parse.urlparse(raw_url)
+        if parsed.path.lower().endswith('.gif'):
+            is_gif = True
+
+    out_path = f"{out_dir}/{product_id}.gif" if is_gif else f"{out_dir}/{product_id}.webp"
     
     # Fallback to local mockup generation if URL fails to download
     if not raw_url:
@@ -55,13 +64,25 @@ def optimize_image(raw_url, product_id):
     try:
         urllib.request.urlretrieve(raw_url, "temp_img")
         with Image.open("temp_img") as img:
+            # Check format in PIL as a second check
+            if img.format == 'GIF' or is_gif:
+                gif_path = f"{out_dir}/{product_id}.gif"
+                import shutil
+                shutil.copyfile("temp_img", gif_path)
+                if os.path.exists("temp_img"):
+                    os.remove("temp_img")
+                return gif_path
+            
             img.thumbnail((800, 800))
             img.save(out_path, "WEBP", quality=80)
+        
         if os.path.exists("temp_img"):
             os.remove("temp_img")
         return out_path
     except Exception as e:
         print(f"Failed to optimize image, generating placeholder: {e}")
+        if os.path.exists("temp_img"):
+            os.remove("temp_img")
         img = Image.new('RGB', (800, 800), color=(15, 20, 34))
         img.save(out_path, "WEBP", quality=80)
         return out_path
@@ -112,6 +133,7 @@ def add_product(url, price, category, database_path):
         "weightGrams": 24,
         "filamentUsage": 18.2,
         "isPreOrder": False,
+        "is_trendy": False,
         "description": data["description"],
         "images": [img_rel_path],
         "colors": ["matte-black", "belvia-gold", "white"],
@@ -137,7 +159,7 @@ def add_product(url, price, category, database_path):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--url", required=True)
-    parser.add_argument("--price", type=float, default=9.99)
+    parser.add_argument("--price", type=int, default=1200)
     parser.add_argument("--category", default="Keychains")
     parser.add_argument("--database", default="public/data/products.json")
     args = parser.parse_args()

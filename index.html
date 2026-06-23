@@ -3,11 +3,55 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>My Google AI Studio App</title>
+
+    <!-- Primary Meta Tags -->
+    <title>Belvia — 3D Printed Products in Bangladesh</title>
+    <meta name="description" content="Belvia 3D Precision Labs — Bangladesh's premium 3D printing store. Browse custom keychains, home decor, desk accessories, gaming collectibles, and functional prints. Fast shipping across Dhaka and all of Bangladesh." />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://belvia3d.com" />
+
+    <!-- PWA Manifest (required for iOS Home Screen install + Android install prompt) -->
+    <link rel="manifest" href="/manifest.json" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://belvia3d.com" />
+    <meta property="og:title" content="Belvia — 3D Printed Products in Bangladesh" />
+    <meta property="og:description" content="Belvia 3D Precision Labs — Bangladesh's premium 3D printing store. Browse custom keychains, home decor, desk accessories, and more. Fast shipping across Dhaka and all of Bangladesh." />
+    <meta property="og:image" content="https://belvia3d.com/images/belvia-og.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:site_name" content="Belvia 3D" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Belvia — 3D Printed Products in Bangladesh" />
+    <meta name="twitter:description" content="Belvia 3D Precision Labs — premium 3D printed keychains, home decor, desk accessories, and gaming collectibles in Bangladesh." />
+    <meta name="twitter:image" content="https://belvia3d.com/images/belvia-og.jpg" />
+
+    <!-- Theme Color -->
+    <meta name="theme-color" content="#f5af19" />
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+
+    <!-- Service Worker Registration -->
+    <!-- Must be inline here (not in main.tsx module) so it runs as early as possible -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () {
+          navigator.serviceWorker
+            .register('/sw.js', { scope: '/' })
+            .then(function (reg) {
+              console.log('[Belvia SW] Registered, scope:', reg.scope);
+            })
+            .catch(function (err) {
+              console.warn('[Belvia SW] Registration failed:', err);
+            });
+        });
+      }
+    </script>
   </body>
 </html>
-

@@ -1,0 +1,17 @@
+node_modules
+dist
+.git
+.vercel
+.env
+.env.example
+.superpowers
+.tmp
+__pycache__
+*.pyc
+belvia-3d-studio
+belvia-3d-studio.zip
+tests
+tools
+architecture
+docs
+assets

@@ -13,8 +13,8 @@
   {
     "id": "string (unique identifier)",
     "title": "string (product name)",
-    "category": "string (Keychains | Home Decor | Desk Accessories | Gaming Accessories | Figures & Collectibles | Business Merchandise | Custom Orders | Functional Prints)",
-    "startingPrice": "number (float, starting price in USD)",
+    "category": "string (Keychains | Home Decor | Desk Accessories | Gaming Accessories | Figures & Collectibles | Business Merchandise | Custom Orders | Functional Prints | or any dynamically created category)",
+    "startingPrice": "number (integer, starting price in BDT)",
     "weightGrams": "number (integer, raw print weight)",
     "filamentUsage": "number (float, filament weight in grams)",
     "description": "string (markdown allowed)",
@@ -54,10 +54,9 @@
 
 ## 📜 Behavioral Rules
 1. **Premium Aesthetic First**: UI must use a minimal cyber-industrial theme with rich slate/carbon backgrounds, thin brand-gold borders, and subtle gold/amber radial gradient glows matching the logo.
-2. **Interactive 3D Centerpiece**: Hero section layout must have a dedicated empty responsive container for the interactive Spline 3D model, ensuring it remains loaded across routing views.
-3. **No Dynamic Layout Layout-Shift**: Router swaps main layouts smoothly using opacity fades and translate transitions.
-4. **Local Product Storage**: The web client reads static `data/products.json` file as the local database.
-5. **No Python on Frontend**: Python runs purely as a Layer 3 CLI tool (`tools/import_products.py`) to scrape, parse, download, and compile products.
+2. **No Dynamic Layout Layout-Shift**: Router swaps main layouts smoothly using opacity fades and translate transitions.
+3. **Local Product Storage**: The web client reads static `data/products.json` file as the local database.
+4. **No Python on Frontend**: Python runs purely as a Layer 3 CLI tool (`tools/import_products.py`) to scrape, parse, download, and compile products.
 
 ---
 
@@ -75,7 +74,10 @@
 
 ## 🔧 Maintenance Log
 - **2026-06-04 — Protocol 0 Initialization**: Configured single-shell SPA router, JSON database, and Python import script.
+- **2026-06-16 — BDT Currency Migration**: Migrated all price storage, display, calculation formulas, and AI prompt schemas from USD ($) to Bangladeshi Taka (BDT, ৳).
+- **2026-06-20 — Dynamic Categories Support**: Enabled creation and persistence of dynamic product categories inline during import or manual editing.
 
 ---
 
-*Last updated: 2026-06-04 — Protocol 0 Initialization*
+*Last updated: 2026-06-20 — Dynamic Categories Support*
+

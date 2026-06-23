@@ -1,6 +1,7 @@
-import React, { useState, useMemo } from 'react';
-import { Search, SlidersHorizontal, Tag, Zap, Eye, RotateCw, Star, Heart, Layers, Download, Check } from 'lucide-react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { Search, SlidersHorizontal, Tag, Zap, Eye, RotateCw, Star, Heart, Layers, Printer, Check, Flame } from 'lucide-react';
 import { Product } from '../types';
+import { formatPrice } from '../utils/format';
 
 interface SidebarGroup {
   name: string;
@@ -9,52 +10,6 @@ interface SidebarGroup {
   count: number;
 }
 
-const PARENT_GROUPS = [
-  {
-    name: 'Art & Sculptures',
-    categories: ['Home Decor', 'Figures & Collectibles'],
-    subcategories: [
-      { name: 'Home Decor Slices', category: 'Home Decor' },
-      { name: 'Collectible Figures', category: 'Figures & Collectibles' }
-    ]
-  },
-  {
-    name: 'Desk & Organisation',
-    categories: ['Desk Accessories', 'Functional Prints'],
-    subcategories: [
-      { name: 'Desk Accessories', category: 'Desk Accessories' },
-      { name: 'Functional Utility', category: 'Functional Prints' }
-    ]
-  },
-  {
-    name: 'Gaming & Spares',
-    categories: ['Gaming Accessories'],
-    subcategories: [
-      { name: 'Console Holders', category: 'Gaming Accessories' }
-    ]
-  },
-  {
-    name: 'Accessories & Merch',
-    categories: ['Keychains', 'Business Merchandise'],
-    subcategories: [
-      { name: 'Keychains', category: 'Keychains' },
-      { name: 'Business Merchandise', category: 'Business Merchandise' }
-    ]
-  },
-  {
-    name: 'Custom & Other',
-    categories: ['Custom Orders', 'Imported Goods', 'A1 Mini Mods', 'Hotends', 'Premium Hardware', 'Exotic Filaments'],
-    subcategories: [
-      { name: 'Custom Orders', category: 'Custom Orders' },
-      { name: 'Imported Goods', category: 'Imported Goods' },
-      { name: 'A1 Mini Mods', category: 'A1 Mini Mods' },
-      { name: 'Hotends', category: 'Hotends' },
-      { name: 'Premium Hardware', category: 'Premium Hardware' },
-      { name: 'Exotic Filaments', category: 'Exotic Filaments' }
-    ]
-  }
-];
-
 interface ProductGridProps {
   products: Product[];
   onQuickView: (product: Product) => void;
@@ -62,6 +17,9 @@ interface ProductGridProps {
   resetCatalog: () => void;
   wishlist?: Product[];
   onToggleWishlist?: (product: Product) => void;
+  selectedCategory: string | string[];
+  onCategoryChange: (category: string | string[]) => void;
+  categories: any[];
 }
 
 export default function ProductGrid({
@@ -70,11 +28,59 @@ export default function ProductGrid({
   onBuyNow,
   resetCatalog,
   wishlist = [],
-  onToggleWishlist
+  onToggleWishlist,
+  selectedCategory,
+  onCategoryChange,
+  categories
 }: ProductGridProps) {
-  const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [selectedCategoryGroup, setSelectedCategoryGroup] = useState<string>('All Categories');
   const [modelTypeTab, setModelTypeTab] = useState<'3d-models' | 'laser-cut'>('3d-models');
+
+  // Dynamically compute parentGroupsConfig from fetched categories
+  const parentGroupsConfig = useMemo(() => {
+    const groupMap: Record<string, { name: string; categories: string[]; subcategories: { name: string; category: string }[] }> = {};
+
+    categories.forEach((cat) => {
+      const parentName = cat.parent_group || cat.name;
+      if (!groupMap[parentName]) {
+        groupMap[parentName] = {
+          name: parentName,
+          categories: [],
+          subcategories: []
+        };
+      }
+      groupMap[parentName].categories.push(cat.name);
+      
+      let subName = cat.name;
+      if (cat.name === "Home Decor") subName = "Home Decor Slices";
+      else if (cat.name === "Figures & Collectibles") subName = "Collectible Figures";
+      else if (cat.name === "Functional Prints") subName = "Functional Utility";
+      else if (cat.name === "Gaming Accessories") subName = "Console Holders";
+      else if (cat.name === "3D Printers & Spares") subName = "Printers & Spares";
+
+      groupMap[parentName].subcategories.push({
+        name: subName,
+        category: cat.name
+      });
+    });
+
+    return Object.values(groupMap);
+  }, [categories]);
+
+  // Synchronise selectedCategoryGroup when selectedCategory prop changes
+  useEffect(() => {
+    if (selectedCategory === 'All') {
+      setSelectedCategoryGroup('All Categories');
+    } else {
+      const singleCat = Array.isArray(selectedCategory) ? selectedCategory[0] : selectedCategory;
+      const matchingGroup = parentGroupsConfig.find(group => 
+        group.categories.includes(singleCat)
+      );
+      if (matchingGroup) {
+        setSelectedCategoryGroup(matchingGroup.name);
+      }
+    }
+  }, [selectedCategory]);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [sortBy, setSortBy] = useState<string>('default');
 
@@ -92,7 +98,7 @@ export default function ProductGrid({
       { name: 'All Categories', mappedCategories: 'All', count: totalCount }
     ];
 
-    PARENT_GROUPS.forEach(group => {
+    parentGroupsConfig.forEach(group => {
       let groupCount = 0;
       const activeSubs: { name: string; mappedCategory: string }[] = [];
 
@@ -115,60 +121,47 @@ export default function ProductGrid({
     });
 
     return groups;
-  }, [products]);
-
-  // Multi-color color lookup dictionary for beautiful UI swatches
-  const colorMap: Record<string, string> = {
-    'Matte Slate': '#334155',
-    'Chalk White': '#f8fafc',
-    'Chalk White (Translucent Only)': '#cbd5e1',
-    'Emerald Green': '#10b981',
-    'Burnt Orange': '#f97316',
-    'Obsidian Black': '#0f172a',
-    'Jade Green': '#059669',
-    'Silk Copper': '#b45309',
-    'Neon Nebula': '#d946ef',
-    'Pastel Mint': '#a7f3d0',
-    'Sandstone Grey': '#78716c',
-    'Terracotta': '#c2410c',
-    'Neon Violet': '#8b5cf6',
-    'Cyber Yellow': '#eab308',
-    'Steel Blue': '#4682b4',
-    'Signal Orange': '#ff4500',
-    'Steel Gray': '#708090',
-    'Silver Pearl': '#c0c0c0',
-  };
-
-  const getSwatchColor = (colorName: string): string => {
-    // If exact name is found, return color code, otherwise hash it dynamically to some nice fallback code
-    if (colorMap[colorName]) return colorMap[colorName];
-    // Simple hash
-    let hash = 0;
-    for (let i = 0; i < colorName.length; i++) {
-      hash = colorName.charCodeAt(i) + ((hash << 5) - hash);
-    }
-    const color = `hsl(${Math.abs(hash) % 360}, 50%, 45%)`;
-    return color;
-  };
+  }, [products, parentGroupsConfig]);
 
   const filteredProducts = useMemo(() => {
     return products
       .filter((p) => {
         if (p.isPreOrder) return false;
-        const matchesCategory = selectedCategory === 'All' || p.category === selectedCategory;
+        const matchesCategory = selectedCategory === 'All'
+          || (Array.isArray(selectedCategory)
+            ? selectedCategory.includes(p.category)
+            : p.category === selectedCategory);
         const matchesSearch =
           p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
           p.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          p.category.toLowerCase().includes(searchQuery.toLowerCase());
-        return matchesCategory && matchesSearch;
+          p.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          (Array.isArray(p.tags) && p.tags.some(t => t.toLowerCase().includes(searchQuery.toLowerCase())));
+        
+        const isLaserOrCut = 
+          p.title.toLowerCase().includes('laser') || 
+          p.title.toLowerCase().includes('cut') || 
+          p.description.toLowerCase().includes('laser') || 
+          p.description.toLowerCase().includes('cut') ||
+          (!!p.tags && p.tags.some(t => t.toLowerCase().includes('laser') || t.toLowerCase().includes('cut')));
+          
+        const matchesModelType = modelTypeTab === 'laser-cut' ? isLaserOrCut : !isLaserOrCut;
+        
+        return matchesCategory && matchesSearch && matchesModelType;
       })
       .sort((a, b) => {
         if (sortBy === 'price-asc') return a.price - b.price;
         if (sortBy === 'price-desc') return b.price - a.price;
         if (sortBy === 'rating') return b.rating - a.rating;
+        
+        // Default sort: place trendy products ahead
+        const aTrendy = a.is_trendy || false;
+        const bTrendy = b.is_trendy || false;
+        if (aTrendy !== bTrendy) {
+          return aTrendy ? -1 : 1;
+        }
         return 0; // Default
       });
-  }, [products, selectedCategory, searchQuery, sortBy]);
+  }, [products, selectedCategory, searchQuery, sortBy, modelTypeTab]);
 
   return (
     <section id="shop-section" className="py-12 bg-bg-base relative animate-fade-in">
@@ -240,7 +233,7 @@ export default function ProductGrid({
               3D PRINTED ART MODELS
             </span>
             <h2 className="font-display font-black text-xl sm:text-2xl text-text-primary tracking-tight mt-1.5">
-              Explore the "{selectedCategory === 'All' ? 'Slices' : selectedCategory}" Category
+              Explore the "{selectedCategory === 'All' ? 'Slices' : (Array.isArray(selectedCategory) ? selectedCategoryGroup : selectedCategory)}" Category
             </h2>
             <p className="text-text-secondary text-xs mt-1 max-w-2xl leading-relaxed">
               Explore custom 3D printing models design collections. Sourced matching mechanical filament densities, certified wall line tolerances and precise FDM bed alignment configs.
@@ -277,11 +270,9 @@ export default function ProductGrid({
                         onClick={() => {
                           setSelectedCategoryGroup(catGroup.name);
                           if (catGroup.mappedCategories === 'All') {
-                            setSelectedCategory('All');
-                          } else if (Array.isArray(catGroup.mappedCategories)) {
-                            setSelectedCategory(catGroup.mappedCategories[0]);
+                            onCategoryChange('All');
                           } else {
-                            setSelectedCategory(catGroup.mappedCategories);
+                            onCategoryChange(catGroup.mappedCategories);
                           }
                         }}
                         className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl font-mono text-[11px] font-bold tracking-tight transition-all duration-150 cursor-pointer border ${
@@ -307,7 +298,7 @@ export default function ProductGrid({
                             return (
                               <button
                                 key={sub.name}
-                                onClick={() => setSelectedCategory(sub.mappedCategory)}
+                                onClick={() => onCategoryChange(sub.mappedCategory)}
                                 className={`w-full text-left px-2.5 py-1.5 rounded text-[10px] font-mono transition-colors cursor-pointer block ${
                                   isSubActive
                                     ? 'text-accent font-bold bg-accent/5 border-l border-accent'
@@ -338,7 +329,7 @@ export default function ProductGrid({
                 </p>
                 <button
                   onClick={() => {
-                    setSelectedCategory('All');
+                    onCategoryChange('All');
                     setSelectedCategoryGroup('All Categories');
                     setSearchQuery('');
                   }}
@@ -361,14 +352,18 @@ export default function ProductGrid({
                   const creatorIdx = Math.abs(p.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0)) % creatorNames.length;
                   const creator = creatorNames[creatorIdx];
 
+                  const isOutOfStock = p.stockQuantity !== undefined && p.stockQuantity === 0;
+
                   return (
                     <div
                       id={`product-card-${p.id}`}
                       key={p.id}
-                      className="group rounded-2xl bg-bg-surface/75 border border-border-premium hover:border-accent/40 hover:shadow-accent/5 transition-all duration-300 relative flex flex-col h-full overflow-hidden text-left shadow-xs"
+                      className={`group rounded-2xl bg-bg-surface/75 border transition-all duration-300 relative flex flex-col overflow-hidden text-left shadow-xs ${
+                        isOutOfStock ? 'border-red-500/20 opacity-70' : 'border-border-premium hover:border-accent/40 hover:shadow-accent/5'
+                      }`}
                     >
                       {/* Image Showcase */}
-                      <div 
+                      <div
                         onClick={() => onQuickView(p)}
                         className="aspect-square w-full bg-bg-base relative overflow-hidden cursor-pointer"
                       >
@@ -378,12 +373,32 @@ export default function ProductGrid({
                           alt={p.title}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out animate-in fade-in"
                           loading="lazy"
+                          onError={(e) => {
+                            e.currentTarget.src = '/images/placeholder.png';
+                          }}
                         />
-                        
-                        {/* Interlocking MakerWorld hexagon green design badge */}
-                        <div className="absolute top-3 left-3 bg-accent p-1.5 rounded-md text-text-on-accent shadow-md z-15 flex items-center justify-center border border-accent/25" title="Verified Maker Quality">
-                          <Layers className="w-4 h-4 text-text-on-accent font-bold" />
+
+                        {/* Top Left Badges */}
+                        <div className="absolute top-3 left-3 flex items-center gap-1.5 z-15">
+                          {/* Interlocking MakerWorld hexagon green design badge */}
+                          <div className="bg-accent p-1.5 rounded-md text-text-on-accent shadow-md flex items-center justify-center border border-accent/25" title="Verified Maker Quality">
+                            <Layers className="w-4 h-4 text-text-on-accent font-bold" />
+                          </div>
+                          
+                          {/* Trending Badge */}
+                          {p.is_trendy && (
+                            <div className="bg-amber-500 p-1.5 rounded-md text-white shadow-md flex items-center justify-center border border-amber-400/30 animate-pulse" title="Trending Product">
+                              <Flame className="w-4 h-4 text-white fill-current" />
+                            </div>
+                          )}
                         </div>
+
+                        {/* Out-of-Stock overlay badge */}
+                        {isOutOfStock && (
+                          <div className="absolute top-3 right-3 z-20 px-2.5 py-1 rounded-lg bg-red-500/90 border border-red-400/40 text-white text-[10px] font-mono font-bold uppercase tracking-wider shadow-lg">
+                            Out of Stock
+                          </div>
+                        )}
 
                         {/* Wishlist Trigger */}
                         {onToggleWishlist && (
@@ -419,13 +434,13 @@ export default function ProductGrid({
                       </div>
 
                       {/* Content Area */}
-                      <div className="p-4 flex-1 flex flex-col justify-between">
+                      <div className="p-4 flex-1 flex flex-col justify-start">
                         <div>
                           
                           {/* Title */}
                           <h3 
                             onClick={() => onQuickView(p)}
-                            className="font-display font-extrabold text-sm text-text-primary mt-1 line-clamp-1 group-hover:text-accent transition cursor-pointer hover:underline"
+                            className="font-display font-extrabold text-sm text-text-primary mt-1 line-clamp-2 h-12 leading-snug group-hover:text-accent transition cursor-pointer hover:underline"
                           >
                             {p.title}
                           </h3>
@@ -436,9 +451,9 @@ export default function ProductGrid({
                           </div>
 
                           {/* Downloads Stats Section - replicating Makerworld */}
-                          <div className="flex items-center space-x-4 mt-2 mb-3.5 font-mono text-[10px] text-text-secondary border-b border-border-premium/50 pb-2.5">
+                          <div className="flex items-center gap-3 flex-wrap mt-2 mb-3.5 font-mono text-[10px] text-text-secondary border-b border-border-premium/50 pb-2.5">
                             <span className="flex items-center space-x-1">
-                              <Download className="w-3.5 h-3.5 text-text-secondary" />
+                              <Printer className="w-3.5 h-3.5 text-text-secondary" />
                               <span>{downloads.toLocaleString()}</span>
                             </span>
                             <span className="flex items-center space-x-1">
@@ -450,42 +465,38 @@ export default function ProductGrid({
                             </span>
                           </div>
 
-                          {/* Short Description */}
-                          <p className="text-text-secondary text-[11px] line-clamp-2 leading-relaxed">
-                            {p.description}
-                          </p>
+                          {/* Short Description removed */}
 
-                          {/* Color Swatch row */}
-                          <div className="flex items-center space-x-1.5 mt-3 select-none">
-                            <div className="flex space-x-1.5">
-                              {p.colors.slice(0, 5).map((c) => (
-                                <span
-                                  key={c}
-                                  className="w-3 h-3 rounded-full border border-border-premium"
-                                  style={{ backgroundColor: getSwatchColor(c) }}
-                                  title={c}
-                                />
-                              ))}
-                            </div>
-                          </div>
+                          {/* Subtle tags — visually hidden for SEO optimization */}
+                          {Array.isArray(p.tags) && p.tags.length > 0 && (
+                            <p className="sr-only">
+                              {p.tags.join(' · ')}
+                            </p>
+                          )}
+
                         </div>
 
                         {/* Order Footer Button */}
-                        <div className="mt-4.5 pt-3.5 border-t border-border-premium/60 flex items-center justify-between">
+                        <div className="mt-auto pt-3.5 border-t border-border-premium/60 flex items-center justify-between">
                           <div>
                             <span className="block text-[8px] font-mono text-text-secondary uppercase tracking-widest">START PRICE</span>
                             <span className="text-base font-mono font-bold text-text-primary">
-                              ${p.price.toFixed(2)}
+                              {formatPrice(p.price - Math.round(p.price * 0.12))}
                             </span>
                           </div>
 
                           <button
                             id={`card-buy-${p.id}`}
                             onClick={() => onBuyNow(p)}
-                            className="px-4 py-2 rounded-xl bg-accent hover:bg-accent-hover text-text-on-accent text-xs font-bold font-mono tracking-wide cursor-pointer flex items-center space-x-1.5 transition duration-150 active:scale-95"
+                            disabled={isOutOfStock}
+                            className={`px-4 py-2 rounded-xl text-xs font-bold font-mono tracking-wide flex items-center space-x-1.5 transition duration-150 active:scale-95 ${
+                              isOutOfStock
+                                ? 'bg-bg-surface border border-border-premium text-text-muted cursor-not-allowed'
+                                : 'bg-accent hover:bg-accent-hover text-text-on-accent cursor-pointer'
+                            }`}
                           >
-                            <Zap className="w-3.5 h-3.5 fill-current text-text-on-accent" />
-                            <span>ORDER</span>
+                            <Zap className="w-3.5 h-3.5 fill-current" />
+                            <span>{isOutOfStock ? 'SOLD OUT' : 'ORDER'}</span>
                           </button>
                         </div>
                       </div>

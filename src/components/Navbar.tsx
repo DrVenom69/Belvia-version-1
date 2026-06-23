@@ -13,6 +13,7 @@ interface NavbarProps {
   toggleTheme: () => void;
   profilePicture?: string | null;
   onLogout?: () => void;
+  adminEmail?: string;
 }
 
 export default function Navbar({
@@ -25,7 +26,8 @@ export default function Navbar({
   theme,
   toggleTheme,
   profilePicture,
-  onLogout
+  onLogout,
+  adminEmail
 }: NavbarProps) {
   const totalItems = cart.reduce((acc, item) => acc + item.quantity, 0);
   const [isAccountDropdownOpen, setIsAccountDropdownOpen] = useState(false);
@@ -191,7 +193,7 @@ export default function Navbar({
               {/* Animated Dropdown Menu */}
               <div
                 id="account-dropdown-menu"
-                className={`absolute right-0 top-full mt-2 w-64 bg-[#070b13] border border-bg-elevated rounded-2xl shadow-2xl shadow-black/50 overflow-hidden transition-all duration-300 origin-top-right ${
+                className={`absolute right-0 top-full mt-2 min-w-[16rem] w-[90vw] sm:w-64 bg-[#070b13] border border-bg-elevated rounded-2xl shadow-2xl shadow-black/50 overflow-hidden transition-all duration-300 origin-top-right ${
                   isAccountDropdownOpen 
                     ? 'opacity-100 scale-100 translate-y-0 pointer-events-auto' 
                     : 'opacity-0 scale-95 -translate-y-2 pointer-events-none'
@@ -212,7 +214,7 @@ export default function Navbar({
                     )}
                     <div>
                       <p className="text-white font-bold text-sm font-display">Iffat Bd</p>
-                      <p className="text-gray-500 text-[10px] font-mono">iffat2000bd@gmail.com</p>
+                      <p className="text-gray-500 text-[10px] font-mono">{adminEmail || 'Store Admin'}</p>
                     </div>
                   </div>
                 </div>
@@ -286,22 +288,6 @@ export default function Navbar({
             </button>
           );
         })}
-        {/* Mobile Account Icon */}
-        <button
-          onClick={() => setActiveTab('tracker')}
-          className={`flex flex-col items-center justify-center flex-1 py-1 text-center transition-colors duration-200 cursor-pointer ${
-            activeTab === 'tracker' ? 'text-accent' : 'text-text-secondary hover:text-text-primary'
-          }`}
-        >
-          {profilePicture ? (
-            <div className="w-5 h-5 rounded-full overflow-hidden border border-accent/40">
-              <img src={profilePicture} alt="Profile" className="w-full h-full object-cover" />
-            </div>
-          ) : (
-            <User className="w-5 h-5" />
-          )}
-          <span className="text-[9px] font-display mt-1 tracking-wide uppercase font-semibold">Account</span>
-        </button>
       </nav>
     </>
   );

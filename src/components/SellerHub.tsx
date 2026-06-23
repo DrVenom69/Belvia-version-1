@@ -34,7 +34,8 @@ import {
   Settings,
   MessageSquare,
   ShieldAlert,
-  LogOut
+  LogOut,
+  Bell
 } from 'lucide-react';
 import { Product, Order, Coupon, Filament, Accessory } from '../types';
 import { formatPrice } from '../utils/format';
@@ -83,7 +84,7 @@ export default function SellerHub({
     return Array.from(groups).sort();
   }, [categories]);
 
-  const [activeSubTab, setActiveSubTab] = useState<'ai' | 'bulk' | 'manual' | 'inventory' | 'orders' | 'preorders' | 'carousel' | 'coupons' | 'festivals' | 'filaments' | 'pricehealth' | 'settings' | 'support-logs' | 'security-logs'>('ai');
+  const [activeSubTab, setActiveSubTab] = useState<'ai' | 'bulk' | 'manual' | 'inventory' | 'orders' | 'preorders' | 'carousel' | 'coupons' | 'festivals' | 'filaments' | 'pricehealth' | 'settings' | 'support-logs' | 'security-logs' | 'notifications'>('ai');
 
   // --- EDIT MODE STATE ---
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
@@ -107,6 +108,19 @@ export default function SellerHub({
   const [isFilamentsLoading, setIsFilamentsLoading] = useState(false);
   const [accessories, setAccessories] = useState<Accessory[]>([]);
   const [isAccessoriesLoading, setIsAccessoriesLoading] = useState(false);
+
+  // --- PUSH NOTIFICATION COMPOSE STATE ---
+  const [notificationAudience, setNotificationAudience] = useState<'all' | 'loyalty_silver' | 'loyalty_gold' | 'loyalty_platinum' | 'order'>('all');
+  const [notificationOrderId, setNotificationOrderId] = useState<string>('');
+  const [notificationTitle, setNotificationTitle] = useState<string>('');
+  const [notificationBody, setNotificationBody] = useState<string>('');
+  const [notificationUrl, setNotificationUrl] = useState<string>('/store');
+  const [pushSendLogs, setPushSendLogs] = useState<any[]>([]);
+  const [isSendingNotification, setIsSendingNotification] = useState(false);
+  const [isSendLogsLoading, setIsSendLogsLoading] = useState(false);
+  const [notificationsError, setNotificationsError] = useState<string | null>(null);
+  const [notificationsSuccess, setNotificationsSuccess] = useState<string | null>(null);
+
 
   // Spool Form State
   const [spoolName, setSpoolName] = useState('');
@@ -477,6 +491,78 @@ export default function SellerHub({
     }
   };
 
+  const fetchPushSendLogs = async () => {
+    setIsSendLogsLoading(true);
+    setNotificationsError(null);
+    try {
+      const res = await fetch('/api/admin/push/send-log', {
+        headers: getAdminHeaders(),
+      });
+      if (!res.ok) throw new Error('Failed to fetch send logs');
+      const data = await res.json();
+      setPushSendLogs(data.logs || []);
+    } catch (err: any) {
+      console.error(err);
+      setNotificationsError('Failed to fetch notification logs: ' + err.message);
+    } finally {
+      setIsSendLogsLoading(false);
+    }
+  };
+
+  const handleSendPushNotification = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setNotificationsError(null);
+    setNotificationsSuccess(null);
+
+    if (!notificationTitle.trim() || !notificationBody.trim()) {
+      setNotificationsError('Title and Body are required.');
+      return;
+    }
+
+    setIsSendingNotification(true);
+    try {
+      const isOrder = notificationAudience === 'order';
+      const endpoint = isOrder ? '/api/admin/push/send-to-order' : '/api/admin/push/broadcast';
+      
+      const payload: Record<string, any> = {
+        title: notificationTitle.trim(),
+        body: notificationBody.trim(),
+        url: notificationUrl.trim(),
+      };
+
+      if (isOrder) {
+        if (!notificationOrderId.trim()) {
+          throw new Error('Order ID is required when targeting a specific order.');
+        }
+        payload.orderId = notificationOrderId.trim();
+      } else {
+        payload.audience = notificationAudience;
+      }
+
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: getAdminHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify(payload),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to dispatch notifications.');
+
+      setNotificationsSuccess(`Successfully dispatched notification! Result: ${data.sent} sent, ${data.failed} failed.`);
+      setNotificationTitle('');
+      setNotificationBody('');
+      setNotificationOrderId('');
+      
+      // Refresh the logs list
+      await fetchPushSendLogs();
+    } catch (err: any) {
+      console.error(err);
+      setNotificationsError(err.message || 'Error occurred while sending push notifications.');
+    } finally {
+      setIsSendingNotification(false);
+    }
+  };
+
   useEffect(() => {
     if (activeSubTab === 'orders') {
       fetchOrders();
@@ -499,6 +585,9 @@ export default function SellerHub({
     }
     if (activeSubTab === 'security-logs') {
       fetchAuthFailLogs();
+    }
+    if (activeSubTab === 'notifications') {
+      fetchPushSendLogs();
     }
   }, [activeSubTab, editingProduct]);
 
@@ -2130,7 +2219,8 @@ Colors suited: Burnt Orange with Matte Slate eyes or Chalk White body.`);
             { id: 'pricehealth', name: 'Price Health', icon: AlertTriangle },
             { id: 'settings', name: 'Store Settings', icon: Settings },
             { id: 'support-logs', name: 'Chat Support Logs', icon: MessageSquare },
-            { id: 'security-logs', name: 'Security Logs', icon: ShieldAlert }
+            { id: 'security-logs', name: 'Security Logs', icon: ShieldAlert },
+            { id: 'notifications', name: 'Push Broadcasts', icon: Bell }
           ].map((tab) => {
             const Icon = tab.icon;
             return (
@@ -6494,6 +6584,236 @@ Colors suited: Burnt Orange with Matte Slate eyes or Chalk White body.`);
                             </span>
                           </td>
                           <td className="p-3 text-text-secondary font-sans">{entry.path}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {activeSubTab === 'notifications' && !editingProduct && (
+          <div className="space-y-6">
+            <div className="bg-[#070b13] border border-border-premium rounded-2xl p-6">
+              <div className="border-b border-border-premium pb-4 mb-6 text-left font-mono">
+                <h3 className="font-display font-black text-white text-base flex items-center space-x-2">
+                  <Bell className="w-5 h-5 text-accent" />
+                  <span>Push Notification Composer</span>
+                </h3>
+                <p className="text-[10px] text-text-secondary mt-1">
+                  Compose and dispatch instant hardware alerts and promotional notifications to active device subscriptions.
+                </p>
+              </div>
+
+              {notificationsError && (
+                <div className="p-4 bg-red-950/15 border border-red-500/20 text-red-400 font-mono text-xs rounded-xl mb-6 text-left">
+                  ⚠ {notificationsError}
+                </div>
+              )}
+
+              {notificationsSuccess && (
+                <div className="p-4 bg-green-950/15 border border-green-500/20 text-green-400 font-mono text-xs rounded-xl mb-6 text-left">
+                  ✔ {notificationsSuccess}
+                </div>
+              )}
+
+              <form onSubmit={handleSendPushNotification} className="space-y-6 text-left">
+                {/* Audience Selection */}
+                <div className="space-y-2">
+                  <label className="block text-[10px] font-mono text-text-secondary uppercase tracking-wider font-bold">
+                    Target Audience Group
+                  </label>
+                  <div className="grid grid-cols-2 md:grid-cols-5 gap-3 font-mono text-xs">
+                    {[
+                      { id: 'all', label: 'All Devices' },
+                      { id: 'loyalty_silver', label: 'Silver+' },
+                      { id: 'loyalty_gold', label: 'Gold+' },
+                      { id: 'loyalty_platinum', label: 'Platinum' },
+                      { id: 'order', label: 'Specific Order' },
+                    ].map((grp) => (
+                      <label
+                        key={grp.id}
+                        className={`flex items-center justify-center p-3.5 rounded-xl border cursor-pointer transition select-none ${
+                          notificationAudience === grp.id
+                            ? 'bg-accent/10 border-accent text-accent font-bold'
+                            : 'bg-bg-surface border-border-premium text-text-secondary hover:text-text-primary hover:border-gray-500'
+                        }`}
+                      >
+                        <input
+                          type="radio"
+                          name="audience"
+                          value={grp.id}
+                          checked={notificationAudience === grp.id}
+                          onChange={() => setNotificationAudience(grp.id as any)}
+                          className="sr-only"
+                        />
+                        <span>{grp.label}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Specific Order Input */}
+                {notificationAudience === 'order' && (
+                  <div className="space-y-1 font-mono max-w-sm">
+                    <label className="block text-[10px] text-text-secondary uppercase tracking-wider">
+                      Target Order ID
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. BLV-ORD-100204"
+                      value={notificationOrderId}
+                      onChange={(e) => setNotificationOrderId(e.target.value)}
+                      className="w-full bg-bg-surface text-gray-200 px-3.5 py-2.5 rounded-xl border border-border-premium focus:border-accent focus:outline-none text-xs font-mono"
+                    />
+                    <p className="text-[9px] text-text-muted mt-1 leading-relaxed">
+                      Matches the order's phone, email, or user ID to registered devices.
+                    </p>
+                  </div>
+                )}
+
+                {/* Title & Body */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-1 font-mono">
+                    <label className="block text-[10px] text-text-secondary uppercase tracking-wider">
+                      Notification Title ({60 - notificationTitle.length} remaining)
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      maxLength={60}
+                      placeholder="e.g. ⚡ Flash Sale - 20% Off Weekend"
+                      value={notificationTitle}
+                      onChange={(e) => setNotificationTitle(e.target.value)}
+                      className="w-full bg-bg-surface text-gray-200 px-3.5 py-2.5 rounded-xl border border-border-premium focus:border-accent focus:outline-none text-xs"
+                    />
+                  </div>
+
+                  <div className="space-y-1 font-mono">
+                    <label className="block text-[10px] text-text-secondary uppercase tracking-wider">
+                      Tap Target Route URL
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. /store or /account"
+                      value={notificationUrl}
+                      onChange={(e) => setNotificationUrl(e.target.value)}
+                      className="w-full bg-bg-surface text-gray-200 px-3.5 py-2.5 rounded-xl border border-border-premium focus:border-accent focus:outline-none text-xs"
+                    />
+                  </div>
+
+                  <div className="space-y-1 font-mono md:col-span-2">
+                    <label className="block text-[10px] text-text-secondary uppercase tracking-wider">
+                      Notification Body Text ({120 - notificationBody.length} remaining)
+                    </label>
+                    <textarea
+                      required
+                      rows={3}
+                      maxLength={120}
+                      placeholder="e.g. Add premium keychains to your collection with code FLASH20. Tap to shop custom items."
+                      value={notificationBody}
+                      onChange={(e) => setNotificationBody(e.target.value)}
+                      className="w-full bg-bg-surface text-gray-200 px-3.5 py-2.5 rounded-xl border border-border-premium focus:border-accent focus:outline-none text-xs font-sans"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex justify-end pt-2 border-t border-border-premium">
+                  <button
+                    type="submit"
+                    disabled={isSendingNotification}
+                    className="px-6 py-3 bg-gradient-to-r from-accent to-accent-secondary hover:from-accent-hover hover:to-accent-secondary-lt text-text-on-accent font-black tracking-wider text-xs rounded-xl transition cursor-pointer font-mono shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+                  >
+                    {isSendingNotification ? (
+                      <>
+                        <div className="animate-spin rounded-full h-3.5 w-3.5 border-b-2 border-white" />
+                        <span>DISPATCHING ALERT...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Bell className="w-3.5 h-3.5" />
+                        <span>DISPATCH PUSH TELEMETRY</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            {/* Audit Log Table */}
+            <div className="bg-[#070b13] border border-border-premium rounded-2xl p-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border-premium pb-4 mb-6">
+                <div className="text-left font-mono">
+                  <h4 className="font-display font-black text-white text-base">
+                    Recent Broadcasts Logs
+                  </h4>
+                  <p className="text-[10px] text-text-secondary mt-1">
+                    Capped at 200 entries · Resets on server restart
+                  </p>
+                </div>
+                <button
+                  onClick={fetchPushSendLogs}
+                  disabled={isSendLogsLoading}
+                  className="px-3.5 py-2 rounded-lg bg-bg-surface border border-border-premium hover:border-gray-500 text-text-primary text-xs font-semibold cursor-pointer disabled:opacity-50 transition"
+                >
+                  Refresh Send Logs
+                </button>
+              </div>
+
+              {isSendLogsLoading ? (
+                <div className="py-12 text-center text-text-muted font-mono text-xs flex flex-col items-center justify-center gap-3">
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-accent" />
+                  <span>Fetching broadcast logs...</span>
+                </div>
+              ) : pushSendLogs.length === 0 ? (
+                <div className="py-16 text-center text-text-muted border border-dashed border-border-premium rounded-xl text-xs space-y-1 font-mono">
+                  <p className="font-bold text-text-primary">No broadcasts sent yet.</p>
+                  <p className="text-[10px] max-w-xs mx-auto">
+                    Manually dispatched alerts or order-lifecycle updates will show up here.
+                  </p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto border border-border-premium rounded-xl">
+                  <table className="w-full text-left border-collapse text-xs">
+                    <thead>
+                      <tr className="bg-bg-elevated/45 text-[10px] font-mono text-text-secondary uppercase tracking-wider border-b border-border-premium">
+                        <th className="p-3 w-44">Timestamp</th>
+                        <th className="p-3 w-36">Audience</th>
+                        <th className="p-3">Title</th>
+                        <th className="p-3 w-28 text-center">Status</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border-premium text-text-secondary">
+                      {pushSendLogs.map((entry) => (
+                        <tr key={entry.id} className="hover:bg-bg-elevated/20 font-mono text-[11px]">
+                          <td className="p-3 text-text-muted">
+                            {new Date(entry.timestamp).toLocaleString('en-US', {
+                              year: 'numeric',
+                              month: 'short',
+                              day: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit',
+                            })}
+                          </td>
+                          <td className="p-3">
+                            <span className="px-2 py-0.5 rounded-full text-[9px] font-bold border bg-bg-surface border-border-premium text-text-primary font-mono uppercase">
+                              {entry.audience}
+                            </span>
+                          </td>
+                          <td className="p-3 text-text-primary font-sans font-medium">{entry.title}</td>
+                          <td className="p-3 text-center">
+                            <span className="text-[10px] font-mono font-bold text-green-400">
+                              {entry.sent} sent
+                            </span>
+                            {entry.failed > 0 && (
+                              <span className="text-[10px] font-mono font-bold text-red-400 ml-2">
+                                / {entry.failed} failed
+                              </span>
+                            )}
+                          </td>
                         </tr>
                       ))}
                     </tbody>

@@ -18,7 +18,7 @@ const mockItem: CartItem = {
     title: 'Custom Name Keychain',
     description: 'Template description',
     category: 'Keychains',
-    price: 4.99,
+    price: 500,
     colors: ['#ffffff', '#f5af19'],
     materials: ['PLA'],
     rating: 5,
@@ -32,11 +32,11 @@ const mockItem: CartItem = {
   selectedMaterial: 'PLA (Matte)',
   quantity: 1,
   customization: mockConfig,
-  calculatedPrice: 6.99
+  calculatedPrice: 700
 };
 
 assert.strictEqual(mockItem.customization?.name, 'Belvia');
-assert.strictEqual(mockItem.calculatedPrice, 6.99);
+assert.strictEqual(mockItem.calculatedPrice, 700);
 console.log('Task 1 Tests Passed!');
 
 // Task 2: Calculations & validations tests
@@ -54,8 +54,8 @@ const spec1 = calculateKeychainSpecs({
   theme: 'floral',
   customizationVersion: 1
 });
-// Pricing formula: (Base price 4.99 * Size multiplier 1.4) + Theme price offset 1.5 + complexity fee 0.5 = 6.99 + 1.50 + 0.50 = 8.99
-assert.strictEqual(spec1.price, 8.99);
+// Pricing formula: (Base price 500 * Size multiplier 1.4) + Theme price offset 150 + complexity fee 50 = 700 + 150 + 50 = 900
+assert.strictEqual(spec1.price, 900);
 // printTime formula: (Base print time 40 + Theme time offset 10) * complexity mult 1.1x = 50 * 1.1 = 55
 assert.strictEqual(spec1.printTimeMinutes, 55);
 
@@ -69,8 +69,8 @@ const specBangla = calculateKeychainSpecs({
   theme: 'standard',
   customizationVersion: 1
 });
-// Pricing: (Base price 4.99 * Size multiplier 1.0) + Theme price offset 0.0 + complexity fee 0.0 + Bangla surcharge 0.50 + 1 char excess surcharge 0.15 = 5.64
-assert.strictEqual(specBangla.price, 5.64);
+// Pricing: (Base price 500 * Size multiplier 1.0) + Theme price offset 0 + complexity fee 0 + Bangla surcharge 50 + 1 char excess surcharge 15 = 565
+assert.strictEqual(specBangla.price, 565);
 
 // Test 3: Input validations
 const valValid = validateKeychainInput('ValidName', '#ffffff', '#000000');
@@ -104,7 +104,7 @@ const cartItemsList: CartItem[] = [
       title: 'Normal item',
       description: 'Desc',
       category: 'Home Decor',
-      price: 10.00,
+      price: 1000,
       colors: [],
       materials: [],
       rating: 5,
@@ -124,7 +124,7 @@ const cartItemsList: CartItem[] = [
       title: 'Custom Name Keychain',
       description: 'Customization specs',
       category: 'Keychains',
-      price: 4.99,
+      price: 500,
       colors: [],
       materials: [],
       rating: 5,
@@ -137,14 +137,14 @@ const cartItemsList: CartItem[] = [
     quantity: 3,
     selectedColor: '#f5af19',
     selectedMaterial: 'PLA (Matte)',
-    calculatedPrice: 8.99,
+    calculatedPrice: 900,
     customPreviewUrl: 'data:image/svg+xml;utf-8,svgContent'
   }
 ];
 
 // 1. Verify price calculation uses frozen calculatedPrice
 const totalCostCalculated = cartItemsList.reduce((acc, item) => acc + (item.calculatedPrice ?? item.product.price) * item.quantity, 0);
-assert.strictEqual(totalCostCalculated, 10.00 * 2 + 8.99 * 3); // 20 + 26.97 = 46.97
+assert.strictEqual(totalCostCalculated, 1000 * 2 + 900 * 3); // 2000 + 2700 = 4700
 
 // 2. Verify image selection uses customPreviewUrl if present
 const imageSource1 = cartItemsList[0].customPreviewUrl || cartItemsList[0].product.images[0];

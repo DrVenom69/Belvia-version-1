@@ -6,7 +6,7 @@ export const INITIAL_PRODUCTS: Product[] = [
     title: 'Modular Helix Desk Organizer',
     description: 'A MakerWorld favorite featuring a rotating internal compartment, dedicated pencil slots, dynamic phone stand, and small accessory drawers. Printed with a high-strength matte PLA for a seamless, professional finish.',
     category: 'Desk Accessories',
-    price: 24.99,
+    price: 2500,
     colors: ['Matte Slate', 'Chalk White', 'Emerald Green', 'Burnt Orange'],
     materials: ['PLA (Matte)', 'PETG (Durable)'],
     rating: 4.9,
@@ -19,14 +19,15 @@ export const INITIAL_PRODUCTS: Product[] = [
     ],
     infill: '15% Gyroid',
     dimensions: '120 x 120 x 140 mm',
-    isCustomizable: true
+    isCustomizable: true,
+    color_picker_count: 1
   },
   {
     id: 'bv-002',
     title: 'Articulated Obsidian Rift Dragon',
     description: 'An stunningly detailed multi-jointed flexi-dragon that is printed as a single interlocking piece. Complete with custom crystalline scale texture and fully flexible tail, wings, and neck. Ideal toy, desk companion, or shelf center-piece.',
     category: 'Figures & Collectibles',
-    price: 29.99,
+    price: 3000,
     colors: ['Obsidian Black', 'Jade Green', 'Silk Copper', 'Neon Nebula'],
     materials: ['PLA (Silk Pearl)', 'PETG'],
     rating: 5.0,
@@ -39,14 +40,15 @@ export const INITIAL_PRODUCTS: Product[] = [
     ],
     infill: '20% Lightning',
     dimensions: '450 x 80 x 60 mm',
-    isCustomizable: false
+    isCustomizable: false,
+    color_picker_count: 1
   },
   {
     id: 'bv-003',
     title: 'Geometric Origami Water Pot',
     description: 'A sleek, contemporary self-watering flower pot modeled on origami folds. Features a secondary internal drainage reservoir to feed roots naturally and maintain optimal humidity. Sealed with a water-tight PETG base liner.',
     category: 'Home Decor',
-    price: 19.99,
+    price: 2000,
     colors: ['Chalk White', 'Pastel Mint', 'Sandstone Grey', 'Terracotta'],
     materials: ['PETG (Waterproof)', 'PLA (Bioplastic)'],
     rating: 4.8,
@@ -59,14 +61,15 @@ export const INITIAL_PRODUCTS: Product[] = [
     ],
     infill: '10% Gyroid',
     dimensions: '140 x 140 x 130 mm',
-    isCustomizable: true
+    isCustomizable: true,
+    color_picker_count: 1
   },
   {
     id: 'bv-004',
     title: 'Cyberpunk Xbox/PS Controller Stand',
     description: 'Elevate your gaming rig with a low-poly dual controller stand configured with mechanical wiring details and built-in slots for charging cables. Sturdy block base prevents tipping and protects thumbsticks.',
     category: 'Gaming Accessories',
-    price: 18.50,
+    price: 1850,
     colors: ['Neon Violet', 'Matte Slate', 'Cyber Yellow', 'Chalk White'],
     materials: ['PLA (Matte)', 'ABS (High-Impact)'],
     rating: 4.7,
@@ -79,14 +82,15 @@ export const INITIAL_PRODUCTS: Product[] = [
     ],
     infill: '15% Grid',
     dimensions: '160 x 110 x 180 mm',
-    isCustomizable: true
+    isCustomizable: true,
+    color_picker_count: 1
   },
   {
     id: 'bv-005',
     title: 'Custom Lithophane Lamp & LED Stand',
     description: 'A magical nightlight. Send us any photograph, and our custom slicing system compiles it into a high-density 3D-curved lithophane panel that reveals your photograph in beautiful monochrome tones when lit by the wooden LED base (included).',
     category: 'Custom Orders',
-    price: 45.00,
+    price: 4500,
     colors: ['Chalk White (Translucent Only)'],
     materials: ['PLA (High-Definition)'],
     rating: 4.9,
@@ -99,14 +103,15 @@ export const INITIAL_PRODUCTS: Product[] = [
     ],
     infill: '100% Solid (Translucence)',
     dimensions: '150 x 150 x 200 mm',
-    isCustomizable: true
+    isCustomizable: true,
+    color_picker_count: 1
   },
   {
     id: 'bv-006',
     title: 'Minimalist Hex Magnet Key Holder',
     description: 'An elegant magnetic key rack that attaches to your entry wall with non-marking command strips. Embedded with deep-seated N52 neodymium magnets capable of holding heavy rings. Each hexagon contains customizable center initials.',
     category: 'Keychains',
-    price: 14.99,
+    price: 1500,
     colors: ['Sandstone Grey', 'Matte Slate', 'Silk Copper', 'Jade Green'],
     materials: ['PLA (Carbon Fiber Infused)', 'PETG'],
     rating: 4.6,
@@ -119,14 +124,15 @@ export const INITIAL_PRODUCTS: Product[] = [
     ],
     infill: '25% Honeycomb',
     dimensions: '180 x 60 x 15 mm',
-    isCustomizable: true
+    isCustomizable: true,
+    color_picker_count: 1
   },
   {
     id: 'bv-007',
     title: 'Ultra-Tough Toggle Wall Clips (4x)',
     description: 'Heavy-duty mounting clamps designed for garage utility pegs, gardening tools, or pantry shelves. Features a mechanical living-hinge snap clasp with verified load-bearing ratings up to 15kg per clip.',
     category: 'Functional Prints',
-    price: 12.50,
+    price: 1250,
     colors: ['Signal Orange', 'Obsidian Black', 'Steel Blue'],
     materials: ['PETG (High-Temperature)', 'TPU (Flexible Snap)'],
     rating: 4.9,
@@ -139,14 +145,15 @@ export const INITIAL_PRODUCTS: Product[] = [
     ],
     infill: '40% Cubic (Max Strength)',
     dimensions: '60 x 40 x 30 mm',
-    isCustomizable: false
+    isCustomizable: false,
+    color_picker_count: 1
   },
   {
     id: 'bv-008',
     title: 'B2B Custom Branded Bottle Openers',
     description: 'Premium bulk promotional items configured with an embedded steel coin core for cap-lifting and customized embossed company logos across the body. Incredible tactile feel and lasting promotional impact. Offered in batches of 50+.',
     category: 'Business Merchandise',
-    price: 125.00, // For a batch of 50
+    price: 12500, // For a batch of 50
     colors: ['Matte Slate', 'Obsidian Black', 'Steel Blue', 'Silver Pearl'],
     materials: ['PLA (Matte)', 'PETG (Durable)'],
     rating: 4.9,
@@ -159,14 +166,15 @@ export const INITIAL_PRODUCTS: Product[] = [
     ],
     infill: '30% Gyroid',
     dimensions: '90 x 40 x 10 mm (Each)',
-    isCustomizable: true
+    isCustomizable: true,
+    color_picker_count: 1
   },
   {
     id: 'imported-001',
     title: 'Bambu Lab Automatic Material System (AMS)',
     description: 'The ultimate colored printing upgrade. Allows your 3D printer to print in up to 4 colors simultaneously with automatic filament spool detection, airtight moisture-proof chassis, and fallback runout sensors.',
     category: 'Premium Hardware',
-    price: 349.00,
+    price: 34900,
     colors: ['Chitubox Graphite Black'],
     materials: ['Heavy Polycarbonate Injection'],
     rating: 4.9,
@@ -183,14 +191,15 @@ export const INITIAL_PRODUCTS: Product[] = [
     isPreOrder: true,
     estimatedArrival: 'Arriving June 26 via Air Cargo',
     depositPercentage: 30,
-    originalImportCountry: 'Germany'
+    originalImportCountry: 'Germany',
+    color_picker_count: 1
   },
   {
     id: 'imported-002',
     title: 'Prism Multi-Chroma Silk Co-Extrusion Filament',
     description: 'High-grade dual-color silk filament imported directly. Extrudes yellow-gold on one side and crimson-red on the other, creating jaw-dropping active-color changes as your model moves in the light.',
     category: 'Exotic Filaments',
-    price: 34.99,
+    price: 3500,
     colors: ['Royal Gold & Crimson Red', 'Emerald Green & Ocean Blue'],
     materials: ['Co-Extruded Silk PLA'],
     rating: 5.0,
@@ -207,14 +216,15 @@ export const INITIAL_PRODUCTS: Product[] = [
     isPreOrder: true,
     estimatedArrival: 'Arriving June 29 via Express Cargo',
     depositPercentage: 50,
-    originalImportCountry: 'Japan'
+    originalImportCountry: 'Japan',
+    color_picker_count: 1
   },
   {
     id: 'imported-003',
     title: 'E3D Revo Micro High-End Heating Block Kit',
     description: 'Ultra-lightweight premium hotend upgrade allowing tool-less nozzle swapping at room temperature. Heats from room temp to 200°C in under 22 seconds using an integrated crystal heating ring.',
     category: 'Premium Hardware',
-    price: 115.00,
+    price: 11500,
     colors: ['Nozzle Brass Gold', 'Anodized Black Sleek'],
     materials: ['Titanium Heatbreak & Brass'],
     rating: 4.8,
@@ -231,7 +241,8 @@ export const INITIAL_PRODUCTS: Product[] = [
     isPreOrder: true,
     estimatedArrival: 'Arriving July 08 via freight cargo Express',
     depositPercentage: 25,
-    originalImportCountry: 'United Kingdom'
+    originalImportCountry: 'United Kingdom',
+    color_picker_count: 1
   }
 ];
 

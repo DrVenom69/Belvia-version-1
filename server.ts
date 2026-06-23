@@ -9,6 +9,7 @@ import { exec } from "child_process";
 import { promisify } from "util";
 import { Resend } from "resend";
 import sharp from "sharp";
+import webpush from "web-push";
 import { scrapeMakerWorldPage } from "./tools/makerworld_scraper.ts";
 import { INITIAL_PRODUCTS } from "./src/data.ts";
 import { uploadToR2, deleteFromR2 } from "./server/r2.ts";
@@ -18,6 +19,18 @@ import { calculateKeychainSpecs } from "./src/utils/keychainCalculations.ts";
 const execAsync = promisify(exec);
 
 dotenv.config();
+
+// ── Web Push (VAPID) Setup ─────────────────────────────────────────────
+const VAPID_PUBLIC_KEY  = process.env.VAPID_PUBLIC_KEY  || "";
+const VAPID_PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY || "";
+const VAPID_SUBJECT     = process.env.VAPID_SUBJECT     || "mailto:admin@belvia3d.com";
+
+if (VAPID_PUBLIC_KEY && VAPID_PRIVATE_KEY) {
+  webpush.setVapidDetails(VAPID_SUBJECT, VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY);
+  console.log("🔔 Web Push (VAPID) initialized.");
+} else {
+  console.warn("⚠️  VAPID_PUBLIC_KEY / VAPID_PRIVATE_KEY not set — push notifications disabled.");
+}
 
 // ── Supabase Admin Client ──────────────────────────────────────────
 // Uses the service_role key for server-side read/write of products & orders.
@@ -2617,6 +2630,7 @@ app.post("/api/update-order-status", requireAdminAuth, async (req: express.Reque
 
       // Fire-and-forget status update email
       sendStatusUpdateEmail(updated);
+      sendOrderStatusPushNotification(updated);
       res.json({ success: true, message: `Order ${orderId} updated.`, order: updated });
       return;
     }
@@ -2654,6 +2668,7 @@ app.post("/api/update-order-status", requireAdminAuth, async (req: express.Reque
 
     await fs.promises.writeFile(dbPath, JSON.stringify(orders, null, 2), "utf-8");
     sendStatusUpdateEmail(orders[idx]);
+    sendOrderStatusPushNotification(orders[idx]);
 
     res.json({ success: true, message: `Order ${orderId} updated.`, order: orders[idx] });
   } catch (err: any) {
@@ -3052,6 +3067,412 @@ app.post("/api/admin/unmatched-questions/clear", requireAdminAuth, async (req: e
   } catch (err: any) {
     res.status(500).json({ error: "Failed to clear unmatched questions: " + err.message });
   }
+});
+
+
+// ══════════════════════════════════════════════════════════════════════
+// PUSH NOTIFICATION SYSTEM
+// ══════════════════════════════════════════════════════════════════════
+
+// ── In-memory send log (capped at 200, matches auth-fail-log pattern) ──
+interface PushSendLogEntry {
+  id: string;
+  timestamp: string;
+  audience: string;    // "all" | "order:{id}" | "loyalty_gold" etc.
+  title: string;
+  sent: number;
+  failed: number;
+}
+const pushSendLog: PushSendLogEntry[] = [];
+
+// ── Core reusable send helper ──────────────────────────────────────────
+// Accepts an array of DB rows from push_subscriptions and a notification payload.
+// Returns counts of sent/failed. Failed subscriptions are deactivated in DB.
+async function sendPushNotification(
+  subscriptions: { id: string; endpoint: string; p256dh: string; auth_key: string }[],
+  payload: { title: string; body: string; icon?: string; badge?: string; data?: Record<string, any> }
+): Promise<{ sent: number; failed: number }> {
+  if (!VAPID_PUBLIC_KEY || !VAPID_PRIVATE_KEY) {
+    console.warn("[Push] VAPID not configured — skipping push send.");
+    return { sent: 0, failed: 0 };
+  }
+
+  let sent = 0;
+  let failed = 0;
+  const staleEndpoints: string[] = [];
+
+  const notifPayload = JSON.stringify({
+    title:  payload.title,
+    body:   payload.body,
+    icon:   payload.icon  || "/logo.png",
+    badge:  payload.badge || "/logo.png",
+    data:   payload.data  || {},
+  });
+
+  await Promise.allSettled(
+    subscriptions.map(async (sub) => {
+      try {
+        await webpush.sendNotification(
+          {
+            endpoint: sub.endpoint,
+            keys: { p256dh: sub.p256dh, auth: sub.auth_key },
+          },
+          notifPayload,
+          { TTL: 86400 } // keep in push service queue for 24 hours if device is offline
+        );
+        sent++;
+      } catch (err: any) {
+        failed++;
+        // 410 Gone or 404 = subscription expired/unsubscribed — deactivate it
+        if (err.statusCode === 410 || err.statusCode === 404) {
+          staleEndpoints.push(sub.endpoint);
+        }
+        console.warn(`[Push] Failed to send to endpoint (status ${err.statusCode}):`, sub.endpoint.substring(0, 60));
+      }
+    })
+  );
+
+  // Deactivate stale subscriptions in bulk
+  if (staleEndpoints.length > 0 && isSupabaseConfigured) {
+    supabaseAdmin!
+      .from("push_subscriptions")
+      .update({ is_active: false })
+      .in("endpoint", staleEndpoints)
+      .then(({ error }) => {
+        if (error) console.error("[Push] Failed to deactivate stale subscriptions:", error.message);
+        else console.log(`[Push] Deactivated ${staleEndpoints.length} stale subscription(s).`);
+      });
+  }
+
+  return { sent, failed };
+}
+
+// ── Helper: fetch all active subscriptions for a customer identity ─────
+// Matches by phone, email, or user_id (same identity anchors as order records).
+async function fetchSubscriptionsForCustomer(opts: {
+  phone?: string;
+  email?: string;
+  userId?: string;
+}): Promise<{ id: string; endpoint: string; p256dh: string; auth_key: string }[]> {
+  if (!isSupabaseConfigured) return [];
+  const { phone, email, userId } = opts;
+  if (!phone && !email && !userId) return [];
+
+  // Build OR filter across all available identity anchors
+  const filters: string[] = [];
+  if (phone)  filters.push(`phone.eq.${phone.trim().toLowerCase().replace(/[\s-]/g, "")}`);
+  if (email)  filters.push(`email.eq.${email.trim().toLowerCase()}`);
+  if (userId) filters.push(`user_id.eq.${userId}`);
+
+  const { data, error } = await supabaseAdmin!
+    .from("push_subscriptions")
+    .select("id, endpoint, p256dh, auth_key")
+    .eq("is_active", true)
+    .or(filters.join(","));
+
+  if (error) {
+    console.error("[Push] Failed to fetch subscriptions:", error.message);
+    return [];
+  }
+  return data || [];
+}
+
+// ── Order lifecycle push: fired inside update-order-status ─────────────
+// Mirror of sendStatusUpdateEmail() — fire-and-forget, never throws.
+async function sendOrderStatusPushNotification(order: any): Promise<void> {
+  if (!VAPID_PUBLIC_KEY || !VAPID_PRIVATE_KEY) return;
+  try {
+    const phone  = order.shippingInfo?.phone  || order["shippingInfo"]?.phone;
+    const email  = order.shippingInfo?.email  || order["shippingInfo"]?.email;
+    const userId = order.userId || order.user_id;
+    const orderId = order.id;
+    const status  = order.status;
+
+    const subscriptions = await fetchSubscriptionsForCustomer({
+      phone:  phone  ? String(phone).trim().toLowerCase().replace(/[\s-]/g, "") : undefined,
+      email:  email  ? String(email).trim().toLowerCase() : undefined,
+      userId: userId || undefined,
+    });
+
+    if (subscriptions.length === 0) return;
+
+    const messages: Record<string, { title: string; body: string }> = {
+      "Paid":        { title: "✅ Payment Confirmed",  body: `Your payment for order ${orderId} has been verified!` },
+      "Processing":  { title: "🖨️ Printing Started",    body: `Order ${orderId} is now in our print queue. We'll update you when it ships.` },
+      "Shipped":     { title: "📦 Your Order Shipped!", body: `Order ${orderId} is on its way. Tap to track your delivery.` },
+      "Completed":   { title: "🎉 Order Delivered!",   body: `Your Belvia order has arrived! Leave a verified review to help other customers.` },
+    };
+
+    const msg = messages[status];
+    if (!msg) return; // Don't fire for Pending / internal statuses
+
+    const { sent, failed } = await sendPushNotification(subscriptions, {
+      title: msg.title,
+      body:  msg.body,
+      data:  { orderId, url: `/?tab=tracker&order=${orderId}` },
+    });
+
+    console.log(`[Push] Order ${orderId} (${status}) → ${sent} sent, ${failed} failed`);
+  } catch (err: any) {
+    // Never let push errors bubble up — email already fired, order update already saved
+    console.error("[Push] sendOrderStatusPushNotification error:", err.message);
+  }
+}
+
+// ── POST /api/push/subscribe — Public ─────────────────────────────────
+// Called by the frontend usePushNotifications hook after browser grants permission.
+app.post("/api/push/subscribe", async (req: express.Request, res: express.Response): Promise<void> => {
+  try {
+    const { endpoint, p256dh, auth_key, phone, email, user_agent } = req.body;
+
+    if (!endpoint || !p256dh || !auth_key) {
+      res.status(400).json({ error: "Missing required fields: endpoint, p256dh, auth_key" });
+      return;
+    }
+
+    // Normalize phone if provided (same normalization as order matching)
+    const normalizedPhone = phone ? String(phone).trim().toLowerCase().replace(/[\s-]/g, "") : null;
+    const normalizedEmail = email ? String(email).trim().toLowerCase() : null;
+
+    if (isSupabaseConfigured) {
+      const { error } = await supabaseAdmin!
+        .from("push_subscriptions")
+        .upsert(
+          {
+            endpoint,
+            p256dh,
+            auth_key,
+            phone:      normalizedPhone,
+            email:      normalizedEmail,
+            user_agent: user_agent || null,
+            is_active:  true,
+            last_used_at: new Date().toISOString(),
+          },
+          { onConflict: "endpoint" } // upsert on endpoint to avoid duplicates
+        );
+
+      if (error) throw new Error(error.message);
+    }
+
+    console.log(`[Push] New subscription registered${normalizedPhone ? ` (phone: ${normalizedPhone})` : ""}`);
+    res.json({ success: true, message: "Push subscription registered." });
+  } catch (err: any) {
+    console.error("[Push] Subscribe error:", err.message);
+    res.status(500).json({ error: "Failed to register push subscription: " + err.message });
+  }
+});
+
+// ── POST /api/push/unsubscribe — Public ────────────────────────────────
+// Called by the frontend when user opts out.
+app.post("/api/push/unsubscribe", async (req: express.Request, res: express.Response): Promise<void> => {
+  try {
+    const { endpoint } = req.body;
+    if (!endpoint) {
+      res.status(400).json({ error: "Missing required field: endpoint" });
+      return;
+    }
+
+    if (isSupabaseConfigured) {
+      const { error } = await supabaseAdmin!
+        .from("push_subscriptions")
+        .update({ is_active: false })
+        .eq("endpoint", endpoint);
+
+      if (error) throw new Error(error.message);
+    }
+
+    console.log("[Push] Subscription unsubscribed:", endpoint.substring(0, 60));
+    res.json({ success: true, message: "Push subscription removed." });
+  } catch (err: any) {
+    console.error("[Push] Unsubscribe error:", err.message);
+    res.status(500).json({ error: "Failed to unsubscribe: " + err.message });
+  }
+});
+
+// ── POST /api/admin/push/send-to-order — Admin ────────────────────────
+// Send a push notification to the customer of a specific order.
+// Body: { orderId, title, body, url? }
+app.post("/api/admin/push/send-to-order", requireAdminAuth, async (req: express.Request, res: express.Response): Promise<void> => {
+  try {
+    const { orderId, title, body: msgBody, url } = req.body;
+    if (!orderId || !title || !msgBody) {
+      res.status(400).json({ error: "Missing required fields: orderId, title, body" });
+      return;
+    }
+
+    if (!isSupabaseConfigured) {
+      res.status(503).json({ error: "Push send-to-order requires Supabase to be configured." });
+      return;
+    }
+
+    // Fetch the order to get customer identity
+    const { data: order, error: orderErr } = await supabaseAdmin!
+      .from("orders")
+      .select("id, shippingInfo, userId, user_id")
+      .eq("id", orderId)
+      .single();
+
+    if (orderErr || !order) {
+      res.status(404).json({ error: `Order ${orderId} not found.` });
+      return;
+    }
+
+    const phone  = order.shippingInfo?.phone;
+    const email  = order.shippingInfo?.email;
+    const userId = order.userId || order.user_id;
+
+    const subscriptions = await fetchSubscriptionsForCustomer({
+      phone:  phone  ? String(phone).trim().toLowerCase().replace(/[\s-]/g, "") : undefined,
+      email:  email  ? String(email).trim().toLowerCase() : undefined,
+      userId: userId || undefined,
+    });
+
+    if (subscriptions.length === 0) {
+      res.json({ success: true, sent: 0, failed: 0, message: "No active subscriptions found for this customer." });
+      return;
+    }
+
+    const { sent, failed } = await sendPushNotification(subscriptions, {
+      title: String(title),
+      body:  String(msgBody),
+      data:  { orderId, url: url || `/?tab=tracker&order=${orderId}` },
+    });
+
+    // Record in send log
+    const logEntry: PushSendLogEntry = {
+      id: `psl-${Date.now()}`,
+      timestamp: new Date().toISOString(),
+      audience: `order:${orderId}`,
+      title: String(title),
+      sent,
+      failed,
+    };
+    pushSendLog.unshift(logEntry);
+    if (pushSendLog.length > 200) pushSendLog.length = 200;
+
+    res.json({ success: true, sent, failed });
+  } catch (err: any) {
+    console.error("[Push] send-to-order error:", err.message);
+    res.status(500).json({ error: "Failed to send push notification: " + err.message });
+  }
+});
+
+// ── POST /api/admin/push/broadcast — Admin ────────────────────────────
+// Broadcast a push notification to a defined audience.
+// Body: { audience: "all"|"loyalty_silver"|"loyalty_gold"|"loyalty_platinum", title, body, url? }
+app.post("/api/admin/push/broadcast", requireAdminAuth, async (req: express.Request, res: express.Response): Promise<void> => {
+  try {
+    const { audience, title, body: msgBody, url } = req.body;
+
+    if (!audience || !title || !msgBody) {
+      res.status(400).json({ error: "Missing required fields: audience, title, body" });
+      return;
+    }
+
+    if (!isSupabaseConfigured) {
+      res.status(503).json({ error: "Push broadcast requires Supabase to be configured." });
+      return;
+    }
+
+    let subscriptions: { id: string; endpoint: string; p256dh: string; auth_key: string }[] = [];
+
+    if (audience === "all") {
+      // Send to all active subscriptions
+      const { data, error } = await supabaseAdmin!
+        .from("push_subscriptions")
+        .select("id, endpoint, p256dh, auth_key")
+        .eq("is_active", true);
+      if (error) throw new Error(error.message);
+      subscriptions = data || [];
+
+    } else if (audience.startsWith("loyalty_")) {
+      // Loyalty targeting: find phones/emails with enough delivered orders
+      const tierThresholds: Record<string, number> = {
+        loyalty_silver:   3,
+        loyalty_gold:     7,
+        loyalty_platinum: 15,
+      };
+      const minOrders = tierThresholds[audience];
+      if (minOrders === undefined) {
+        res.status(400).json({ error: `Unknown audience: ${audience}. Use all, loyalty_silver, loyalty_gold, or loyalty_platinum.` });
+        return;
+      }
+
+      // Get all delivered orders, count per phone
+      const { data: orders, error: ordErr } = await supabaseAdmin!
+        .from("orders")
+        .select("shippingInfo, userId, user_id")
+        .eq("status", "Completed");
+
+      if (ordErr) throw new Error(ordErr.message);
+
+      const deliveredCountByPhone: Record<string, number> = {};
+      for (const o of (orders || [])) {
+        const ph = o.shippingInfo?.phone
+          ? String(o.shippingInfo.phone).trim().toLowerCase().replace(/[\s-]/g, "")
+          : null;
+        if (ph) {
+          deliveredCountByPhone[ph] = (deliveredCountByPhone[ph] || 0) + 1;
+        }
+      }
+
+      const qualifyingPhones = Object.entries(deliveredCountByPhone)
+        .filter(([, count]) => count >= minOrders)
+        .map(([phone]) => phone);
+
+      if (qualifyingPhones.length === 0) {
+        res.json({ success: true, sent: 0, failed: 0, message: `No customers qualify for ${audience}.` });
+        return;
+      }
+
+      const { data: subs, error: subErr } = await supabaseAdmin!
+        .from("push_subscriptions")
+        .select("id, endpoint, p256dh, auth_key")
+        .eq("is_active", true)
+        .in("phone", qualifyingPhones);
+
+      if (subErr) throw new Error(subErr.message);
+      subscriptions = subs || [];
+
+    } else {
+      res.status(400).json({ error: `Unknown audience: ${audience}. Use all, loyalty_silver, loyalty_gold, or loyalty_platinum.` });
+      return;
+    }
+
+    if (subscriptions.length === 0) {
+      res.json({ success: true, sent: 0, failed: 0, message: "No active subscriptions found for this audience." });
+      return;
+    }
+
+    const { sent, failed } = await sendPushNotification(subscriptions, {
+      title: String(title),
+      body:  String(msgBody),
+      data:  { url: url || "/" },
+    });
+
+    // Record in send log
+    const logEntry: PushSendLogEntry = {
+      id: `psl-${Date.now()}`,
+      timestamp: new Date().toISOString(),
+      audience: String(audience),
+      title: String(title),
+      sent,
+      failed,
+    };
+    pushSendLog.unshift(logEntry);
+    if (pushSendLog.length > 200) pushSendLog.length = 200;
+
+    res.json({ success: true, sent, failed });
+  } catch (err: any) {
+    console.error("[Push] Broadcast error:", err.message);
+    res.status(500).json({ error: "Failed to broadcast push notification: " + err.message });
+  }
+});
+
+// ── GET /api/admin/push/send-log — Admin ──────────────────────────────
+// Returns the in-memory send log.
+app.get("/api/admin/push/send-log", requireAdminAuth, (_req: express.Request, res: express.Response) => {
+  res.json({ success: true, log: pushSendLog, total: pushSendLog.length });
 });
 
 // Configure Vite dynamic compiler middleware or assets server

@@ -188,6 +188,15 @@ button {
   background: var(--color-accent);
 }
 
+/* Hide scrollbar utility */
+@utility scrollbar-none {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+  &::-webkit-scrollbar {
+    display: none !important; /* Chrome, Safari and Opera */
+  }
+}
+
 @keyframes pulseGlow {
   0%, 100% {
     box-shadow: 0 0 10px rgba(245, 175, 25, 0.15);
@@ -206,6 +215,11 @@ button {
 @keyframes heroCarouselScroll {
   0%   { transform: translateX(0); }
   100% { transform: translateX(-50%); }
+}
+
+@keyframes heroCarouselScrollCustom {
+  0%   { transform: translateX(var(--start-x, 0px)); }
+  100% { transform: translateX(var(--end-x, -50%)); }
 }
 
 /* Legacy helpers kept for any other possible usage */
@@ -492,5 +506,12 @@ button {
   }
 }
 
-
-
+/* ── Safe area utilities for notched devices ── */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  padding-bottom: constant(safe-area-inset-bottom, 0px);
+}
+.pt-safe {
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-top: constant(safe-area-inset-top, 0px);
+}

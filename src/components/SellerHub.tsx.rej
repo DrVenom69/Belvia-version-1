@@ -1,0 +1,24 @@
+diff a/src/components/SellerHub.tsx b/src/components/SellerHub.tsx	(rejected hunks)
+@@ -2457,13 +3854,20 @@ Colors suited: Burnt Orange with Matte Slate eyes or Chalk White body.`);
+                           />
+                         </td>
+                         <td className="p-4 font-bold text-accent">{item.id}</td>
+-                        <td className="p-4 font-sans font-bold text-text-primary">{item.title}</td>
++                        <td className="p-4 font-sans font-bold text-text-primary">
++                          <div className="flex items-center gap-1.5">
++                            <span>{item.title}</span>
++                            {item.featured_carousel && (
++                              <Star className="w-3.5 h-3.5 text-accent fill-accent" title="Featured in Carousel" />
++                            )}
++                          </div>
++                        </td>
+                         <td className="p-4">
+                           <span className="px-2 py-0.5 rounded text-[10px] bg-bg-surface border border-border-premium text-accent font-semibold uppercase font-mono">
+                             {item.category}
+                           </span>
+                         </td>
+-                        <td className="p-4 text-accent font-bold">${item.price.toFixed(2)}</td>
++                        <td className="p-4 text-accent font-bold">{formatPrice(item.price)}</td>
+                         <td className="p-4 text-text-secondary">
+                           {item.weightGrams}g GÇó {item.printTime} // {item.infill}
+                         </td>

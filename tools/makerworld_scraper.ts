@@ -7,14 +7,51 @@
 import { chromium, type Browser, type Page } from "playwright";
 import fs from "fs";
 import path from "path";
+import sharp from "sharp";
+import { uploadToR2 } from "../server/r2";
 
 // Lazy browser singleton — reused across requests for performance
 let browserInstance: Browser | null = null;
+let processListenersRegistered = false;
+
+function registerProcessListeners() {
+  if (processListenersRegistered) return;
+  processListenersRegistered = true;
+
+  const cleanUp = async (signal: string) => {
+    if (browserInstance) {
+      console.log(`[Scraper] Received ${signal}. Closing Chromium browser singleton...`);
+      try {
+        await browserInstance.close();
+        browserInstance = null;
+        console.log(`[Scraper] Chromium browser closed successfully.`);
+      } catch (err: any) {
+        console.error(`[Scraper] Error closing browser during ${signal} cleanup:`, err.message);
+      }
+    }
+  };
+
+  const signals = ["SIGINT", "SIGTERM", "SIGUSR2"];
+  signals.forEach((signal) => {
+    process.once(signal, async () => {
+      await cleanUp(signal);
+      process.exit(0);
+    });
+  });
+
+  process.on("exit", () => {
+    if (browserInstance) {
+      console.warn("[Scraper] Process exiting with open browser instance.");
+    }
+  });
+}
 
 async function getBrowser(): Promise<Browser> {
   if (!browserInstance || !browserInstance.isConnected()) {
     browserInstance = await chromium.launch({
       headless: true,
+      handleSIGINT: false,
+      handleSIGTERM: false,
       args: [
         "--no-sandbox",
         "--disable-setuid-sandbox",
@@ -27,6 +64,8 @@ async function getBrowser(): Promise<Browser> {
         "--lang=en-US",
       ],
     });
+    // Register process lifecycle listeners on-demand
+    registerProcessListeners();
   }
   return browserInstance;
 }
@@ -371,13 +410,153 @@ async function tryMakerWorldAPI(
 
 // ---- Helper: Detect product category from text ----
 function detectCategory(text: string): string {
-  if (text.includes('keychain') || text.includes('key chain') || text.includes('key tag')) return 'Keychains';
-  if (text.includes('vase') || text.includes('pot') || text.includes('decor') || text.includes('lamp') || text.includes('candle') || text.includes('planter')) return 'Home Decor';
-  if (text.includes('stand') || text.includes('holder') || text.includes('organizer') || text.includes('desk') || text.includes('pen')) return 'Desk Accessories';
-  if (text.includes('game') || text.includes('controller') || text.includes('switch') || text.includes('gaming') || text.includes('nintendo') || text.includes('playstation') || text.includes('xbox')) return 'Gaming Accessories';
-  if (text.includes('business') || text.includes('logo') || text.includes('brand') || text.includes('corporate') || text.includes('card')) return 'Business Merchandise';
-  if (text.includes('tool') || text.includes('functional') || text.includes('bracket') || text.includes('mount') || text.includes('clip') || text.includes('connector')) return 'Functional Prints';
+  // 1. Conflict Resolution / Specific Rules First (Priority Order)
+  if (text.includes('phone case') || text.includes('phone stand')) {
+    return 'Desk Accessories';
+  }
+  if (text.includes('kit car') || text.includes('rc car') || text.includes('model car')) {
+    return 'Figures & Collectibles';
+  }
+  if (text.includes('fidget') || text.includes('spinner')) {
+    return 'Gaming Accessories';
+  }
+  if (text.includes('magnet')) {
+    // If text contains 'magnet' AND NOT 'keychain', it must NOT be Keychains
+    // We can directly return 'Home Decor' as specified in common conflict resolution rules: "magnet → Home Decor (not Keychain)"
+    if (!text.includes('keychain') && !text.includes('key chain') && !text.includes('key tag')) {
+      return 'Home Decor';
+    }
+  }
+
+  // 2. Standard Category Rules
+  // Keychains (only if it doesn't conflict with magnet exclusion rule, which is already handled above)
+  if (text.includes('keychain') || text.includes('key chain') || text.includes('key tag')) {
+    return 'Keychains';
+  }
+  
+  // Home Decor
+  if (
+    text.includes('vase') || 
+    text.includes('pot') || 
+    text.includes('decor') || 
+    text.includes('lamp') || 
+    text.includes('candle') || 
+    text.includes('planter') ||
+    text.includes('magnet')
+  ) {
+    return 'Home Decor';
+  }
+  
+  // Desk Accessories
+  if (
+    text.includes('stand') || 
+    text.includes('holder') || 
+    text.includes('organizer') || 
+    text.includes('desk') || 
+    text.includes('pen')
+  ) {
+    return 'Desk Accessories';
+  }
+  
+  // Gaming Accessories
+  if (
+    text.includes('game') || 
+    text.includes('controller') || 
+    text.includes('switch') || 
+    text.includes('gaming') || 
+    text.includes('nintendo') || 
+    text.includes('playstation') || 
+    text.includes('xbox')
+  ) {
+    return 'Gaming Accessories';
+  }
+  
+  // Business Merchandise
+  if (
+    text.includes('business') || 
+    text.includes('logo') || 
+    text.includes('brand') || 
+    text.includes('corporate') || 
+    text.includes('card')
+  ) {
+    return 'Business Merchandise';
+  }
+  
+  // Functional Prints
+  if (
+    text.includes('tool') || 
+    text.includes('functional') || 
+    text.includes('bracket') || 
+    text.includes('mount') || 
+    text.includes('clip') || 
+    text.includes('connector')
+  ) {
+    return 'Functional Prints';
+  }
+
+  // Default fallback
   return 'Figures & Collectibles';
+}
+
+// ---- Helper: Compress buffer with sharp and upload to R2 ----
+// GIFs are never recompressed to preserve animation.
+// All other formats are resized to max 1200px width and quality-compressed.
+async function compressAndUpload(
+  rawBuffer: Buffer,
+  fileName: string,
+  outputDir: string
+): Promise<string> {
+  const ext = path.extname(fileName).toLowerCase().replace('.', '');
+  const filePath = path.join(outputDir, fileName);
+  const originalSize = rawBuffer.length;
+
+  let finalBuffer: Buffer;
+  let contentType: string;
+
+  if (ext === 'gif') {
+    // Never compress GIFs — upload as-is to preserve animation
+    finalBuffer = rawBuffer;
+    contentType = 'image/gif';
+    console.log(`[Scraper] GIF detected — skipping compression: ${fileName} (${originalSize} bytes)`);
+  } else {
+    try {
+      const image = sharp(rawBuffer);
+      const metadata = await image.metadata();
+
+      // Resize to max 1200px wide if needed
+      let pipeline = image;
+      if (metadata.width && metadata.width > 1200) {
+        pipeline = pipeline.resize({ width: 1200, withoutEnlargement: true });
+      }
+
+      if (ext === 'png') {
+        finalBuffer = await pipeline.png({ quality: 80, compressionLevel: 9 }).toBuffer();
+        contentType = 'image/png';
+      } else if (ext === 'jpg' || ext === 'jpeg') {
+        finalBuffer = await pipeline.jpeg({ quality: 82, mozjpeg: true }).toBuffer();
+        contentType = 'image/jpeg';
+      } else {
+        // webp and anything else → webp
+        finalBuffer = await pipeline.webp({ quality: 80 }).toBuffer();
+        contentType = 'image/webp';
+      }
+
+      const saving = (((originalSize - finalBuffer.length) / originalSize) * 100).toFixed(1);
+      console.log(`[Scraper] Compressed ${fileName}: ${originalSize} → ${finalBuffer.length} bytes (${saving}% saved)`);
+    } catch (compressErr: any) {
+      console.warn(`[Scraper] Compression failed for ${fileName}, using raw buffer:`, compressErr.message);
+      finalBuffer = rawBuffer;
+      contentType = ext === 'png' ? 'image/png' : ext === 'jpg' || ext === 'jpeg' ? 'image/jpeg' : 'image/webp';
+    }
+  }
+
+  // Save locally for reference
+  fs.writeFileSync(filePath, finalBuffer);
+
+  // Upload to R2 and return the public URL
+  const r2Key = `images/products/${fileName}`;
+  const publicUrl = await uploadToR2(finalBuffer, r2Key, contentType);
+  return publicUrl;
 }
 
 // ---- Helper: Download images with correct filename ----
@@ -398,18 +577,17 @@ async function downloadImages(imageUrls: string[], title: string, outputDir: str
     const imgUrl = imageUrls[i];
     try {
       const suffix = i === 0 ? '' : `-${i + 1}`;
-      const ext = imgUrl.includes('.png') ? 'png' : imgUrl.includes('.jpg') || imgUrl.includes('.jpeg') ? 'jpg' : 'webp';
+      const ext = imgUrl.includes('.gif') ? 'gif' : imgUrl.includes('.png') ? 'png' : imgUrl.includes('.jpg') || imgUrl.includes('.jpeg') ? 'jpg' : 'webp';
       const fileName = `${productSlug}${suffix}.${ext}`;
-      const filePath = path.join(outputDir, fileName);
 
       const imgRes = await fetch(imgUrl, {
         headers: { 'Referer': 'https://makerworld.com/', 'User-Agent': 'Mozilla/5.0' }
       });
       if (imgRes.ok) {
-        const buffer = Buffer.from(await imgRes.arrayBuffer());
-        fs.writeFileSync(filePath, buffer);
-        localImages.push(`/images/products/${fileName}`);
-        console.log(`[Scraper] Saved image ${i + 1}/${imageUrls.length}: ${fileName} (${buffer.length} bytes)`);
+        const rawBuffer = Buffer.from(await imgRes.arrayBuffer());
+        const publicUrl = await compressAndUpload(rawBuffer, fileName, outputDir);
+        localImages.push(publicUrl);
+        console.log(`[Scraper] ✅ Uploaded image ${i + 1}/${imageUrls.length}: ${fileName} → ${publicUrl}`);
       }
     } catch (imgErr: any) {
       console.warn(`[Scraper] Failed to download image ${i + 1}:`, imgErr.message);
@@ -841,7 +1019,7 @@ async function scrapeWithPlaywright(
       extracted.images = [...new Set([...capturedImages, ...extracted.images])].slice(0, 20);
     }
 
-    // ---- Download images locally ----
+    // ---- Download, compress, and upload images to R2 ----
 
     if (!fs.existsSync(outputDir)) {
       fs.mkdirSync(outputDir, { recursive: true });
@@ -858,15 +1036,17 @@ async function scrapeWithPlaywright(
       const imgUrl = extracted.images[i];
       try {
         const suffix = i === 0 ? "" : `-${i + 1}`;
-        const fileName = `${productSlug}${suffix}.webp`;
-        const filePath = path.join(outputDir, fileName);
+        // Detect extension from URL; default to webp for MakerWorld CDN images
+        const extMatch = imgUrl.match(/\.(gif|png|jpe?g|webp)(\?|$)/i);
+        const ext = extMatch ? extMatch[1].toLowerCase().replace('jpeg', 'jpg') : 'webp';
+        const fileName = `${productSlug}${suffix}.${ext}`;
 
         const imgRes = await page.request.get(imgUrl);
         if (imgRes.ok()) {
-          const buffer = await imgRes.body();
-          fs.writeFileSync(filePath, buffer);
-          localImages.push(`/images/products/${fileName}`);
-          console.log(`[Scraper] Saved image ${i + 1}: ${fileName}`);
+          const rawBuffer = await imgRes.body();
+          const publicUrl = await compressAndUpload(rawBuffer, fileName, outputDir);
+          localImages.push(publicUrl);
+          console.log(`[Scraper] ✅ Uploaded image ${i + 1}: ${fileName} → ${publicUrl}`);
         }
       } catch (imgErr) {
         console.warn(`[Scraper] Failed to download image ${i + 1}:`, imgErr);
@@ -875,20 +1055,7 @@ async function scrapeWithPlaywright(
 
     // ---- Determine category from tags ----
     const allText = `${extracted.title} ${extracted.tags.join(" ")}`.toLowerCase();
-    let category = "Figures & Collectibles";
-    if (allText.includes("keychain") || allText.includes("key chain") || allText.includes("tag")) {
-      category = "Keychains";
-    } else if (allText.includes("vase") || allText.includes("pot") || allText.includes("decor") || allText.includes("lamp") || allText.includes("candle")) {
-      category = "Home Decor";
-    } else if (allText.includes("stand") || allText.includes("holder") || allText.includes("organizer") || allText.includes("desk") || allText.includes("pen")) {
-      category = "Desk Accessories";
-    } else if (allText.includes("game") || allText.includes("controller") || allText.includes("switch") || allText.includes("gaming")) {
-      category = "Gaming Accessories";
-    } else if (allText.includes("business") || allText.includes("logo") || allText.includes("brand") || allText.includes("corporate")) {
-      category = "Business Merchandise";
-    } else if (allText.includes("tool") || allText.includes("functional") || allText.includes("bracket") || allText.includes("mount") || allText.includes("clip")) {
-      category = "Functional Prints";
-    }
+    const category = detectCategory(allText);
 
     // ---- Estimate weight from print time if not found ----
     let weightGrams = 0;

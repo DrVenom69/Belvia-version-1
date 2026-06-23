@@ -1,57 +1,16 @@
 import React, { useRef } from 'react';
+import { Product } from '../types';
+import { formatPrice } from '../utils/format';
 
-// ─── Product Data ──────────────────────────────────────────────────────────────
-// Each item maps to a real product category so clicking opens the relevant store view
 export interface CarouselItem {
   src: string;
   label: string;
   tag: string;
-  category: string;   // matches App.tsx product category for filtering
-  size: 'full' | 'top' | 'bottom'; // layout slot within a column
+  category: string;
+  price: number;
+  size: 'full' | 'top' | 'bottom';
 }
 
-// 19 cards arranged into columns of the masonry strip.
-// 'full'   = occupies the entire column height
-// 'top'    = occupies the upper half of a 2-card column
-// 'bottom' = occupies the lower half of a 2-card column
-//
-// Pairing rule: every 'top' must be immediately followed by a 'bottom'.
-export const CAROUSEL_ITEMS: CarouselItem[] = [
-  // col 1 – full
-  { src: '/images/products/product_desk_organizer_1780670605562.png',       label: 'Geo Desk Organizer',     tag: 'Desk Accessories',         category: 'Desk Accessories',         size: 'full'   },
-  // col 2 – two stacked
-  { src: '/images/products/product_skull_planter_1780670618312.png',        label: 'Gothic Skull Planter',   tag: 'Home Decor',               category: 'Home Decor',               size: 'top'    },
-  { src: '/images/products/product_cable_clips_1780670752617.png',          label: 'Cable Clips Set',        tag: 'Desk Accessories',         category: 'Desk Accessories',         size: 'bottom' },
-  // col 3 – full (hero centre card, wide)
-  { src: '/images/products/product_gyroscope_fidget_1780670678897.png',     label: 'Gyroscope Fidget',       tag: 'Gaming Accessories',       category: 'Gaming Accessories',       size: 'full'   },
-  // col 4 – two stacked
-  { src: '/images/products/product_moon_lamp_1780670634368.png',            label: 'Wireframe Moon Lamp',    tag: 'Home Decor',               category: 'Home Decor',               size: 'top'    },
-  { src: '/images/products/product_wall_tiles_1780670797745.png',           label: 'Hex Wall Tiles',         tag: 'Home Decor',               category: 'Home Decor',               size: 'bottom' },
-  // col 5 – full
-  { src: '/images/products/product_headphone_stand_1780670666790.png',      label: 'Headphone Stand',        tag: 'Desk Accessories',         category: 'Desk Accessories',         size: 'full'   },
-  // col 6 – two stacked
-  { src: '/images/products/product_multitool_keyring_1780670785136.png',    label: 'Multi-Tool Keyring',     tag: 'Keychains',                category: 'Keychains',                size: 'top'    },
-  { src: '/images/products/product_dice_tower_1780670692414.png',           label: 'Medieval Dice Tower',    tag: 'Gaming Accessories',       category: 'Gaming Accessories',       size: 'bottom' },
-  // col 7 – full
-  { src: '/images/products/product_geometric_planter_1780670724568.png',    label: 'Hexagonal Planter',      tag: 'Home Decor',               category: 'Home Decor',               size: 'full'   },
-  // col 8 – two stacked
-  { src: '/images/products/product_phone_stand_1780670710802.png',          label: 'Carbon Phone Stand',     tag: 'Desk Accessories',         category: 'Desk Accessories',         size: 'top'    },
-  { src: '/images/products/product_business_card_holder_1780670772449.png', label: 'Business Card Holder',   tag: 'Business Merch',           category: 'Business Merchandise',     size: 'bottom' },
-  // col 9 – full
-  { src: '/images/products/product_dragon_keychain_1780670592667.png',      label: 'Dragon Keychain',        tag: 'Keychains',                category: 'Keychains',                size: 'full'   },
-  // col 10 – two stacked
-  { src: '/images/products/product_mini_armor_1780670739609.png',           label: 'Samurai Figurine',       tag: 'Figures & Collectibles',   category: 'Figures & Collectibles',   size: 'top'    },
-  { src: '/images/products/product_flexi_snake_1780670655120.png',          label: 'Flexi-Snake Toy',        tag: 'Figures & Collectibles',   category: 'Figures & Collectibles',   size: 'bottom' },
-  // col 11 – full (repeat for seamless loop density)
-  { src: '/images/products/hero_products_row1_1780670549040.png',           label: 'Collection Showcase',    tag: 'Featured',                 category: 'Keychains',                size: 'full'   },
-  // col 12 – two stacked
-  { src: '/images/products/product_skull_planter_1780670618312.png',        label: 'Gothic Skull Planter',   tag: 'Home Decor',               category: 'Home Decor',               size: 'top'    },
-  { src: '/images/products/product_gyroscope_fidget_1780670678897.png',     label: 'Gyroscope Fidget',       tag: 'Gaming Accessories',       category: 'Gaming Accessories',       size: 'bottom' },
-  // col 13 – full
-  { src: '/images/products/product_moon_lamp_1780670634368.png',            label: 'Ambient Moon Lamp',      tag: 'Home Decor',               category: 'Home Decor',               size: 'full'   },
-];
-
-// ─── Build column groups from the flat list ────────────────────────────────────
 interface Column {
   items: CarouselItem[];
 }
@@ -75,7 +34,6 @@ function buildColumns(items: CarouselItem[]): Column[] {
   return cols;
 }
 
-// ─── Card component ────────────────────────────────────────────────────────────
 interface CardProps {
   item: CarouselItem;
   isFull: boolean;
@@ -91,7 +49,7 @@ function Card({ item, isFull, onCardClick }: CardProps) {
         isFull ? 'h-full' : 'flex-1'
       }`}
       aria-label={`View ${item.label}`}
-      style={{ minHeight: 0 }} // allow flex child to shrink
+      style={{ minHeight: 0 }}
     >
       {/* Image */}
       <img
@@ -101,25 +59,27 @@ function Card({ item, isFull, onCardClick }: CardProps) {
         draggable={false}
         className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-110 select-none"
         onError={(e) => {
-          const el = e.target as HTMLImageElement;
-          el.style.opacity = '0';
+          e.currentTarget.src = '/images/placeholder.png';
         }}
       />
 
       {/* Dark gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/15 to-transparent opacity-60 group-hover:opacity-85 transition-opacity duration-300 pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-black/10 opacity-70 group-hover:opacity-90 transition-opacity duration-300 pointer-events-none" />
 
       {/* Category tag – appears on hover */}
       <div className="absolute top-3 left-3 pointer-events-none">
-        <span className="inline-block px-2 py-0.5 rounded-full bg-accent text-[9px] font-mono font-black text-black tracking-widest uppercase opacity-0 group-hover:opacity-100 transition-opacity duration-200 translate-y-1 group-hover:translate-y-0 shadow-sm">
+        <span className="inline-block px-2 py-0.5 rounded-full bg-accent/90 text-[9px] font-mono font-black text-black tracking-widest uppercase opacity-0 group-hover:opacity-100 transition-opacity duration-200 translate-y-1 group-hover:translate-y-0 shadow-sm">
           {item.tag}
         </span>
       </div>
 
-      {/* Product label at bottom */}
-      <div className="absolute bottom-0 left-0 right-0 p-3 pointer-events-none">
-        <p className="text-white text-[11px] font-display font-semibold leading-tight truncate opacity-0 group-hover:opacity-100 transition-opacity duration-200 group-hover:text-accent">
+      {/* Product label and price at bottom */}
+      <div className="absolute bottom-0 left-0 right-0 p-3 pointer-events-none text-left">
+        <p className="text-white text-[11px] font-display font-semibold leading-tight truncate group-hover:text-accent transition-colors duration-200">
           {item.label}
+        </p>
+        <p className="text-accent text-[9px] font-mono font-bold leading-tight mt-0.5 opacity-80 group-hover:opacity-100 transition-opacity duration-200">
+          {formatPrice(item.price)}
         </p>
       </div>
 
@@ -129,11 +89,10 @@ function Card({ item, isFull, onCardClick }: CardProps) {
   );
 }
 
-// ─── Column component ──────────────────────────────────────────────────────────
 interface ColProps {
   key?: React.Key | number;
   col: Column;
-  colWidth: number; // px
+  colWidth: number;
   onCardClick: (category: string) => void;
 }
 
@@ -156,22 +115,118 @@ function Col({ col, colWidth, onCardClick }: ColProps) {
   );
 }
 
-// ─── Main Carousel ─────────────────────────────────────────────────────────────
 interface HeroCarouselProps {
+  products: Product[];
   onCategoryClick: (category: string) => void;
 }
 
-export default function HeroCarousel({ onCategoryClick }: HeroCarouselProps) {
+export default function HeroCarousel({ products, onCategoryClick }: HeroCarouselProps) {
   const COL_WIDTH = 220; // px – individual column width
   const GAP = 12;        // px – gap between columns
   const HEIGHT = 420;    // px – fixed strip height
 
-  const columns = buildColumns(CAROUSEL_ITEMS);
-  // Duplicate for seamless loop
-  const trackCols = [...columns, ...columns];
+  // 1. Filter, sort, and select products
+  const productsWithImages = (products || [])
+    .filter(p => p.images && p.images.length > 0);
 
-  // Total width of ONE copy of the track (used for animation keyframe)
+  // Get products curated for the carousel
+  let curatedProducts = productsWithImages.filter(p => p.featured_carousel === true);
+
+  // Sort featured products by carousel_order ascending first, then by updated_at descending
+  curatedProducts.sort((a, b) => {
+    const orderA = a.carousel_order !== undefined ? a.carousel_order : 999999;
+    const orderB = b.carousel_order !== undefined ? b.carousel_order : 999999;
+    if (orderA !== orderB) {
+      return orderA - orderB;
+    }
+    const timeA = a.updated_at ? new Date(a.updated_at).getTime() : 0;
+    const timeB = b.updated_at ? new Date(b.updated_at).getTime() : 0;
+    return timeB - timeA;
+  });
+
+  // Fallback: If fewer than 3 products are featured, auto-fill with most recent products to avoid empty carousel
+  if (curatedProducts.length < 3) {
+    const featuredIds = new Set(curatedProducts.map(p => p.id));
+    const nonFeatured = productsWithImages
+      .filter(p => !featuredIds.has(p.id))
+      .sort((a, b) => {
+        const timeA = a.updated_at ? new Date(a.updated_at).getTime() : 0;
+        const timeB = b.updated_at ? new Date(b.updated_at).getTime() : 0;
+        return timeB - timeA;
+      });
+    const fillCount = 8 - curatedProducts.length;
+    const toAdd = nonFeatured.slice(0, Math.max(0, fillCount));
+    curatedProducts = [...curatedProducts, ...toAdd];
+  }
+
+  // Deduplicate and limit to max 12 items for carousel loop performance
+  const validProducts = curatedProducts
+    .reduce((acc: Product[], current) => {
+      if (!acc.some(p => p.id === current.id)) {
+        acc.push(current);
+      }
+      return acc;
+    }, [])
+    .slice(0, 12);
+
+  if (validProducts.length === 0) {
+    return (
+      <div 
+        className="w-full overflow-hidden relative flex items-center justify-center border border-white/5 bg-bg-surface/30 rounded-2xl animate-pulse" 
+        style={{ height: HEIGHT }}
+      >
+        <p className="text-text-secondary text-xs font-mono">Loading precision models...</p>
+      </div>
+    );
+  }
+
+  // 2. Map products to CarouselItem structure, assigning size to build masonry columns
+  const items: CarouselItem[] = [];
+  let sizeIndex = 0;
+  for (let i = 0; i < validProducts.length; i++) {
+    const p = validProducts[i];
+    let size: 'full' | 'top' | 'bottom' = 'full';
+
+    const cycle = sizeIndex % 3;
+    if (cycle === 0) {
+      size = 'full';
+      sizeIndex++;
+    } else if (cycle === 1) {
+      if (i === validProducts.length - 1) {
+        size = 'full';
+      } else {
+        size = 'top';
+        sizeIndex++;
+      }
+    } else {
+      size = 'bottom';
+      sizeIndex++;
+    }
+
+    items.push({
+      src: p.images[0],
+      label: p.title,
+      tag: p.category,
+      category: p.category,
+      price: p.isPreOrder ? p.price : (p.price - Math.round(p.price * 0.12)),
+      size
+    });
+  }
+
+  const columns = buildColumns(items);
+
+  // Clone 3 columns at start and end for seamless looping wrap
+  const cloneCount = Math.min(3, columns.length);
+  const prependedClones = columns.slice(-cloneCount);
+  const appendedClones = columns.slice(0, cloneCount);
+  const trackCols = [...prependedClones, ...columns, ...appendedClones];
+
+  // Total width of ONE copy of the track
   const singleTrackWidth = columns.length * (COL_WIDTH + GAP);
+
+  // Translate offsets
+  const startTranslate = -cloneCount * (COL_WIDTH + GAP);
+  const endTranslate = startTranslate - singleTrackWidth;
 
   const trackRef = useRef<HTMLDivElement>(null);
 
@@ -179,7 +234,6 @@ export default function HeroCarousel({ onCategoryClick }: HeroCarouselProps) {
     <div
       className="w-full overflow-hidden relative"
       style={{ height: HEIGHT }}
-      // Pause on hover using CSS via the data attribute
       onMouseEnter={() => {
         if (trackRef.current) trackRef.current.style.animationPlayState = 'paused';
       }}
@@ -205,9 +259,16 @@ export default function HeroCarousel({ onCategoryClick }: HeroCarouselProps) {
         style={{
           gap: GAP,
           height: '100%',
-          width: `${2 * singleTrackWidth}px`,
-          animation: `heroCarouselScroll ${columns.length * 3.5}s linear infinite`,
+          width: `${(columns.length + 2 * cloneCount) * (COL_WIDTH + GAP)}px`,
+          animationName: 'heroCarouselScrollCustom',
+          animationDuration: `${columns.length * 3.5}s`,
+          animationTimingFunction: 'linear',
+          animationIterationCount: 'infinite',
           willChange: 'transform',
+          // @ts-ignore
+          '--start-x': `${startTranslate}px`,
+          // @ts-ignore
+          '--end-x': `${endTranslate}px`,
         }}
       >
         {trackCols.map((col, idx) => (

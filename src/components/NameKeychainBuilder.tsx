@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Sparkles, RotateCcw, AlertTriangle, ShoppingCart } from 'lucide-react';
 import { calculateKeychainSpecs, validateKeychainInput } from '../utils/keychainCalculations';
 import { CartItem, Product } from '../types';
+import { formatPrice } from '../utils/format';
 
 interface NameKeychainBuilderProps {
   onAddToCart: (item: CartItem) => void;
@@ -712,7 +713,7 @@ export default function NameKeychainBuilder({ onAddToCart }: NameKeychainBuilder
           <div className="flex items-center justify-between">
             <div>
               <span className="block text-[8px] font-mono text-text-secondary uppercase tracking-widest">Total Price</span>
-              <span className="text-2xl font-bold text-accent">${(specs.price * quantity).toFixed(2)}</span>
+              <span className="text-2xl font-bold text-accent">{formatPrice(specs.price * quantity)}</span>
             </div>
 
             <div className="flex items-center space-x-3.5">

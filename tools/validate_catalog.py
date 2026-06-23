@@ -3,7 +3,7 @@ import os
 import sys
 
 def validate():
-    db_path = "public/data/products.json"
+    db_path = "data/products.json"
     if not os.path.exists(db_path):
         print(f"Error: Database {db_path} does not exist.")
         sys.exit(1)
@@ -17,6 +17,16 @@ def validate():
 
     required_keys = ["id", "title", "category", "startingPrice", "weightGrams", "filamentUsage", "images", "colors", "materials", "printTimeMinutes", "isPreOrder", "reviews"]
     valid_categories = ["Keychains", "Home Decor", "Desk Accessories", "Gaming Accessories", "Figures & Collectibles", "Business Merchandise", "Custom Orders", "Functional Prints", "Imported Goods", "A1 Mini Mods", "Hotends"]
+    
+    categories_json_path = "data/categories.json"
+    if os.path.exists(categories_json_path):
+        try:
+            with open(categories_json_path, "r", encoding="utf-8") as cat_f:
+                categories_data = json.load(cat_f)
+                if isinstance(categories_data, list):
+                    valid_categories = [c["name"] for c in categories_data if isinstance(c, dict) and "name" in c]
+        except Exception as e:
+            print(f"Warning: Failed to load dynamic categories from {categories_json_path}: {e}")
 
     for idx, product in enumerate(catalog):
         for key in required_keys:

@@ -1,17 +1,20 @@
 import React, { useState } from 'react';
 import { Tag, Plane, HelpCircle, Star, BadgePercent, Calendar, ShoppingCart, Info, Globe } from 'lucide-react';
-import { Product } from '../types';
+import { Product, CartItem } from '../types';
+import { formatPrice } from '../utils/format';
 
 interface ImportedPreOrdersProps {
   products: Product[];
   onQuickView: (product: Product) => void;
   onAddToCart: (product: Product) => void;
+  onAddPreOrderToCart?: (item: CartItem) => void;
 }
 
 export default function ImportedPreOrders({
   products,
   onQuickView,
   onAddToCart,
+  onAddPreOrderToCart,
 }: ImportedPreOrdersProps) {
   const [selectedSubCat, setSelectedSubCat] = useState<string>('All');
 
@@ -102,6 +105,9 @@ export default function ImportedPreOrders({
                       src={p.images[0]}
                       alt={p.title}
                       className="w-full h-full object-cover filter contrast-[1.05]"
+                      onError={(e) => {
+                        e.currentTarget.src = '/images/placeholder.png';
+                      }}
                     />
                     
                     {/* Origin Tag */}
@@ -156,10 +162,10 @@ export default function ImportedPreOrders({
                       <div>
                         {/* Deposit specification calculations */}
                         <div className="flex items-center text-[9px] font-mono text-text-muted tracking-wider">
-                          <span>TOTAL VALUE: ${p.price.toFixed(2)}</span>
+                          <span>TOTAL VALUE: {formatPrice(p.price)}</span>
                         </div>
                         <div className="flex items-end space-x-1 mt-0.5">
-                          <span className="text-xl font-mono font-extrabold text-accent">${depositPrice.toFixed(2)}</span>
+                          <span className="text-xl font-mono font-extrabold text-accent">{formatPrice(depositPrice)}</span>
                           <span className="text-[10px] font-mono text-text-secondary mb-0.5">({p.depositPercentage || 50}% DEPOSIT)</span>
                         </div>
                       </div>
@@ -176,7 +182,23 @@ export default function ImportedPreOrders({
                         
                         <button
                           id={`btn-preorder-${p.id}`}
-                          onClick={() => onAddToCart(p)}
+                          onClick={() => {
+                            const depositDecimal = (p.depositPercentage || 50) / 100;
+                            const depositPrice = p.price * depositDecimal;
+                            if (onAddPreOrderToCart) {
+                              onAddPreOrderToCart({
+                                product: p,
+                                selectedColor: p.colors[0] || '',
+                                selectedMaterial: p.materials[0] || 'PLA (Matte)',
+                                quantity: 1,
+                                isPreOrder: true,
+                                calculatedPrice: depositPrice,
+                                depositAmount: depositPrice
+                              });
+                            } else {
+                              onAddToCart(p);
+                            }
+                          }}
                           className="px-4.5 py-2.5 rounded-xl bg-gradient-to-r from-accent to-accent-secondary hover:from-accent-hover hover:to-accent-secondary-lt text-text-on-accent font-bold text-xs cursor-pointer flex items-center space-x-1.5 transition duration-150 transform hover:-translate-y-0.5 active:translate-y-0 shadow-md shadow-accent/10"
                         >
                           <ShoppingCart className="w-3.5 h-3.5" />

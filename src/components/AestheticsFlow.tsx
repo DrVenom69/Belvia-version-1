@@ -1,15 +1,11 @@
 import React, { useState } from 'react';
 import { HelpCircle, Star, Quote, ChevronDown, CheckCircle, Flame, Layers2 } from 'lucide-react';
+import WhyBelvia from './WhyBelvia';
 
 export default function AestheticsFlow() {
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
 
-  const WHY_CHOOSE_BELVIA = [
-    { num: '01', title: 'Fast Delivery', desc: '1–2 day delivery inside Dhaka.' },
-    { num: '02', title: 'Custom Printing', desc: 'Upload STL, 3MF, or OBJ files and get a quote.' },
-    { num: '03', title: 'Premium Quality', desc: 'Professionally tuned printers and premium materials.' },
-    { num: '04', title: 'Local Support', desc: 'Real customer support and order tracking in Bangladesh.' }
-  ];
+
 
   const PORTFOLIO = [
     { title: 'Satin-Silk Pearl Low-Poly Fox', mate: 'Silk Pearl Gold PLA', layer: '0.12mm (Extra Fine)', weight: '65g', time: '2h 15m', img: 'https://images.unsplash.com/photo-1608889175123-8ec330b86f84?auto=format&fit=crop&q=80&w=800' },
@@ -33,28 +29,8 @@ export default function AestheticsFlow() {
   return (
     <div id="additional-aesthetics-wrapper" className="bg-bg-base relative">
       
-      {/* 1. WHY CHOOSE BELVIA */}
-      <section id="why-choose-belvia" className="py-20 border-t border-border-premium bg-bg-base/40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          
-          <div className="text-center mb-16 max-w-xl mx-auto">
-            <span className="text-xs font-mono font-bold uppercase tracking-widest text-indigo-400">Why Choose Belvia</span>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6.5 text-left">
-            {WHY_CHOOSE_BELVIA.map((item, idx) => (
-              <div key={idx} className="bg-bg-surface/50 border border-border-premium rounded-2xl p-6.5 relative overflow-hidden flex flex-col justify-between">
-                <div>
-                  <span className="block font-mono text-3xl font-black text-accent/10 mb-4">{item.num}</span>
-                  <h3 className="font-display font-bold text-sm uppercase text-text-primary tracking-wide">{item.title}</h3>
-                  <p className="text-text-secondary text-xs mt-2.5 leading-relaxed">{item.desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-
-        </div>
-      </section>
+      {/* 1. WHY CHOOSE BELVIA — Signal Node Interface */}
+      <WhyBelvia />
 
       {/* 2. PORTFOLIO / RECENT PROJECTS */}
       <section id="recent-prints" className="py-20">

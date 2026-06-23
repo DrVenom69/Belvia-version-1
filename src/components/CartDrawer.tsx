@@ -1,17 +1,34 @@
-import React, { useState, useRef } from 'react';
-import { X, Trash2, ShoppingBag, ShieldCheck, Zap, Copy, Check, Upload, ArrowLeft, Loader, AlertCircle } from 'lucide-react';
-import { CartItem, Order } from '../types';
+import React, { useState, useRef, useEffect } from 'react';
+import { Trash2, ShoppingBag, ShieldCheck, Zap, Copy, Check, Upload, ArrowLeft, Loader, AlertCircle, Tag, XCircle, Sparkles, Trophy, PartyPopper } from 'lucide-react';
+import { CartItem, Order, AppliedCoupon, DiscountResult, DiscountType } from '../types';
+import { formatPrice } from '../utils/format';
 
 interface CartDrawerProps {
   isOpen: boolean;
   onClose: () => void;
   cart: CartItem[];
-  onUpdateQty: (productId: string, color: string, material: string, newQty: number) => void;
-  onRemoveItem: (productId: string, color: string, material: string) => void;
+  onUpdateQty: (productId: string, color: string, material: string, newQty: number, selectedResin?: boolean) => void;
+  onRemoveItem: (productId: string, color: string, material: string, selectedResin?: boolean) => void;
   onClearCart: () => void;
+  bkashNumber?: string;
+  nagadNumber?: string;
+  userId?: string; // Supabase user.id for auto-discount resolution
+  // Express Order: skip cart step, use this single item directly
+  expressItem?: CartItem;
+  skipCart?: boolean;
 }
 
 type CheckoutStep = 'cart' | 'shipping' | 'payment' | 'success';
+
+function getItemPrice(item: CartItem): number {
+  if (item.calculatedPrice !== undefined && item.calculatedPrice !== null) {
+    return item.calculatedPrice;
+  }
+  if (item.product.isPreOrder) {
+    return item.product.price * ((item.product.depositPercentage || 50) / 100);
+  }
+  return item.product.price - Math.round(item.product.price * 0.12);
+}
 
 export default function CartDrawer({
   isOpen,
@@ -19,14 +36,30 @@ export default function CartDrawer({
   cart,
   onUpdateQty,
   onRemoveItem,
-  onClearCart
+  onClearCart,
+  bkashNumber = "01712511193",
+  nagadNumber = "01712511193",
+  userId,
+  expressItem,
+  skipCart = false,
 }: CartDrawerProps) {
-  const [step, setStep] = useState<CheckoutStep>('cart');
+  const [step, setStep] = useState<CheckoutStep>(skipCart ? 'shipping' : 'cart');
   const [checkoutSuccess, setCheckoutSuccess] = useState<string | null>(null);
+
+  // Auto-discount state (resolved server-side)
+  const [autoDiscount, setAutoDiscount] = useState<DiscountResult | null>(null);
+  const [isDiscountLoading, setIsDiscountLoading] = useState(false);
+
+  // Coupon States
+  const [couponInput, setCouponInput] = useState('');
+  const [appliedCoupon, setAppliedCoupon] = useState<AppliedCoupon | null>(null);
+  const [couponError, setCouponError] = useState('');
+  const [isCouponLoading, setIsCouponLoading] = useState(false);
   
   // Shipping Form States
   const [shippingName, setShippingName] = useState('');
   const [shippingPhone, setShippingPhone] = useState('');
+  const [shippingEmail, setShippingEmail] = useState('');
   const [shippingAddress, setShippingAddress] = useState('');
   
   // Payment States
@@ -37,16 +70,136 @@ export default function CartDrawer({
   const [copiedText, setCopiedText] = useState(false);
   const [orderId, setOrderId] = useState('');
   
+  // TRX ID validation
+  const [trxIdError, setTrxIdError] = useState('');
+
+  // bKash / Nagad TRX ID format: starts with letters, followed by alphanumeric, 8-11 chars total
+  // e.g. BKX9283749, AA123456789, TR12345678
+  const validateTrxId = (id: string): boolean => {
+    return /^[A-Za-z][A-Za-z0-9]{7,10}$/.test(id);
+  };
+
+  const handleTrxIdChange = (value: string) => {
+    const upper = value.toUpperCase();
+    setTrxId(upper);
+    if (upper && !validateTrxId(upper)) {
+      setTrxIdError('TRX ID should be 8-11 alphanumeric characters (e.g. BKX9283749)');
+    } else {
+      setTrxIdError('');
+    }
+  };
+
   // Form submission / UI states
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Sync and reset step and error states when drawer opens/closes or skipCart changes
+  useEffect(() => {
+    if (isOpen) {
+      setStep(skipCart ? 'shipping' : 'cart');
+      setErrorMsg('');
+      setCheckoutSuccess(null);
+      setPaymentMethod('');
+      setTrxId('');
+      setScreenshotFile(null);
+      setScreenshotPreview(null);
+    }
+  }, [isOpen, skipCart]);
+
+  // Fetch auto-discount whenever the cart opens or items change
+  // Skipped in express mode — cart-level discounts don't apply to a standalone item
+  useEffect(() => {
+    if (skipCart) return;
+    if (!isOpen || cart.length === 0) {
+      setAutoDiscount(null);
+      return;
+    }
+    let cancelled = false;
+    const fetchDiscount = async () => {
+      setIsDiscountLoading(true);
+      try {
+        const sub = cart.reduce((acc, item) => acc + getItemPrice(item) * item.quantity, 0);
+        const res = await fetch('/api/get-discount', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId, cartItems: cart, subtotal: sub })
+        });
+        if (!res.ok) throw new Error('failed');
+        const data = await res.json();
+        if (!cancelled && data.discount?.type) {
+          setAutoDiscount(data.discount as DiscountResult);
+        } else if (!cancelled) {
+          setAutoDiscount(null);
+        }
+      } catch {
+        if (!cancelled) setAutoDiscount(null);
+      } finally {
+        if (!cancelled) setIsDiscountLoading(false);
+      }
+    };
+    fetchDiscount();
+    return () => { cancelled = true; };
+  }, [isOpen, cart.length, userId, skipCart]);
+
   if (!isOpen) return null;
 
-  const totalCost = cart.reduce((acc, item) => acc + (item.calculatedPrice ?? item.product.price) * item.quantity, 0);
-  const totalWeight = cart.reduce((acc, item) => acc + item.product.weightGrams * item.quantity, 0);
+  // In express mode, all totals derive from expressItem alone
+  const activeItems: CartItem[] = skipCart && expressItem ? [expressItem] : cart;
+  const subtotalCost = activeItems.reduce((acc, item) => acc + getItemPrice(item) * item.quantity, 0);
+  const totalWeight = activeItems.reduce((acc, item) => acc + item.product.weightGrams * item.quantity, 0);
+
+  // Winning discount: coupon overrides auto-discount per priority rules
+  // If coupon is applied, it always wins (coupon > festival > loyalty > new_user)
+  const winningDiscount: DiscountResult | null = appliedCoupon
+    ? {
+        type: 'coupon' as DiscountType,
+        percent: appliedCoupon.type === 'percent' ? appliedCoupon.value : Math.round((appliedCoupon.value / subtotalCost) * 100),
+        discountAmount: appliedCoupon.discountAmount,
+        label: appliedCoupon.type === 'percent'
+          ? `Coupon ${appliedCoupon.code} — ${appliedCoupon.value}% off`
+          : `Coupon ${appliedCoupon.code} — ৳${appliedCoupon.value} off`,
+        couponCode: appliedCoupon.code,
+      }
+    : autoDiscount;
+
+  const discountAmount = winningDiscount?.discountAmount ?? 0;
+  const totalCost = Math.max(0, subtotalCost - discountAmount);
+
+  const handleApplyCoupon = async () => {
+    const code = couponInput.trim();
+    if (!code) return;
+    setIsCouponLoading(true);
+    setCouponError('');
+    try {
+      const res = await fetch('/api/validate-coupon', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code })
+      });
+      const data = await res.json();
+      if (data.valid) {
+        const discAmt = data.type === 'percent'
+          ? Math.round(subtotalCost * (data.value / 100))
+          : Math.round(data.value);
+        setAppliedCoupon({ code: code.toUpperCase(), type: data.type, value: data.value, discountAmount: discAmt });
+        setCouponInput('');
+      } else {
+        setCouponError(data.message || 'Invalid coupon code.');
+      }
+    } catch {
+      setCouponError('Could not verify coupon. Please try again.');
+    } finally {
+      setIsCouponLoading(false);
+    }
+  };
+
+  const handleRemoveCoupon = () => {
+    setAppliedCoupon(null);
+    setCouponError('');
+    setCouponInput('');
+  };
 
   const handleCopyNumber = (num: string) => {
     navigator.clipboard.writeText(num);
@@ -68,14 +221,18 @@ export default function CartDrawer({
   };
 
   const handleProceedToShipping = () => {
-    if (cart.length === 0) return;
+    if (activeItems.length === 0) return;
     setStep('shipping');
   };
 
   const handleGenerateOrder = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!shippingName.trim() || !shippingPhone.trim() || !shippingAddress.trim()) {
+    if (!shippingName.trim() || !shippingPhone.trim() || !shippingEmail.trim() || !shippingAddress.trim()) {
       setErrorMsg('Please fill in all shipping details.');
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(shippingEmail.trim())) {
+      setErrorMsg('Please enter a valid email address for order confirmation.');
       return;
     }
     setErrorMsg('');
@@ -93,6 +250,10 @@ export default function CartDrawer({
     }
     if (!trxId.trim()) {
       setErrorMsg('Please enter the Transaction ID (TRX ID).');
+      return;
+    }
+    if (!validateTrxId(trxId.trim())) {
+      setErrorMsg('Invalid TRX ID format. Must be 8-11 alphanumeric characters (e.g. BKX9283749).');
       return;
     }
     if (!screenshotFile) {
@@ -137,14 +298,26 @@ export default function CartDrawer({
       const screenshotUrl = uploadResult.imagePath;
 
       // 3. Create order structure
+      const hasPreOrders = activeItems.some(i => i.isPreOrder);
       const newOrder: Order = {
         id: orderId,
-        items: cart,
+        items: activeItems,
+        originalCost: subtotalCost,
+        discountAmount: winningDiscount?.discountAmount,
+        discountType: winningDiscount?.type,
+        discountPercent: winningDiscount?.percent,
+        couponCode: winningDiscount?.couponCode,
+        userId,
         totalCost,
         totalWeight,
+        orderType: hasPreOrders ? 'pre-order' : 'standard',
+        depositPercentage: hasPreOrders
+          ? Math.max(...activeItems.filter(i => i.isPreOrder).map(i => i.product.depositPercentage || 50))
+          : undefined,
         shippingInfo: {
           name: shippingName.trim(),
           phone: shippingPhone.trim(),
+          email: shippingEmail.trim(),
           address: shippingAddress.trim()
         },
         payment: {
@@ -153,33 +326,47 @@ export default function CartDrawer({
           screenshotUrl,
           submittedAt: new Date().toISOString()
         },
-        status: 'Paid',
+        status: 'Pending Verification',
         createdAt: new Date().toISOString()
       };
 
-      // 4. Fetch current orders
-      const getOrdersRes = await fetch('/api/get-orders');
-      if (!getOrdersRes.ok) {
-        throw new Error('Failed to retrieve order history.');
-      }
-      const existingOrders: Order[] = await getOrdersRes.json();
-
-      // 5. Append and Save
-      const updatedOrders = [newOrder, ...existingOrders];
-      const saveOrdersRes = await fetch('/api/save-orders', {
+      // 4. Save the single order to the server (appended server-side)
+      const saveOrderRes = await fetch('/api/save-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updatedOrders)
+        body: JSON.stringify(newOrder)
       });
 
-      if (!saveOrdersRes.ok) {
+      if (!saveOrderRes.ok) {
         throw new Error('Failed to save order details.');
       }
 
-      // 6. Finalize Success
+      // 6. Save order reference to localStorage for customer order history
+      try {
+        const stored = JSON.parse(localStorage.getItem('belvia_my_orders') || '[]');
+        if (!Array.isArray(stored)) throw new Error('not array');
+        stored.unshift({ orderId, phone: shippingPhone.trim(), timestamp: new Date().toISOString() });
+        localStorage.setItem('belvia_my_orders', JSON.stringify(stored));
+      } catch {
+        localStorage.setItem(
+          'belvia_my_orders',
+          JSON.stringify([{ orderId, phone: shippingPhone.trim(), timestamp: new Date().toISOString() }])
+        );
+      }
+
+      // 7. Increment coupon usage (fire-and-forget — order already saved)
+      if (winningDiscount?.type === 'coupon' && winningDiscount.couponCode) {
+        fetch('/api/apply-coupon', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ code: winningDiscount.couponCode })
+        }).catch(err => console.warn('apply-coupon increment failed:', err));
+      }
+
+      // 8. Finalize Success (don't clear the shared cart in express mode — it was never touched)
       setCheckoutSuccess(orderId);
       setStep('success');
-      onClearCart();
+      if (!skipCart) onClearCart();
     } catch (err: any) {
       console.error(err);
       setErrorMsg(err.message || 'An error occurred during order checkout.');
@@ -199,6 +386,10 @@ export default function CartDrawer({
     setScreenshotFile(null);
     setScreenshotPreview(null);
     setErrorMsg('');
+    setAppliedCoupon(null);
+    setCouponInput('');
+    setCouponError('');
+    setAutoDiscount(null);
   };
 
   return (
@@ -210,7 +401,7 @@ export default function CartDrawer({
         {/* Header content */}
         <div className="p-4 border-b border-bg-elevated flex items-center justify-between">
           <div className="flex items-center space-x-2 text-text-primary">
-            {step !== 'cart' && step !== 'success' && (
+            {step !== 'success' && (skipCart ? step === 'payment' : step !== 'cart') && (
               <button 
                 onClick={() => setStep(step === 'payment' ? 'shipping' : 'cart')}
                 className="p-1 hover:bg-bg-surface rounded text-text-secondary hover:text-text-primary mr-1"
@@ -245,7 +436,7 @@ export default function CartDrawer({
             </div>
           )}
 
-          {step === 'cart' && (
+          {step === 'cart' && !skipCart && (
             <div className="space-y-4">
               {cart.length === 0 ? (
                 <div className="text-center py-24 space-y-3">
@@ -262,7 +453,15 @@ export default function CartDrawer({
                   >
                     {/* Thumbnail of product */}
                     <div className="w-16 h-16 bg-bg-surface rounded-lg overflow-hidden shrink-0">
-                      <img referrerPolicy="no-referrer" src={item.customPreviewUrl || item.product.images[0]} alt="Cart thumb" className="w-full h-full object-cover" />
+                      <img 
+                        referrerPolicy="no-referrer" 
+                        src={item.customPreviewUrl || item.product.images[0]} 
+                        alt="Cart thumb" 
+                        className="w-full h-full object-cover" 
+                        onError={(e) => {
+                          e.currentTarget.src = '/images/placeholder.png';
+                        }}
+                      />
                     </div>
 
                     {/* Specifications detail text */}
@@ -276,6 +475,16 @@ export default function CartDrawer({
                         <div className="flex flex-wrap gap-1 mt-1 font-mono text-[9px] text-text-secondary">
                           <span className="px-1 bg-bg-base border border-bg-elevated rounded">Color: {item.selectedColor}</span>
                           <span className="px-1 bg-bg-base border border-bg-elevated rounded">Material: {item.selectedMaterial}</span>
+                          {item.isPreOrder && item.product.depositPercentage && (
+                            <span className="px-1 bg-accent/10 border border-accent/20 rounded text-accent font-semibold">
+                              Pre-order deposit — {item.product.depositPercentage}%
+                            </span>
+                          )}
+                          {item.selectedResin && (
+                            <span className="px-1 bg-accent/10 border border-accent/20 rounded text-accent font-semibold">
+                              Resin Finish (+৳{item.product.resin_price})
+                            </span>
+                          )}
                           {item.customization && (
                             <>
                               <span className="px-1 bg-bg-base border border-bg-elevated rounded">Name: {item.customization.name}</span>
@@ -290,7 +499,7 @@ export default function CartDrawer({
                       {/* Pricing, Quantity adjust bars */}
                       <div className="flex items-center justify-between mt-2 pt-2 border-t border-border-premium">
                         <span className="font-mono text-xs font-bold text-accent">
-                          ${((item.calculatedPrice ?? item.product.price) * item.quantity).toFixed(2)}
+                          {formatPrice(getItemPrice(item) * item.quantity)}
                         </span>
 
                         <div className="flex items-center space-x-2.5">
@@ -299,27 +508,27 @@ export default function CartDrawer({
                             <button
                               onClick={() => {
                                 if (item.quantity > 1) {
-                                  onUpdateQty(item.product.id, item.selectedColor, item.selectedMaterial, item.quantity - 1);
+                                  onUpdateQty(item.product.id, item.selectedColor, item.selectedMaterial, item.quantity - 1, item.selectedResin);
                                 }
                               }}
-                              className="w-5 h-5 flex items-center justify-center text-text-secondary hover:text-text-primary"
+                              className="w-7 h-7 sm:w-5 sm:h-5 flex items-center justify-center text-text-secondary hover:text-text-primary"
                             >
                               -
                             </button>
-                            <span className="w-6 font-mono text-center text-text-primary">{item.quantity}</span>
+                            <span className="w-7 sm:w-6 font-mono text-center text-text-primary">{item.quantity}</span>
                             <button
                               onClick={() => {
-                                onUpdateQty(item.product.id, item.selectedColor, item.selectedMaterial, item.quantity + 1);
+                                onUpdateQty(item.product.id, item.selectedColor, item.selectedMaterial, item.quantity + 1, item.selectedResin);
                               }}
-                              className="w-5 h-5 flex items-center justify-center text-text-secondary hover:text-text-primary"
+                              className="w-7 h-7 sm:w-5 sm:h-5 flex items-center justify-center text-text-secondary hover:text-text-primary"
                             >
                               +
                             </button>
                           </div>
-
+ 
                           {/* Delete from cart */}
                           <button
-                            onClick={() => onRemoveItem(item.product.id, item.selectedColor, item.selectedMaterial)}
+                            onClick={() => onRemoveItem(item.product.id, item.selectedColor, item.selectedMaterial, item.selectedResin)}
                             className="p-1 px-1.5 rounded hover:bg-red-500/10 text-red-400 hover:text-red-300 transition"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
@@ -335,8 +544,37 @@ export default function CartDrawer({
 
           {step === 'shipping' && (
             <form onSubmit={handleGenerateOrder} className="space-y-4">
+              {skipCart && expressItem && (
+                <div className="p-3 bg-bg-elevated border border-border-premium rounded-xl flex space-x-3 text-left">
+                  <div className="w-14 h-14 bg-bg-surface rounded-lg overflow-hidden shrink-0">
+                    <img
+                      referrerPolicy="no-referrer"
+                      src={expressItem.customPreviewUrl || expressItem.product.images[0]}
+                      alt=""
+                      className="w-full h-full object-cover"
+                      onError={(e) => { e.currentTarget.src = '/images/placeholder.png'; }}
+                    />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h4 className="text-xs font-bold text-text-primary leading-tight truncate">{expressItem.product.title}</h4>
+                    <div className="flex flex-wrap gap-1 mt-1 font-mono text-[9px] text-text-secondary">
+                      <span className="px-1 bg-bg-base border border-bg-elevated rounded">Color: {expressItem.selectedColor}</span>
+                      <span className="px-1 bg-bg-base border border-bg-elevated rounded">Material: {expressItem.selectedMaterial}</span>
+                      <span className="px-1 bg-bg-base border border-bg-elevated rounded">Qty: {expressItem.quantity}</span>
+                      {expressItem.selectedResin && (
+                        <span className="px-1 bg-accent/10 border border-accent/20 rounded text-accent font-semibold">
+                          Resin Finish (+৳{expressItem.product.resin_price})
+                        </span>
+                      )}
+                    </div>
+                    <div className="mt-1.5 text-xs font-mono font-bold text-accent">
+                      {formatPrice(getItemPrice(expressItem) * expressItem.quantity)}
+                    </div>
+                  </div>
+                </div>
+              )}
               <p className="text-text-secondary text-xs leading-relaxed mb-4">
-                Please enter your shipping information below. This is required for physical courier delivery of your manufactured prints.
+                {skipCart ? 'Review your single item and enter shipping details below.' : 'Please enter your shipping information below. This is required for physical courier delivery of your manufactured prints.'}
               </p>
 
               <div className="space-y-1">
@@ -359,6 +597,18 @@ export default function CartDrawer({
                   placeholder="e.g. +8801712345678"
                   value={shippingPhone}
                   onChange={(e) => setShippingPhone(e.target.value)}
+                  className="w-full bg-bg-elevated border border-border-premium rounded-xl p-3 text-xs text-text-primary focus:outline-none focus:border-accent"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="block text-[10px] font-mono text-text-secondary uppercase">Email (for order confirmation)</label>
+                <input
+                  type="email"
+                  required
+                  placeholder="e.g. customer@example.com"
+                  value={shippingEmail}
+                  onChange={(e) => setShippingEmail(e.target.value)}
                   className="w-full bg-bg-elevated border border-border-premium rounded-xl p-3 text-xs text-text-primary focus:outline-none focus:border-accent"
                 />
               </div>
@@ -399,7 +649,7 @@ export default function CartDrawer({
                 </div>
                 <div className="flex justify-between text-base font-bold text-text-primary pt-1 border-t border-border-premium/50">
                   <span>Total Due:</span>
-                  <span className="text-accent">${totalCost.toFixed(2)}</span>
+                  <span className="text-accent">{formatPrice(totalCost)}</span>
                 </div>
               </div>
 
@@ -457,11 +707,11 @@ export default function CartDrawer({
                   {/* Copy box */}
                   <div className="flex items-center justify-between p-2.5 bg-bg-base border border-border-premium rounded-xl font-mono text-xs text-text-primary">
                     <span className="font-bold">
-                      {paymentMethod === 'bKash' ? '01712-345678' : '01812-345678'}
+                      {paymentMethod === 'bKash' ? bkashNumber : nagadNumber}
                     </span>
                     <button
                       type="button"
-                      onClick={() => handleCopyNumber(paymentMethod === 'bKash' ? '01712345678' : '01812345678')}
+                      onClick={() => handleCopyNumber(paymentMethod === 'bKash' ? bkashNumber.replace(/[-\s]/g, '') : nagadNumber.replace(/[-\s]/g, ''))}
                       className="text-accent hover:text-accent-hover p-1 flex items-center space-x-1 cursor-pointer"
                     >
                       {copiedText ? (
@@ -487,11 +737,19 @@ export default function CartDrawer({
                     <input
                       type="text"
                       required
-                      placeholder="e.g. BKX9283749823"
+                      placeholder="e.g. BKX9283749"
                       value={trxId}
-                      onChange={(e) => setTrxId(e.target.value)}
-                      className="w-full bg-bg-elevated border border-border-premium rounded-xl p-3 text-xs text-text-primary focus:outline-none focus:border-accent font-mono uppercase"
+                      onChange={(e) => handleTrxIdChange(e.target.value)}
+                      className={`w-full bg-bg-elevated border rounded-xl p-3 text-xs text-text-primary focus:outline-none font-mono uppercase ${
+                        trxIdError ? 'border-red-500 focus:border-red-500' : 'border-border-premium focus:border-accent'
+                      }`}
                     />
+                    {trxIdError && (
+                      <p className="text-[10px] text-red-400 font-mono flex items-center space-x-1 mt-1">
+                        <AlertCircle className="w-3 h-3 shrink-0" />
+                        <span>{trxIdError}</span>
+                      </p>
+                    )}
                   </div>
 
                   <div className="space-y-1">
@@ -584,8 +842,8 @@ export default function CartDrawer({
 
         </div>
 
-        {/* Calculations / Total Bar shown on step 'cart' only */}
-        {step === 'cart' && cart.length > 0 && (
+        {/* Calculations / Total Bar shown on step 'cart' only (hidden in express mode) */}
+        {step === 'cart' && !skipCart && cart.length > 0 && (
           <div className="p-4 bg-bg-surface border-t border-border-premium space-y-3 font-mono text-xs">
             <div className="space-y-1.5 text-text-secondary">
               <div className="flex justify-between">
@@ -602,9 +860,89 @@ export default function CartDrawer({
               </div>
             </div>
 
-            <div className="border-t border-border-premium pt-2.5 flex justify-between text-base font-bold text-text-primary">
-              <span>Queue Quotation Total:</span>
-              <span className="text-accent">${totalCost.toFixed(2)}</span>
+            {/* Auto-Discount Banner (new_user / loyalty / festival) */}
+            {!appliedCoupon && autoDiscount && autoDiscount.type && autoDiscount.type !== 'coupon' && (
+              <div className={`flex items-center justify-between p-2.5 rounded-lg border text-[10px] font-mono font-bold ${
+                autoDiscount.type === 'new_user'
+                  ? 'bg-amber-500/10 border-amber-500/30 text-amber-400'
+                  : autoDiscount.type === 'festival'
+                  ? 'bg-purple-500/10 border-purple-500/30 text-purple-300'
+                  : 'bg-blue-500/10 border-blue-500/30 text-blue-300'
+              }`}>
+                <div className="flex items-center space-x-2">
+                  {autoDiscount.type === 'new_user' && <PartyPopper className="w-3.5 h-3.5 shrink-0" />}
+                  {autoDiscount.type === 'festival' && <Sparkles className="w-3.5 h-3.5 shrink-0" />}
+                  {autoDiscount.type === 'loyalty' && <Trophy className="w-3.5 h-3.5 shrink-0" />}
+                  <span>{autoDiscount.label}</span>
+                </div>
+                <span className="opacity-60 text-[9px]">AUTO</span>
+              </div>
+            )}
+
+            {/* Coupon Input Block */}
+            {!appliedCoupon ? (
+              <div className="space-y-1.5">
+                <div className="flex items-center space-x-2">
+                  <div className="relative flex-1">
+                    <Tag className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-text-muted" />
+                    <input
+                      id="coupon-input"
+                      type="text"
+                      placeholder="Coupon code (e.g. BELVIA20)"
+                      value={couponInput}
+                      onChange={e => { setCouponInput(e.target.value.toUpperCase()); setCouponError(''); }}
+                      onKeyDown={e => e.key === 'Enter' && handleApplyCoupon()}
+                      className="w-full bg-bg-elevated border border-border-premium rounded-lg pl-8 pr-3 py-2 text-[10px] font-mono uppercase text-text-primary focus:outline-none focus:border-accent placeholder:normal-case placeholder:text-text-muted"
+                    />
+                  </div>
+                  <button
+                    id="coupon-apply-btn"
+                    onClick={handleApplyCoupon}
+                    disabled={isCouponLoading || !couponInput.trim()}
+                    className="px-3 py-2 rounded-lg bg-accent/15 border border-accent/30 text-accent text-[10px] font-bold hover:bg-accent/25 transition disabled:opacity-40 disabled:cursor-not-allowed whitespace-nowrap"
+                  >
+                    {isCouponLoading ? <Loader className="w-3 h-3 animate-spin" /> : 'Apply'}
+                  </button>
+                </div>
+                {couponError && (
+                  <p className="text-red-400 text-[10px] flex items-center space-x-1">
+                    <AlertCircle className="w-3 h-3 shrink-0" />
+                    <span>{couponError}</span>
+                  </p>
+                )}
+              </div>
+            ) : (
+              <div className="flex items-center justify-between p-2.5 rounded-lg bg-green-500/10 border border-green-500/30">
+                <div className="flex items-center space-x-2 text-green-400">
+                  <Check className="w-3.5 h-3.5 shrink-0" />
+                  <span className="text-[10px] font-bold">
+                    {appliedCoupon.code} — {appliedCoupon.type === 'percent' ? `${appliedCoupon.value}% off` : `৳${appliedCoupon.value} off`} applied!
+                  </span>
+                </div>
+                <button onClick={handleRemoveCoupon} className="text-text-muted hover:text-red-400 transition p-0.5">
+                  <XCircle className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            )}
+
+            {/* Total Breakdown */}
+            <div className="border-t border-border-premium pt-2.5 space-y-1">
+              {winningDiscount && winningDiscount.discountAmount > 0 && (
+                <>
+                  <div className="flex justify-between text-text-secondary">
+                    <span>Subtotal:</span>
+                    <span>{formatPrice(subtotalCost)}</span>
+                  </div>
+                  <div className="flex justify-between text-green-400">
+                    <span>Discount ({winningDiscount.type === 'coupon' ? winningDiscount.couponCode : winningDiscount.percent + '%'}):</span>
+                    <span>-{formatPrice(winningDiscount.discountAmount)}</span>
+                  </div>
+                </>
+              )}
+              <div className="flex justify-between text-base font-bold text-text-primary">
+                <span>Queue Quotation Total:</span>
+                <span className="text-accent">{formatPrice(totalCost)}</span>
+              </div>
             </div>
 
             <button

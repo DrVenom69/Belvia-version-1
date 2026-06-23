@@ -1,10 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { 
-  User, Lock, Settings, Heart, ShoppingCart, CheckCircle2, 
-  Truck, Cpu, Star, Mail, MapPin, Edit2, LogOut, Code, ClipboardList, Info, Sparkles, Camera, Upload
+import {
+  User, Settings, Heart, ShoppingCart, CheckCircle2,
+  Truck, Cpu, Star, Mail, MapPin, Edit2, LogOut, Code, ClipboardList, Info, Sparkles, Camera, Upload, X, Loader, Trophy, ChevronRight, Bell
 } from 'lucide-react';
-import { Product, Review } from '../types';
+import { Product, Review, Order, LOYALTY_TIERS } from '../types';
+import { getLoyaltyTier, getLoyaltyProgress, getNextLoyaltyTier } from '../utils/discountEngine';
 import { getStoredReviews, saveStoredReview, getStoredProducts } from '../data';
+import { useAuth } from '../contexts/AuthContext';
+import { usePushNotifications } from '../hooks/usePushNotifications';
+import { formatPrice } from '../utils/format';
+
 
 interface MyAccountHubProps {
   products: Product[];
@@ -26,6 +31,26 @@ interface PastOrder {
   date: string;
   status: 'In Progress' | 'Shipped' | 'Delivered' | 'Active Printing';
   trackingCode: string;
+  design_credit_enabled?: boolean;
+  design_credit_amount?: number | null;
+}
+
+/** Map real Order status from the API to the PastOrder status display strings */
+function mapStatus(s: Order['status'] | string): PastOrder['status'] {
+  switch (s) {
+    case 'Pending':
+    case 'Pending Verification':
+    case 'Paid':
+      return 'In Progress';
+    case 'Processing':
+      return 'Active Printing';
+    case 'Shipped':
+      return 'Shipped';
+    case 'Completed':
+      return 'Delivered';
+    default:
+      return 'In Progress';
+  }
 }
 
 export default function MyAccountHub({
@@ -37,11 +62,21 @@ export default function MyAccountHub({
   profilePicture,
   onProfilePictureChange
 }: MyAccountHubProps) {
-  // Authentication status
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(true); // Pre-logged in for maximum user testing convenience
-  const [email, setEmail] = useState<string>('iffat2000bd@gmail.com');
-  const [password, setPassword] = useState<string>('••••••••');
-  
+  // ── Real auth via Supabase (with dev mode fallback) ──
+  const { user, signIn, signOut, isLoading: isAuthLoading } = useAuth();
+  const isLoggedIn = !!user;
+  const authEmail = user?.email || '';
+
+  // ── Push notification connection ──
+  const { isSupported, permission, isSubscribed, isLoading: isPushLoading, error: pushError, subscribe: subscribePush, unsubscribe: unsubscribePush } = usePushNotifications();
+
+
+  // ── Auth form state ──
+  const [email, setEmail] = useState<string>('');
+  const [authSuccessMsg, setAuthSuccessMsg] = useState<string>('');
+  const [authErrorMsg, setAuthErrorMsg] = useState<string>('');
+  const [isAuthSubmitting, setIsAuthSubmitting] = useState(false);
+
   // Registration simulation toggle
   const [isRegisterMode, setIsRegisterMode] = useState<boolean>(false);
   
@@ -82,42 +117,109 @@ export default function MyAccountHub({
   const [reviewTextText, setReviewTextText] = useState<string>('');
   const [reviewSuccessMsg, setReviewSuccessMsg] = useState<string>('');
 
-  // Preloaded simulation past orders
-  const [pastOrders, setPastOrders] = useState<PastOrder[]>([
-    {
-      id: 'BLV-ORD-99120',
-      productId: 'bv-005',
-      title: 'Custom Lithophane Lamp & LED Stand',
-      material: 'PLA (High-Definition)',
-      color: 'Chalk White (Translucent Only)',
-      price: 45.00,
-      date: 'June 02, 2026',
-      status: 'Delivered',
-      trackingCode: 'BLV-SHIP-99120'
-    },
-    {
-      id: 'BLV-ORD-71510',
-      productId: 'bv-001',
-      title: 'Modular Helix Desk Organizer',
-      material: 'PLA (Matte)',
-      color: 'Matte Slate',
-      price: 24.99,
-      date: 'June 04, 2026',
-      status: 'Active Printing',
-      trackingCode: 'BLV-SHIP-71510'
-    },
-    {
-      id: 'BLV-ORD-00812',
-      productId: 'bv-002',
-      title: 'Articulated Obsidian Rift Dragon',
-      material: 'PLA (Silk Pearl)',
-      color: 'Neon Nebula',
-      price: 29.99,
-      date: 'June 01, 2026',
-      status: 'Delivered',
-      trackingCode: 'BLV-SHIP-00812'
-    }
-  ]);
+  // ── Real orders fetched from server, filtered by phone or stored order IDs ──
+  const [pastOrders, setPastOrders] = useState<PastOrder[]>([]);
+  const [ordersLoading, setOrdersLoading] = useState(true);
+  const storedOrdersRef = useRef<Set<string>>(new Set());
+
+  // Load stored phone from localStorage (profile phone persistence)
+  useEffect(() => {
+    const savedPhone = localStorage.getItem('belvia_profile_phone');
+    if (savedPhone) setPhone(savedPhone);
+    const savedAddr = localStorage.getItem('belvia_profile_address');
+    if (savedAddr) setShippingAddress(savedAddr);
+  }, []);
+
+  // Persist profile phone to localStorage when changed
+  useEffect(() => {
+    localStorage.setItem('belvia_profile_phone', phone);
+  }, [phone]);
+  useEffect(() => {
+    localStorage.setItem('belvia_profile_address', shippingAddress);
+  }, [shippingAddress]);
+
+  // Fetch + filter orders — re-runs when phone changes
+  useEffect(() => {
+    // Load stored order IDs from localStorage
+    try {
+      const stored = JSON.parse(localStorage.getItem('belvia_my_orders') || '[]');
+      if (Array.isArray(stored)) {
+        storedOrdersRef.current = new Set(stored.map((s: any) => s.orderId));
+      }
+    } catch { /* ignore */ }
+
+    const fetchOrders = async () => {
+      setOrdersLoading(true);
+      try {
+        const res = await fetch('/api/get-orders');
+        if (!res.ok) throw new Error('Failed to fetch orders');
+        const orders: Order[] = await res.json();
+        const storedIds = storedOrdersRef.current;
+
+        const profilePhone = phone.trim().toLowerCase().replace(/[\s-]/g, '');
+
+        const matched = orders.filter((o) => {
+          if (storedIds.has(o.id)) return true;
+          if (profilePhone) {
+            const orderPhone = (o.shippingInfo?.phone || '').trim().toLowerCase().replace(/[\s-]/g, '');
+            if (orderPhone && orderPhone === profilePhone) return true;
+          }
+          return false;
+        });
+
+        const mapped: PastOrder[] = matched.map((o) => {
+          const firstItem = o.items?.[0];
+          const firstProduct = firstItem?.product;
+          return {
+            id: o.id,
+            productId: firstProduct?.id || '',
+            title: firstProduct?.title || firstItem?.customization?.name || `Order ${o.id}`,
+            material: firstItem?.selectedMaterial || 'N/A',
+            color: firstItem?.selectedColor || 'N/A',
+            price: o.totalCost,
+            date: new Date(o.createdAt).toLocaleDateString('en-US', {
+              year: 'numeric', month: 'long', day: 'numeric'
+            }),
+            status: mapStatus(o.status),
+            trackingCode: o.id.replace('ORD', 'SHIP'),
+            design_credit_enabled: o.design_credit_enabled,
+            design_credit_amount: o.design_credit_amount,
+          };
+        });
+
+        setPastOrders(mapped);
+      } catch (err) {
+        console.error('Failed to load real orders:', err);
+        const storedData = localStorage.getItem('belvia_my_orders');
+        if (storedData) {
+          try {
+            const stored = JSON.parse(storedData);
+            if (Array.isArray(stored) && stored.length > 0) {
+              setPastOrders(
+                stored.map((s: any) => ({
+                  id: s.orderId,
+                  productId: '',
+                  title: `Order ${s.orderId}`,
+                  material: 'N/A',
+                  color: 'N/A',
+                  price: 0,
+                  date: new Date(s.timestamp).toLocaleDateString('en-US', {
+                    year: 'numeric', month: 'long', day: 'numeric'
+                  }),
+                  status: 'In Progress' as const,
+                  trackingCode: s.orderId.replace('ORD', 'SHIP'),
+                }))
+              );
+            }
+          } catch { /* ignore */ }
+        }
+      } finally {
+        setOrdersLoading(false);
+      }
+    };
+
+    fetchOrders();
+  }, [phone]);
 
   const PRELOADED_SHIPMENTS_TELEMETRY: Record<string, any> = {
     'BLV-SHIP-99120': {
@@ -243,10 +345,21 @@ export default function MyAccountHub({
     }, 4000);
   };
 
-  const handleAuthSubmit = (e: React.FormEvent) => {
+  const handleAuthSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (email.trim().length > 3) {
-      setIsLoggedIn(true);
+    setAuthErrorMsg('');
+    setAuthSuccessMsg('');
+    if (!email.trim()) return;
+
+    setIsAuthSubmitting(true);
+    const result = await signIn(email.trim());
+    setIsAuthSubmitting(false);
+
+    if (result.success) {
+      setAuthSuccessMsg(result.message);
+      setEmail('');
+    } else {
+      setAuthErrorMsg(result.message);
     }
   };
 
@@ -256,8 +369,13 @@ export default function MyAccountHub({
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 relative text-left">
         
-        {/* LOGGED OUT VISUAL STATE */}
-        {!isLoggedIn ? (
+        {/* AUTH LOADING STATE — session still being checked */}
+        {isAuthLoading ? (
+          <div className="max-w-md mx-auto bg-[#070b13] border border-bg-elevated rounded-2xl p-8 shadow-2xl relative overflow-hidden text-center">
+            <Loader className="w-8 h-8 animate-spin text-accent mx-auto mb-3" />
+            <p className="text-gray-400 text-xs font-mono">Verifying session...</p>
+          </div>
+        ) : !isLoggedIn ? (
           <div className="max-w-md mx-auto bg-[#070b13] border border-bg-elevated rounded-2xl p-8 shadow-2xl relative overflow-hidden">
             <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-accent to-accent-secondary" />
             
@@ -289,36 +407,49 @@ export default function MyAccountHub({
                 />
               </div>
 
-              <div className="space-y-1">
-                <label className="block text-[10px] font-mono text-gray-500 uppercase tracking-widest font-black">Secure Password</label>
-                <input
-                  type="password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-bg-base text-gray-200 px-3.5 py-2.5 rounded-xl border border-bg-elevated focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent/30 text-xs font-mono"
-                />
-              </div>
-
-              {isRegisterMode && (
-                <div className="flex items-center space-x-2 bg-bg-surface/60 p-3 rounded-lg border border-gray-850 text-[10px] text-gray-400 font-mono">
-                  <span className="w-2 h-2 rounded-full bg-accent animate-ping" />
-                  <span>Includes dynamic PLA, PETG &amp; resin swatch allocations.</span>
+              {/* Auth success / error messages */}
+              {authSuccessMsg && (
+                <div className="p-3 rounded-lg bg-green-500/10 border border-green-500/30 text-green-400 text-[11px] font-mono text-center">
+                  {authSuccessMsg}
+                </div>
+              )}
+              {authErrorMsg && (
+                <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-[11px] font-mono text-center">
+                  {authErrorMsg}
                 </div>
               )}
 
+              {/* Passwordless magic link: no password field */}
+              <div className="flex items-center space-x-2 bg-accent/5 p-3 rounded-lg border border-accent/15 text-[10px] text-accent font-mono">
+                <Sparkles className="w-3 h-3 shrink-0" />
+                <span>No password needed — a magic sign-in link will be sent to your email.</span>
+              </div>
+
               <button
                 type="submit"
-                className="w-full py-3 bg-gradient-to-r from-accent to-accent-secondary text-text-on-accent hover:from-accent-hover hover:to-accent-secondary-lt font-black tracking-wider text-xs rounded-xl transition cursor-pointer font-mono shadow-lg shadow-accent/10"
+                disabled={isAuthSubmitting || !email.trim()}
+                className="w-full py-3 bg-gradient-to-r from-accent to-accent-secondary text-text-on-accent hover:from-accent-hover hover:to-accent-secondary-lt font-black tracking-wider text-xs rounded-xl transition cursor-pointer font-mono shadow-lg shadow-accent/10 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
               >
-                {isRegisterMode ? 'REGISTER CREATOR HUB' : 'SECURE SECURE LOGIN'}
+                {isAuthSubmitting ? (
+                  <>
+                    <Loader className="w-3.5 h-3.5 animate-spin" />
+                    <span>Sending magic link...</span>
+                  </>
+                ) : (
+                  <span>{isRegisterMode ? 'REGISTER CREATOR HUB' : 'SEND MAGIC LINK'}</span>
+                )}
               </button>
 
               <button
                 type="button"
                 onClick={() => {
                   setEmail('iffat2000bd@gmail.com');
-                  setIsLoggedIn(true);
+                  setAuthErrorMsg('');
+                  setAuthSuccessMsg('');
+                  signIn('iffat2000bd@gmail.com').then((r) => {
+                    if (r.success) setAuthSuccessMsg(r.message);
+                    else setAuthErrorMsg(r.message);
+                  });
                 }}
                 className="w-full py-2.5 border border-bg-elevated bg-[#090f1f] hover:bg-bg-surface text-gray-400 hover:text-white rounded-xl transition text-[11px] font-mono font-bold cursor-pointer"
               >
@@ -409,7 +540,7 @@ export default function MyAccountHub({
                 <div className="mt-6 pt-5 border-t border-gray-850/80 space-y-3 font-mono text-xs text-gray-400">
                   <div className="flex items-center space-x-2">
                     <Mail className="w-4 h-4 text-accent shrink-0" />
-                    <span className="truncate">{email}</span>
+                    <span className="truncate">{authEmail}</span>
                   </div>
                   <div className="flex items-start space-x-2">
                     <MapPin className="w-4 h-4 text-accent shrink-0 mt-0.5" />
@@ -467,13 +598,70 @@ export default function MyAccountHub({
 
                 {/* Log out trigger */}
                 <button
-                  onClick={() => setIsLoggedIn(false)}
+                  onClick={() => signOut()}
                   className="mt-6 w-full py-2 rounded-xl bg-bg-base border border-gray-850 hover:bg-red-950/20 hover:border-red-900/40 text-gray-500 hover:text-red-400 transition font-mono text-[10px] cursor-pointer flex items-center justify-center space-x-1.5"
                 >
                   <LogOut className="w-3.5 h-3.5" />
                   <span>LOG OUT HUB</span>
                 </button>
               </div>
+
+            {/* ── LOYALTY TIER CARD ── */}
+            {isLoggedIn && (() => {
+              const completedCount = pastOrders.filter(o => o.status === 'Delivered').length;
+              const tier = getLoyaltyTier(completedCount);
+              const nextTier = getNextLoyaltyTier(completedCount);
+              const progress = nextTier
+                ? Math.min(100, ((completedCount - tier.minOrders) / (nextTier.minOrders - tier.minOrders)) * 100)
+                : 100;
+              return (
+                <div className="bg-[#070b13] border border-bg-elevated rounded-2xl p-5 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[9px] font-mono font-black text-gray-500 tracking-widest uppercase">Loyalty Status</span>
+                    <Trophy className="w-4 h-4" style={{ color: tier.color }} />
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <span className="font-display font-black text-lg" style={{ color: tier.color }}>
+                      {tier.name}
+                    </span>
+                    {tier.percent > 0 && (
+                      <span className="px-2 py-0.5 rounded text-[10px] font-bold font-mono" style={{ background: tier.color + '22', color: tier.color }}>
+                        {tier.percent}% off
+                      </span>
+                    )}
+                  </div>
+                  <div className="space-y-1.5">
+                    <div className="w-full h-1.5 bg-bg-elevated rounded-full overflow-hidden">
+                      <div
+                        className="h-full rounded-full transition-all duration-500"
+                        style={{ width: `${progress}%`, background: tier.color }}
+                      />
+                    </div>
+                    <p className="text-[10px] font-mono text-gray-400">
+                      {getLoyaltyProgress(completedCount)}
+                    </p>
+                  </div>
+                  <div className="grid grid-cols-4 gap-1 pt-1">
+                    {LOYALTY_TIERS.map(t => (
+                      <div
+                        key={t.name}
+                        className={`text-center px-1 py-1.5 rounded-lg border text-[9px] font-mono font-black transition ${
+                          tier.name === t.name ? 'border-opacity-60' : 'border-transparent opacity-30'
+                        }`}
+                        style={{
+                          borderColor: tier.name === t.name ? t.color : 'transparent',
+                          color: t.color,
+                          background: tier.name === t.name ? t.color + '15' : 'transparent'
+                        }}
+                      >
+                        <div>{t.name}</div>
+                        <div className="opacity-70">{t.percent > 0 ? `${t.percent}%` : '—'}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })()}
 
               {/* Instant tracking lookup utility right under */}
               <div className="bg-[#070b13] border border-bg-elevated rounded-2xl p-5.5 text-left text-xs space-y-3 font-mono">
@@ -624,6 +812,80 @@ export default function MyAccountHub({
               {activeSubView === 'orders' && (
                 <div className="space-y-6">
                   
+                  {/* Push Notifications Opt-In Card */}
+                  <div className="bg-[#070b13] border border-accent/20 rounded-2xl p-6 text-left relative overflow-hidden shadow-lg">
+                    {/* Subtle cyber glow in the corner */}
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-accent/5 to-transparent rounded-full pointer-events-none" />
+                    
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 relative">
+                      <div className="space-y-1.5 max-w-xl">
+                        <div className="flex items-center space-x-2">
+                          <Bell className={`w-4 h-4 ${isSubscribed ? 'text-accent animate-bounce' : 'text-gray-400'}`} />
+                          <h4 className="font-display font-black text-sm text-white uppercase tracking-wider">
+                            Live Additive Telemetry Feed
+                          </h4>
+                          {isSubscribed && (
+                            <span className="inline-flex items-center px-2 py-0.5 rounded text-[8px] font-mono font-black bg-accent/15 text-accent border border-accent/20 uppercase tracking-widest">
+                              ● Connected
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-gray-400 text-xs leading-relaxed font-sans">
+                          Receive instant, hardware-level push alerts when your printing beds become active, slicing profiles compile, or shipping carriers dispatch your cargo.
+                        </p>
+                        
+                        {/* Error state */}
+                        {pushError && (
+                          <p className="text-red-400 text-[10px] font-mono mt-1">
+                            ⚠ Error: {pushError}
+                          </p>
+                        )}
+                        
+                        {/* iOS / Browser limitations note */}
+                        {!isSubscribed && (
+                          <div className="text-[10px] text-gray-500 font-mono space-y-1 mt-2 border-t border-gray-900 pt-2">
+                            <p>💡 Subscriptions are anchored to your normalized phone number: <code className="text-gray-300 font-bold">{phone || 'None (Set in settings)'}</code></p>
+                            <p className="text-accent/80">📱 iOS Safari: Tap the Share menu and select "Add to Home Screen" first, then launch Belvia from your home screen to authorize push connection.</p>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="shrink-0">
+                        {isSubscribed ? (
+                          <button
+                            type="button"
+                            disabled={isPushLoading}
+                            onClick={() => unsubscribePush()}
+                            className="px-4 py-2 bg-slate-900 hover:bg-red-950/20 text-gray-400 hover:text-red-400 border border-gray-850 hover:border-red-900/30 rounded-xl font-bold font-mono text-[10px] transition cursor-pointer disabled:opacity-50"
+                          >
+                            {isPushLoading ? 'DISCONNECTING...' : 'DISCONNECT FEED'}
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            disabled={isPushLoading || !isSupported || permission === 'denied'}
+                            onClick={() => subscribePush({ phone, email: authEmail })}
+                            className="px-5 py-2.5 bg-gradient-to-r from-accent to-accent-secondary hover:from-accent-hover hover:to-accent-secondary-lt text-text-on-accent rounded-xl font-black font-mono text-[10px] tracking-wider transition cursor-pointer shadow-lg shadow-accent/10 disabled:opacity-50 disabled:cursor-not-allowed uppercase"
+                          >
+                            {isPushLoading ? 'CONNECTING...' : 'CONNECT TELEMETRY'}
+                          </button>
+                        )}
+                      </div>
+                    </div>
+
+                    {!isSupported && !isPushLoading && (
+                      <p className="mt-3 text-[10px] font-mono text-amber-500/80 bg-amber-500/5 border border-amber-500/15 p-2.5 rounded-lg">
+                        ⚠ Push notifications are unsupported on this browser. If you are on iOS Safari, you must first install the application to your Home Screen.
+                      </p>
+                    )}
+
+                    {permission === 'denied' && (
+                      <p className="mt-3 text-[10px] font-mono text-red-400 bg-red-500/5 border border-red-500/15 p-2.5 rounded-lg">
+                        🛑 Notification permissions were blocked. Please reset your browser notification permissions for this website to enable telemetry feeds.
+                      </p>
+                    )}
+                  </div>
+
                   {/* Reviews Form overlay banner if selected and active */}
                   {selectedReviewOrder && (
                     <div className="bg-bg-elevated border border-accent/30 rounded-2xl p-6 text-left relative animate-in slide-in-from-top-4 duration-300">
@@ -631,7 +893,7 @@ export default function MyAccountHub({
                         onClick={() => setSelectedReviewOrder(null)}
                         className="absolute top-4 right-4 text-gray-400 hover:text-white p-1 rounded-md"
                       >
-                        <Lock className="w-4 h-4" />
+                        <X className="w-4 h-4" />
                       </button>
 
                       <div className="flex items-center space-x-2 text-accent font-mono text-[10px] font-bold mb-1 uppercase">
@@ -643,7 +905,7 @@ export default function MyAccountHub({
                         Write Verified Review: {selectedReviewOrder.title}
                       </h4>
                       <p className="text-gray-400 text-xs mt-1 leading-normal">
-                        Your purchase of <code className="bg-bg-surface px-1 py-0.5 text-[10px] rounded">{selectedReviewOrder.id}</code> is logged under client id {email}. Leave a review regarding G-code precision, infill strength or shipping finish below.
+                        Your purchase of <code className="bg-bg-surface px-1 py-0.5 text-[10px] rounded">{selectedReviewOrder.id}</code> is logged under client id {authEmail}. Leave a review regarding G-code precision, infill strength or shipping finish below.
                       </p>
 
                       <form onSubmit={handlePostReviewSubmit} className="mt-4 space-y-3">
@@ -657,7 +919,7 @@ export default function MyAccountHub({
                                 onClick={() => setReviewRating(s)}
                                 className="hover:scale-110 active:scale-95 transition cursor-pointer"
                               >
-                                <Star className={`w-5.1 h-5.1 ${s <= reviewRating ? 'fill-current text-amber-500' : 'text-gray-600'}`} />
+                                <Star className={`w-5 h-5 ${s <= reviewRating ? 'fill-current text-amber-500' : 'text-gray-600'}`} />
                               </button>
                             ))}
                           </div>
@@ -705,9 +967,18 @@ export default function MyAccountHub({
                     <h3 className="font-display font-black text-lg text-white mb-1">Queue &amp; Active Production Telemetry</h3>
                     <p className="text-gray-400 text-xs mb-5">Continuous printing jobs mapped to your active registered client address.</p>
 
-                    <div className="space-y-4">
-                      {pastOrders.filter(o => o.status === 'Active Printing' || o.status === 'In Progress').map((o) => (
-                        <div key={o.id} className="border border-[#10b981]/20 bg-accent/5 rounded-xl p-4.5 space-y-3">
+                    {ordersLoading ? (
+                      <div className="flex items-center justify-center space-x-2 py-8">
+                        <Loader className="w-4 h-4 animate-spin text-accent" />
+                        <span className="text-xs font-mono text-gray-400">Syncing order data...</span>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        {pastOrders.filter(o => o.status === 'Active Printing' || o.status === 'In Progress').length === 0 ? (
+                          <p className="text-gray-500 text-xs font-mono text-center py-6">No active printing jobs found. All clear!</p>
+                        ) : (
+                          pastOrders.filter(o => o.status === 'Active Printing' || o.status === 'In Progress').map((o) => (
+                            <div key={o.id} className="border border-[#10b981]/20 bg-accent/5 rounded-xl p-4.5 space-y-3">
                           <div className="flex justify-between items-start gap-4">
                             <div>
                               <span className="text-[9px] font-mono text-accent bg-accent/15 px-2 py-0.5 rounded font-black border border-[#10b981]/20">
@@ -725,7 +996,7 @@ export default function MyAccountHub({
                           </div>
 
                           {/* Machine slices simulation */}
-                          <div className="bg-[#050912] p-3 rounded-lg border border-gray-850 grid grid-cols-3 gap-2 text-[10px] font-mono text-gray-400">
+                          <div className="bg-[#050912] p-3 rounded-lg border border-gray-850 grid grid-cols-2 sm:grid-cols-3 gap-2 text-[10px] font-mono text-gray-400">
                             <div>
                               <span className="block text-gray-500 text-[8px]">LAYER STATUS:</span>
                               <span className="text-accent font-bold">1640 / 2250</span>
@@ -753,9 +1024,12 @@ export default function MyAccountHub({
                               OPEN LIVE TRACKER
                             </button>
                           </div>
-                        </div>
-                      ))}
+                              </div>
+                            ))
+                          )
+                        }
                     </div>
+                    )}
                   </div>
 
                   {/* Historical logs list */}
@@ -763,8 +1037,17 @@ export default function MyAccountHub({
                     <h3 className="font-display font-black text-lg text-white mb-1">Delivered Fabrications Logs</h3>
                     <p className="text-gray-400 text-xs mb-5">History of physical spools dispatched, with verified client feedback links.</p>
 
+                    {ordersLoading ? (
+                      <div className="flex items-center justify-center space-x-2 py-8">
+                        <Loader className="w-4 h-4 animate-spin text-accent" />
+                        <span className="text-xs font-mono text-gray-400">Syncing order data...</span>
+                      </div>
+                    ) : (
                     <div className="space-y-4">
-                      {pastOrders.filter(o => o.status === 'Delivered').map((o) => {
+                      {pastOrders.filter(o => o.status === 'Delivered').length === 0 ? (
+                        <p className="text-gray-500 text-xs font-mono text-center py-6">No completed deliveries yet.</p>
+                      ) : (
+                        pastOrders.filter(o => o.status === 'Delivered').map((o) => {
                         // Check if a review already exists from this client for this product
                         const alreadyReviewed = globalReviews.some(
                           r => r.productId === o.productId && r.author.includes(firstName)
@@ -784,7 +1067,8 @@ export default function MyAccountHub({
                               </div>
                               <h4 className="font-sans font-bold text-sm text-gray-200 mt-1 font-sans">{o.title}</h4>
                               <p className="text-gray-500 text-[10px]">
-                                Dispatched {o.date} // Weight: {o.productId === 'bv-005' ? '210' : '165'}g // Value: ${o.price.toFixed(2)}
+                                Dispatched {o.date} // Weight: {o.productId === 'bv-005' ? '210' : '165'}g // Value: {formatPrice(o.price)}
+                                {o.design_credit_enabled && o.design_credit_amount && ` (includes Design Credit: +৳${o.design_credit_amount})`}
                               </p>
                             </div>
 
@@ -814,8 +1098,9 @@ export default function MyAccountHub({
                             </div>
                           </div>
                         );
-                      })}
+                      }))}
                     </div>
+                    )}
                   </div>
 
                 </div>
@@ -847,10 +1132,17 @@ export default function MyAccountHub({
                           className="p-3 bg-bg-base/50 border border-gray-850 rounded-xl flex items-center space-x-3 text-xs justify-between"
                         >
                           <div className="flex items-center space-x-3 text-left">
-                            <img src={w.images[0]} alt={w.title} className="w-12 h-12 rounded-lg object-cover border border-bg-elevated" />
+                            <img 
+                              src={w.images[0]} 
+                              alt={w.title} 
+                              className="w-12 h-12 rounded-lg object-cover border border-bg-elevated" 
+                              onError={(e) => {
+                                e.currentTarget.src = '/images/placeholder.png';
+                              }}
+                            />
                             <div>
                               <h4 className="font-sans font-bold text-gray-200 line-clamp-1">{w.title}</h4>
-                              <span className="font-mono text-[10px] text-accent">${w.price.toFixed(2)}</span>
+                              <span className="font-mono text-[10px] text-accent">{formatPrice(w.isPreOrder ? w.price : (w.price - Math.round(w.price * 0.12)))}</span>
                             </div>
                           </div>
 

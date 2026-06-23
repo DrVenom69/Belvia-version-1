@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { UploadCloud, CheckCircle2, FileCode, AlertCircle, Sparkles, HelpCircle, HardDrive, Send } from 'lucide-react';
 import { CustomPrintRequest, BulkOrderRequest, CartItem } from '../types';
+import { formatPrice } from '../utils/format';
 import BulkOrders from './BulkOrders';
 import NameKeychainBuilder from './NameKeychainBuilder';
 
@@ -48,8 +49,8 @@ export default function CustomPrintStudio({ onAddCustomQuote, onAddBulkOrder, on
     const estWeight = Math.round(estVolume * 1.15 * (parseFloat(infill) / 20)); // in grams
 
     // Calculate simulated price
-    const baseSet = 6.50; // machine calibration fee
-    const materialMultiplier = material.includes('TPU') ? 0.08 : material.includes('Carbon') ? 0.12 : 0.04;
+    const baseSet = 650; // machine calibration fee
+    const materialMultiplier = material.includes('TPU') ? 8 : material.includes('Carbon') ? 12 : 4;
     const layerVolumeFee = estWeight * materialMultiplier;
     const rawQuote = (baseSet + layerVolumeFee) * quantity;
 
@@ -58,7 +59,7 @@ export default function CustomPrintStudio({ onAddCustomQuote, onAddBulkOrder, on
       triangles: (len * 45214).toLocaleString(),
       volume: `${estVolume} cc`,
       weight: `${estWeight} grams`,
-      rawPrice: Math.max(8.50, parseFloat(rawQuote.toFixed(2)))
+      rawPrice: Math.max(850, Math.round(rawQuote))
     };
   }, [file, material, infill, quantity]);
 
@@ -555,7 +556,7 @@ export default function CustomPrintStudio({ onAddCustomQuote, onAddBulkOrder, on
                     <div className="bg-bg-elevated border border-accent/30 p-4 rounded-xl flex items-center justify-between font-mono mt-4">
                       <div className="text-left">
                         <span className="block text-[8px] text-gray-500 uppercase tracking-widest">Instant quote estimate</span>
-                        <span className="text-xl font-bold text-accent">${calculatedSpecs.rawPrice.toFixed(2)}</span>
+                        <span className="text-xl font-bold text-accent">{formatPrice(calculatedSpecs.rawPrice)}</span>
                       </div>
                       <span className="text-[10px] text-accent font-bold bg-accent/10 px-2 py-1 rounded">G-CODE READY</span>
                     </div>

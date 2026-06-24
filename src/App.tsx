@@ -110,6 +110,36 @@ function AppContent() {
 
   const { user } = useAuth();
 
+  // --- PROFILE NAME STATE (LIFTED & PERSISTED) ---
+  const [firstName, setFirstName] = useState<string>("Guest");
+  const [lastName, setLastName] = useState<string>("Client");
+
+  useEffect(() => {
+    if (user) {
+      const metaFirst = user.user_metadata?.first_name || user.user_metadata?.given_name;
+      const metaLast = user.user_metadata?.last_name || user.user_metadata?.family_name;
+
+      if (metaFirst || metaLast) {
+        setFirstName(metaFirst || "");
+        setLastName(metaLast || "");
+      } else {
+        const storedFirst = localStorage.getItem("belvia_profile_first_name");
+        const storedLast = localStorage.getItem("belvia_profile_last_name");
+        if (storedFirst !== null || storedLast !== null) {
+          setFirstName(storedFirst || "");
+          setLastName(storedLast || "");
+        } else if (user.email) {
+          const emailPrefix = user.email.split("@")[0];
+          setFirstName(emailPrefix);
+          setLastName("");
+        }
+      }
+    } else {
+      setFirstName("Guest");
+      setLastName("Client");
+    }
+  }, [user]);
+
   // --- GLOBAL PERSISTENT STATE ---
   const [products, setProducts] = useState<Product[]>([]);
   const [cart, setCart] = useState<CartItem[]>([]);
@@ -257,6 +287,13 @@ function AppContent() {
     setIsAdminVerified(false);
     setAdminKeyInput('');
     setKeyError('');
+  };
+
+  const { signOut } = useAuth();
+  const handleLogout = async () => {
+    await signOut();
+    handleAdminLogout();
+    setActiveTab('home');
   };
 
   const [isCartOpen, setIsCartOpen] = useState<boolean>(false);
@@ -787,8 +824,11 @@ function AppContent() {
         theme={theme}
         toggleTheme={toggleTheme}
         profilePicture={profilePicture}
-        onLogout={() => setActiveTab('home')}
-        adminEmail={settings?.alertEmail || user?.email || undefined}
+        onLogout={handleLogout}
+        adminEmail={user?.email || undefined}
+        isAdmin={isAdminVerified ?? false}
+        firstName={firstName}
+        lastName={lastName}
       />
 
       {/* 2. DYNAMIC CONTENT SWITCHBOARD */}
@@ -953,6 +993,10 @@ function AppContent() {
                 onQuickView={setSelectedProduct}
                 profilePicture={profilePicture}
                 onProfilePictureChange={handleProfilePictureChange}
+                firstName={firstName}
+                lastName={lastName}
+                setFirstName={setFirstName}
+                setLastName={setLastName}
               />
             </div>
           )}

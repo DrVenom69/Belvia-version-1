@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Layers, ShoppingBag, Terminal, Heart, Home, Globe, Sparkles, User, Sun, Moon, Settings, LogOut, Package, BookHeart, ChevronDown, Bell, CreditCard } from 'lucide-react';
 import { CartItem } from '../types';
+import { useAuth } from '../contexts/AuthContext';
 
 interface NavbarProps {
   activeTab: string;
@@ -14,6 +15,9 @@ interface NavbarProps {
   profilePicture?: string | null;
   onLogout?: () => void;
   adminEmail?: string;
+  isAdmin?: boolean;
+  firstName: string;
+  lastName: string;
 }
 
 export default function Navbar({
@@ -27,7 +31,10 @@ export default function Navbar({
   toggleTheme,
   profilePicture,
   onLogout,
-  adminEmail
+  adminEmail,
+  isAdmin,
+  firstName,
+  lastName
 }: NavbarProps) {
   const totalItems = cart.reduce((acc, item) => acc + item.quantity, 0);
   const [isAccountDropdownOpen, setIsAccountDropdownOpen] = useState(false);
@@ -168,104 +175,142 @@ export default function Navbar({
               onMouseEnter={handleMouseEnterAccount}
               onMouseLeave={handleMouseLeaveAccount}
             >
-              <button
-                id="account-trigger-btn"
-                onClick={() => setActiveTab('tracker')}
-                className={`relative flex items-center space-x-1.5 px-2.5 py-2 rounded-xl transition cursor-pointer group border ${
-                  activeTab === 'tracker' 
-                    ? 'text-text-primary bg-accent/20 border-accent/30' 
-                    : 'text-text-secondary hover:text-text-primary bg-bg-surface hover:bg-bg-elevated border-border-premium'
-                }`}
-                title="My Account"
-              >
-                {/* Profile Avatar or Icon */}
-                {profilePicture ? (
-                  <div className="w-7 h-7 rounded-full overflow-hidden border-2 border-accent/40 shrink-0">
-                    <img src={profilePicture} alt="Profile" className="w-full h-full object-cover" />
-                  </div>
-                ) : (
-                  <User className="w-5 h-5 group-hover:scale-105 transition-transform shrink-0" />
-                )}
-                <span className="hidden md:block text-[11px] font-semibold font-display">My Account</span>
-                <ChevronDown className={`hidden md:block w-3 h-3 transition-transform duration-300 ${isAccountDropdownOpen ? 'rotate-180' : ''}`} />
-              </button>
+              {/* Call Auth to verify active session */}
+              {(() => {
+                const { user } = useAuth();
+                const isLoggedIn = !!user;
 
-              {/* Animated Dropdown Menu */}
-              <div
-                id="account-dropdown-menu"
-                className={`absolute right-0 top-full mt-2 min-w-[16rem] w-[90vw] sm:w-64 bg-[#070b13] border border-bg-elevated rounded-2xl shadow-2xl shadow-black/50 overflow-hidden transition-all duration-300 origin-top-right ${
-                  isAccountDropdownOpen 
-                    ? 'opacity-100 scale-100 translate-y-0 pointer-events-auto' 
-                    : 'opacity-0 scale-95 -translate-y-2 pointer-events-none'
-                }`}
-                style={{ zIndex: 9999 }}
-              >
-                {/* Dropdown Header */}
-                <div className="px-4 py-3.5 border-b border-bg-elevated bg-gradient-to-r from-accent/5 to-transparent">
-                  <div className="flex items-center space-x-3">
-                    {profilePicture ? (
-                      <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-accent/30 shrink-0">
-                        <img src={profilePicture} alt="Profile" className="w-full h-full object-cover" />
-                      </div>
-                    ) : (
-                      <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-accent to-accent-secondary flex items-center justify-center text-white font-black text-sm shrink-0 shadow border border-white/10">
-                        IB
-                      </div>
-                    )}
-                    <div>
-                      <p className="text-white font-bold text-sm font-display">Iffat Bd</p>
-                      <p className="text-gray-500 text-[10px] font-mono">{adminEmail || 'Store Admin'}</p>
-                    </div>
-                  </div>
-                </div>
+                return (
+                  <>
+                    <button
+                      id="account-trigger-btn"
+                      onClick={() => setActiveTab('tracker')}
+                      className={`relative flex items-center space-x-1.5 px-2.5 py-2 rounded-xl transition cursor-pointer group border ${
+                        activeTab === 'tracker' 
+                          ? 'text-text-primary bg-accent/20 border-accent/30' 
+                          : 'text-text-secondary hover:text-text-primary bg-bg-surface hover:bg-bg-elevated border-border-premium'
+                      }`}
+                      title="My Account"
+                    >
+                      {/* Profile Avatar or Icon */}
+                      {isLoggedIn ? (
+                        profilePicture ? (
+                          <div className="w-7 h-7 rounded-full overflow-hidden border-2 border-accent/40 shrink-0">
+                            <img src={profilePicture} alt="Profile" className="w-full h-full object-cover" />
+                          </div>
+                        ) : (
+                          <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-accent to-accent-secondary flex items-center justify-center text-white font-black text-[10px] shrink-0 border border-white/10">
+                            {((firstName?.substring(0, 1) || '') + (lastName?.substring(0, 1) || '')).toUpperCase() || 'U'}
+                          </div>
+                        )
+                      ) : (
+                        <User className="w-5 h-5 group-hover:scale-105 transition-transform shrink-0" />
+                      )}
+                      <span className="hidden md:block text-[11px] font-semibold font-display">My Account</span>
+                      <ChevronDown className={`hidden md:block w-3 h-3 transition-transform duration-300 ${isAccountDropdownOpen ? 'rotate-180' : ''}`} />
+                    </button>
 
-                {/* Menu Items */}
-                <div className="py-2 px-2">
-                  {accountMenuItems.map((item, idx) => {
-                    const Icon = item.icon;
-                    return (
-                      <button
-                        key={idx}
-                        id={`account-menu-${item.label.toLowerCase()}`}
-                        onClick={() => handleAccountItemClick(item)}
-                        className="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-left hover:bg-bg-elevated/70 transition-all duration-200 group cursor-pointer"
-                      >
-                        <div className="w-8 h-8 rounded-lg bg-bg-surface border border-bg-elevated flex items-center justify-center shrink-0 group-hover:border-accent/30 group-hover:bg-accent/5 transition-all duration-200">
-                          <Icon className="w-4 h-4 text-gray-400 group-hover:text-accent transition-colors" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-white text-xs font-semibold font-display group-hover:text-accent transition-colors">{item.label}</p>
-                          <p className="text-gray-500 text-[10px] font-mono truncate">{item.description}</p>
-                        </div>
-                        {item.label === 'Wishlist' && wishlistCount > 0 && (
-                          <span className="text-[9px] bg-red-500/20 text-red-400 border border-red-500/20 px-1.5 py-0.5 rounded-full font-mono font-bold shrink-0">
-                            {wishlistCount}
-                          </span>
+                    {/* Animated Dropdown Menu */}
+                    <div
+                      id="account-dropdown-menu"
+                      className={`absolute right-0 top-full mt-2 min-w-[16rem] w-[90vw] sm:w-64 bg-[#070b13] border border-bg-elevated rounded-2xl shadow-2xl shadow-black/50 overflow-hidden transition-all duration-300 origin-top-right ${
+                        isAccountDropdownOpen 
+                          ? 'opacity-100 scale-100 translate-y-0 pointer-events-auto' 
+                          : 'opacity-0 scale-95 -translate-y-2 pointer-events-none'
+                      }`}
+                      style={{ zIndex: 9999 }}
+                    >
+                      {/* Dropdown Header */}
+                      <div className="px-4 py-3.5 border-b border-bg-elevated bg-gradient-to-r from-accent/5 to-transparent">
+                        {isLoggedIn ? (
+                          <div className="flex items-center space-x-3">
+                            {profilePicture ? (
+                              <div className="w-10 h-10 rounded-full overflow-hidden border-2 border-accent/30 shrink-0">
+                                <img src={profilePicture} alt="Profile" className="w-full h-full object-cover" />
+                              </div>
+                            ) : (
+                              <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-accent to-accent-secondary flex items-center justify-center text-white font-black text-sm shrink-0 shadow border border-white/10">
+                                {((firstName?.substring(0, 1) || '') + (lastName?.substring(0, 1) || '')).toUpperCase() || 'U'}
+                              </div>
+                            )}
+                            <div className="min-w-0 flex-1">
+                              <p className="text-white font-bold text-sm font-display truncate">{firstName} {lastName}</p>
+                              <p className="text-accent text-[9px] font-mono uppercase tracking-wider">{isAdmin ? 'Store Admin' : 'Belvia Client'}</p>
+                              <p className="text-gray-500 text-[10px] font-mono truncate">{adminEmail}</p>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="text-center py-2">
+                            <div className="w-10 h-10 rounded-full bg-bg-surface border border-bg-elevated flex items-center justify-center text-gray-500 mx-auto mb-2">
+                              <User className="w-5 h-5" />
+                            </div>
+                            <p className="text-white font-bold text-xs font-display">Guest Client</p>
+                            <p className="text-gray-500 text-[9px] font-mono mb-3">Sign in to track orders</p>
+                            <button
+                              id="guest-signin-btn"
+                              onClick={() => {
+                                setIsAccountDropdownOpen(false);
+                                setActiveTab('tracker');
+                              }}
+                              className="w-full py-2 bg-gradient-to-r from-accent to-accent-secondary text-text-on-accent hover:from-accent-hover hover:to-accent-secondary-lt font-black tracking-wider text-[10px] rounded-lg transition cursor-pointer font-mono shadow-md"
+                            >
+                              SIGN IN / SIGN UP
+                            </button>
+                          </div>
                         )}
-                      </button>
-                    );
-                  })}
-                </div>
+                      </div>
 
-                {/* Divider + Logout */}
-                <div className="px-2 pb-2 border-t border-bg-elevated pt-2 mt-1">
-                  <button
-                    id="account-menu-logout"
-                    onClick={handleLogoutClick}
-                    className="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-left hover:bg-red-950/30 transition-all duration-200 group cursor-pointer"
-                  >
-                    <div className="w-8 h-8 rounded-lg bg-bg-surface border border-bg-elevated flex items-center justify-center shrink-0 group-hover:border-red-500/30 group-hover:bg-red-950/30 transition-all duration-200">
-                      <LogOut className="w-4 h-4 text-gray-500 group-hover:text-red-400 transition-colors" />
+                      {/* Menu Items */}
+                      <div className="py-2 px-2">
+                        {accountMenuItems.map((item, idx) => {
+                          const Icon = item.icon;
+                          return (
+                            <button
+                              key={idx}
+                              id={`account-menu-${item.label.toLowerCase()}`}
+                              onClick={() => handleAccountItemClick(item)}
+                              className="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-left hover:bg-bg-elevated/70 transition-all duration-200 group cursor-pointer"
+                            >
+                              <div className="w-8 h-8 rounded-lg bg-bg-surface border border-bg-elevated flex items-center justify-center shrink-0 group-hover:border-accent/30 group-hover:bg-accent/5 transition-all duration-200">
+                                <Icon className="w-4 h-4 text-gray-400 group-hover:text-accent transition-colors" />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-white text-xs font-semibold font-display group-hover:text-accent transition-colors">{item.label}</p>
+                                <p className="text-gray-500 text-[10px] font-mono truncate">{item.description}</p>
+                              </div>
+                              {item.label === 'Wishlist' && wishlistCount > 0 && (
+                                <span className="text-[9px] bg-red-500/20 text-red-400 border border-red-500/20 px-1.5 py-0.5 rounded-full font-mono font-bold shrink-0">
+                                  {wishlistCount}
+                                </span>
+                              )}
+                            </button>
+                          );
+                        })}
+                      </div>
+
+                      {/* Divider + Logout */}
+                      {isLoggedIn && (
+                        <div className="px-2 pb-2 border-t border-bg-elevated pt-2 mt-1">
+                          <button
+                            id="account-menu-logout"
+                            onClick={handleLogoutClick}
+                            className="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-left hover:bg-red-950/30 transition-all duration-200 group cursor-pointer"
+                          >
+                            <div className="w-8 h-8 rounded-lg bg-bg-surface border border-bg-elevated flex items-center justify-center shrink-0 group-hover:border-red-500/30 group-hover:bg-red-950/30 transition-all duration-200">
+                              <LogOut className="w-4 h-4 text-gray-500 group-hover:text-red-400 transition-colors" />
+                            </div>
+                            <div>
+                              <p className="text-gray-400 text-xs font-semibold font-display group-hover:text-red-400 transition-colors">Log Out</p>
+                              <p className="text-gray-600 text-[10px] font-mono">Sign out of your account</p>
+                            </div>
+                          </button>
+                        </div>
+                      )}
                     </div>
-                    <div>
-                      <p className="text-gray-400 text-xs font-semibold font-display group-hover:text-red-400 transition-colors">Log Out</p>
-                      <p className="text-gray-600 text-[10px] font-mono">Sign out of your account</p>
-                    </div>
-                  </button>
-                </div>
-              </div>
+                  </>
+                );
+              })()}
             </div>
-
           </div>
         </div>
       </header>

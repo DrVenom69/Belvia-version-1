@@ -7,12 +7,21 @@ interface AuthContextValue {
   session: Session | null;
   isLoading: boolean;
   signIn: (email: string) => Promise<{ success: boolean; message: string }>;
+  signInWithGoogle: () => Promise<{ success: boolean; message: string }>;
   signOut: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  // ── Loud Production Guard ──
+  if (import.meta.env.PROD && !isSupabaseConfigured) {
+    throw new Error(
+      "[FATAL] Supabase configuration is missing in production build! " +
+      "VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY must be properly configured in your production environment variables."
+    );
+  }
+
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -53,28 +62,60 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return { success: false, message: "Email is required." };
       }
 
-      if (isSupabaseConfigured && supabase) {
-        // ── Real Supabase magic link flow ──
-        const { error } = await supabase.auth.signInWithOtp({
-          email: email.trim(),
-          options: { shouldCreateUser: true },
-        });
+      try {
+        if (isSupabaseConfigured && supabase) {
+          // ── Real Supabase magic link flow ──
+          const { error } = await supabase.auth.signInWithOtp({
+            email: email.trim(),
+            options: { shouldCreateUser: true },
+          });
 
-        if (error) {
-          return { success: false, message: error.message };
+          if (error) {
+            return { success: false, message: error.message };
+          }
+
+          return {
+            success: true,
+            message: "Magic link sent! Check your email to sign in.",
+          };
+        } else {
+          // ── Dev mode fallback ──
+          localStorage.setItem("belvia_dev_email", email.trim());
+          setDevEmail(email.trim());
+          return { success: true, message: "Signed in (dev mode)." };
         }
+      } catch (err: any) {
+        return { success: false, message: err.message || "Failed to send magic link." };
+      }
+    },
+    []
+  );
 
-        // Dev: also store so the UI can show who's trying to log in
-        localStorage.setItem("belvia_dev_email", email.trim());
-        return {
-          success: true,
-          message: "Magic link sent! Check your email to sign in.",
-        };
-      } else {
-        // ── Dev mode fallback ──
-        localStorage.setItem("belvia_dev_email", email.trim());
-        setDevEmail(email.trim());
-        return { success: true, message: "Signed in (dev mode)." };
+  const signInWithGoogle = useCallback(
+    async (): Promise<{ success: boolean; message: string }> => {
+      try {
+        if (isSupabaseConfigured && supabase) {
+          const { error } = await supabase.auth.signInWithOAuth({
+            provider: "google",
+            options: {
+              redirectTo: window.location.origin,
+            },
+          });
+
+          if (error) {
+            return { success: false, message: error.message };
+          }
+
+          return { success: true, message: "Redirecting to Google..." };
+        } else {
+          // ── Dev mode fallback ──
+          const emailStr = "google-demo@belvia.app";
+          localStorage.setItem("belvia_dev_email", emailStr);
+          setDevEmail(emailStr);
+          return { success: true, message: "Signed in with Google (dev mode)." };
+        }
+      } catch (err: any) {
+        return { success: false, message: err.message || "Google OAuth redirect failed." };
       }
     },
     []
@@ -85,6 +126,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await supabase.auth.signOut();
     }
     localStorage.removeItem("belvia_dev_email");
+    localStorage.removeItem("belvia_admin_key"); // Double-logout safety
     setDevEmail(null);
     setUser(null);
     setSession(null);
@@ -92,7 +134,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // In dev mode (no Supabase), treat the stored email as the "user"
   const effectiveUser: User | null =
-    user ?? (devEmail ? ({ email: devEmail, id: "dev-user" } as unknown as User) : null);
+    user ?? (!isSupabaseConfigured && devEmail ? ({ email: devEmail, id: "dev-user" } as unknown as User) : null);
 
   return (
     <AuthContext.Provider
@@ -101,6 +143,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         session,
         isLoading,
         signIn,
+        signInWithGoogle,
         signOut,
       }}
     >

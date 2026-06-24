@@ -38,6 +38,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     console.log("🔑 [AuthContext] Search:", window.location.search);
     console.log("🔑 [AuthContext] isSupabaseConfigured:", isSupabaseConfigured);
 
+    if (window.location.hash) {
+      try {
+        const hashParams = new URLSearchParams(window.location.hash.substring(1));
+        const accessToken = hashParams.get("access_token");
+        if (accessToken) {
+          console.log("🔑 [AuthContext] Found access_token in URL hash! Length:", accessToken.length);
+          const base64Url = accessToken.split('.')[1];
+          const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+          const payload = JSON.parse(atob(base64));
+          console.log("🔑 [AuthContext] Decoded access_token payload:", payload);
+        }
+      } catch (e) {
+        console.error("🔑 [AuthContext] Failed to decode access_token from hash:", e);
+      }
+    }
+
     if (!isSupabaseConfigured || !supabase) {
       console.log("🔑 [AuthContext] Supabase NOT configured in useEffect.");
       setIsLoading(false);

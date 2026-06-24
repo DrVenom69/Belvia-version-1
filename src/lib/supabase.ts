@@ -32,6 +32,14 @@ console.log("🔑 [supabase.ts] Initialization check:", {
 
 const isConfigured = !!(supabaseUrl && supabaseAnonKey && supabaseUrl !== "https://your-project.supabase.co");
 
+if (isConfigured && supabaseAnonKey && !supabaseAnonKey.startsWith("eyJ")) {
+  console.error(
+    `❌ [CRITICAL] VITE_SUPABASE_ANON_KEY is misconfigured! It must be a JWT starting with 'eyJ', but starts with '${supabaseAnonKey.substring(0, 8)}'. ` +
+    `It looks like you might have accidentally configured VITE_SUPABASE_ANON_KEY with your VAPID_PUBLIC_KEY in Railway. ` +
+    `Please set VITE_SUPABASE_ANON_KEY in Railway to your Supabase Project's 'anon' public key.`
+  );
+}
+
 export const supabase = isConfigured
   ? createClient(supabaseUrl!, supabaseAnonKey!, {
       auth: {

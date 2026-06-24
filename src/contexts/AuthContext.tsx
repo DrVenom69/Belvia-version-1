@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react";
-import { supabase, isSupabaseConfigured } from "../lib/supabase";
+import { supabase, isSupabaseConfigured, supabaseAnonKey } from "../lib/supabase";
 import type { User, Session } from "@supabase/supabase-js";
 
 interface AuthContextValue {
@@ -15,10 +15,12 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   // ── Loud Production Guard ──
-  if (import.meta.env.PROD && !isSupabaseConfigured) {
+  if (import.meta.env.PROD && (!isSupabaseConfigured || !supabaseAnonKey || !supabaseAnonKey.startsWith("eyJ"))) {
     throw new Error(
-      "[FATAL] Supabase configuration is missing in production build! " +
-      "VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY must be properly configured in your production environment variables."
+      "[FATAL] Supabase configuration is missing or invalid in production build! " +
+      "VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY must be properly configured in your production environment variables. " +
+      "Ensure VITE_SUPABASE_ANON_KEY is a valid JWT starting with 'eyJ' (currently starts with: '" + 
+      (supabaseAnonKey ? supabaseAnonKey.substring(0, 8) : "undefined") + "')."
     );
   }
 

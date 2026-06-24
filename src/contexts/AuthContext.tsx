@@ -32,15 +32,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 
   useEffect(() => {
+    // Log the current window location on mount
+    console.log("🔑 [AuthContext] useEffect mount. URL:", window.location.href);
+    console.log("🔑 [AuthContext] Hash:", window.location.hash);
+    console.log("🔑 [AuthContext] Search:", window.location.search);
+    console.log("🔑 [AuthContext] isSupabaseConfigured:", isSupabaseConfigured);
+
     if (!isSupabaseConfigured || !supabase) {
+      console.log("🔑 [AuthContext] Supabase NOT configured in useEffect.");
       setIsLoading(false);
       return;
     }
 
+    console.log("🔑 [AuthContext] Subscribed to auth states. Checking getSession...");
+
     // Check existing session
     supabase.auth.getSession().then(({ data: { session: s } }) => {
+      console.log("🔑 [AuthContext] getSession resolved. Session user:", s?.user?.email, "session:", !!s);
+      if (s) {
+        console.log("🔑 [AuthContext] getSession found session metadata:", s.user?.user_metadata);
+      }
       setSession(s);
       setUser(s?.user ?? null);
+      setIsLoading(false);
+    }).catch(err => {
+      console.error("🔑 [AuthContext] getSession error:", err);
       setIsLoading(false);
     });
 
@@ -48,12 +64,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, s) => {
+      console.log("🔑 [AuthContext] onAuthStateChange event fired:", _event, "user:", s?.user?.email, "session:", !!s);
+      if (s) {
+        console.log("🔑 [AuthContext] onAuthStateChange session metadata:", s.user?.user_metadata);
+      }
       setSession(s);
       setUser(s?.user ?? null);
       setIsLoading(false);
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      console.log("🔑 [AuthContext] Cleaning up auth subscription.");
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signIn = useCallback(

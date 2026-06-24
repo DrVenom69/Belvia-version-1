@@ -90,23 +90,16 @@ export default function OrderTracker() {
   const [searchCode, setSearchCode] = useState('');
   const [activeShipment, setActiveShipment] = useState<MockShipment | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
-  const [dbOrders, setDbOrders] = useState<Order[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [searchError, setSearchError] = useState('');
 
-  // Fetch all orders on mount to search locally
-  useEffect(() => {
-    fetch('/api/get-orders')
-      .then(res => res.json())
-      .then(data => {
-        if (Array.isArray(data)) {
-          setDbOrders(data);
-        }
-      })
-      .catch(err => console.error("Error fetching tracker orders:", err));
-  }, []);
-
-  const handleSearch = (code: string) => {
+  const handleSearch = async (code: string) => {
     const trimmed = code.trim().toUpperCase();
+    if (!trimmed) return;
+
     setHasSearched(true);
+    setSearchError('');
+    setActiveShipment(null);
 
     // 1. Check preloaded mock shipments
     if (PRELOADED_SHIPMENTS[trimmed]) {
@@ -114,11 +107,22 @@ export default function OrderTracker() {
       return;
     }
 
-    // 2. Check local database orders
-    const foundOrder = dbOrders.find(o => o.id.toUpperCase() === trimmed);
-    if (foundOrder) {
-      const firstItem = foundOrder.items[0];
-      const totalQty = foundOrder.items.reduce((acc, item) => acc + item.quantity, 0);
+    // 2. Fetch from public order status endpoint
+    setIsLoading(true);
+    try {
+      const res = await fetch(`/api/orders/tracker/${encodeURIComponent(trimmed)}`);
+      if (!res.ok) {
+        if (res.status === 404) {
+          setSearchError('Order reference code not found.');
+        } else {
+          setSearchError('Failed to fetch order status. Please try again.');
+        }
+        return;
+      }
+      const foundOrder = await res.json();
+
+      const firstItem = foundOrder.items?.[0];
+      const totalQty = foundOrder.items?.reduce((acc: number, item: any) => acc + item.quantity, 0) || 0;
 
       const createdDateStr = new Date(foundOrder.createdAt).toLocaleDateString('en-US', {
         month: 'short',
@@ -127,7 +131,7 @@ export default function OrderTracker() {
         minute: '2-digit'
       });
 
-      const submittedDateStr = foundOrder.payment.submittedAt
+      const submittedDateStr = foundOrder.payment?.submittedAt
         ? new Date(foundOrder.payment.submittedAt).toLocaleDateString('en-US', {
             month: 'short',
             day: 'numeric',
@@ -156,14 +160,14 @@ export default function OrderTracker() {
       } else if (foundOrder.status === 'Paid') {
         milestones.push({
           title: 'Payment Verification',
-          description: `Proof submitted (TrxID: ${foundOrder.payment.trxId}). Awaiting admin verification.`,
+          description: `Proof submitted (TrxID: ${foundOrder.payment?.trxId || 'N/A'}). Awaiting admin verification.`,
           time: submittedDateStr,
           status: 'current'
         });
       } else {
         milestones.push({
           title: 'Payment Verified',
-          description: `Payment cleared successfully (TrxID: ${foundOrder.payment.trxId}).`,
+          description: `Payment cleared successfully (TrxID: ${foundOrder.payment?.trxId || 'N/A'}).`,
           time: submittedDateStr || createdDateStr,
           status: 'completed'
         });
@@ -223,12 +227,12 @@ export default function OrderTracker() {
       const mappedShipment: MockShipment = {
         id: foundOrder.id,
         productName: firstItem
-          ? `${firstItem.product.title}${foundOrder.items.length > 1 ? ` + ${foundOrder.items.length - 1} other shapes` : ''}`
+          ? `${firstItem.product?.title || 'Unknown Shape'}${foundOrder.items.length > 1 ? ` + ${foundOrder.items.length - 1} other shapes` : ''}`
           : 'Custom Manufacturing Order',
         qty: totalQty,
-        material: firstItem ? firstItem.selectedMaterial : 'PLA (Matte)',
-        color: firstItem ? firstItem.selectedColor : 'Obsidian Black',
-        weightGrams: foundOrder.totalWeight,
+        material: firstItem ? (firstItem.selectedMaterial || firstItem.material || 'PLA (Matte)') : 'PLA (Matte)',
+        color: firstItem ? (firstItem.selectedColor || firstItem.color || 'Matte Black') : 'Matte Black',
+        weightGrams: foundOrder.totalWeight || 0,
         status: (() => {
           if (foundOrder.status === 'Pending') return 'Awaiting Payment';
           if (foundOrder.status === 'Paid') return 'Awaiting Verification';
@@ -254,8 +258,11 @@ export default function OrderTracker() {
       };
 
       setActiveShipment(mappedShipment);
-    } else {
-      setActiveShipment(null);
+    } catch (err) {
+      console.error("Error fetching tracker order status:", err);
+      setSearchError('Error communicating with the tracking system. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -339,7 +346,14 @@ export default function OrderTracker() {
         </div>
 
         {/* Dynamic Tracking Status Card Grid */}
-        {hasSearched && (
+        {isLoading ? (
+          <div className="bg-bg-surface border border-border-premium rounded-2xl p-10 text-center max-w-md mx-auto space-y-4 animate-in fade-in duration-300">
+            <div className="w-12 h-12 bg-accent/10 border border-accent/20 rounded-full flex items-center justify-center mx-auto animate-spin">
+              <Cpu className="w-6 h-6 text-accent" />
+            </div>
+            <h3 className="font-display font-black text-lg text-text-primary">Locating Print telemetry...</h3>
+          </div>
+        ) : hasSearched && (
           activeShipment ? (
             <div className="space-y-6 animate-in fade-in duration-300">
               {/* Primary Summary Block */}
@@ -439,7 +453,7 @@ export default function OrderTracker() {
               </div>
               <h3 className="font-display font-black text-lg text-text-primary">Tracking Reference Not Found</h3>
               <p className="text-text-secondary text-xs max-w-xs mx-auto">
-                The tracking coordinate reference code `{searchCode}` could not be resolved across our logistics queues. Try entering a valid order reference code or one of our verified default codes above!
+                {searchError || `The tracking coordinate reference code \`${searchCode}\` could not be resolved across our logistics queues. Try entering a valid order reference code or one of our verified default codes above!`}
               </p>
             </div>
           )

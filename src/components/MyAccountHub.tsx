@@ -72,7 +72,7 @@ export default function MyAccountHub({
   setLastName
 }: MyAccountHubProps) {
   // ── Real auth via Supabase (with dev mode fallback) ──
-  const { user, signIn, signInWithGoogle, signOut, isLoading: isAuthLoading } = useAuth();
+  const { user, session, signIn, signInWithGoogle, signOut, isLoading: isAuthLoading } = useAuth();
   const isLoggedIn = !!user;
   const authEmail = user?.email || '';
 
@@ -168,7 +168,11 @@ export default function MyAccountHub({
     const fetchOrders = async () => {
       setOrdersLoading(true);
       try {
-        const res = await fetch('/api/get-orders');
+        const headers: Record<string, string> = {};
+        if (session?.access_token) {
+          headers['Authorization'] = `Bearer ${session.access_token}`;
+        }
+        const res = await fetch(`/api/customer/orders?email=${encodeURIComponent(user?.email || '')}`, { headers });
         if (!res.ok) throw new Error('Failed to fetch orders');
         const orders: Order[] = await res.json();
         const storedIds = storedOrdersRef.current;
@@ -176,6 +180,7 @@ export default function MyAccountHub({
         const profilePhone = phone.trim().toLowerCase().replace(/[\s-]/g, '');
 
         const matched = orders.filter((o) => {
+          if (isSupabaseConfigured && user) return true;
           if (storedIds.has(o.id)) return true;
           if (profilePhone) {
             const orderPhone = (o.shippingInfo?.phone || '').trim().toLowerCase().replace(/[\s-]/g, '');

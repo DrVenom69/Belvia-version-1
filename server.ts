@@ -966,6 +966,117 @@ app.get("/api/get-orders", requireAdminAuth, async (req: express.Request, res: e
   }
 });
 
+// GET customer orders (securely verified via Supabase JWT, or email query in dev)
+app.get("/api/customer/orders", async (req: express.Request, res: express.Response): Promise<void> => {
+  try {
+    const authHeader = req.headers.authorization;
+    let email = req.query.email as string || "";
+
+    if (isSupabaseConfigured) {
+      if (!authHeader || !authHeader.startsWith("Bearer ")) {
+        res.status(401).json({ error: "Unauthorized. Missing authorization token." });
+        return;
+      }
+      const token = authHeader.split(" ")[1];
+      const { data: { user }, error } = await supabaseAdmin!.auth.getUser(token);
+      if (error || !user) {
+        res.status(401).json({ error: "Unauthorized. Invalid token." });
+        return;
+      }
+      email = user.email || "";
+    }
+
+    if (!email) {
+      res.status(400).json({ error: "Email is required to retrieve customer orders." });
+      return;
+    }
+
+    // Fetch matching orders
+    if (isSupabaseConfigured) {
+      const { data, error } = await supabaseAdmin!
+        .from("orders")
+        .select("*")
+        .eq("email", email)
+        .order("created_at", { ascending: false });
+
+      if (error) throw new Error(error.message);
+      res.json(data || []);
+      return;
+    }
+
+    // Fallback: filesystem
+    const dbPath = path.join(process.cwd(), "data", "orders.json");
+    if (!fs.existsSync(dbPath)) {
+      res.json([]);
+      return;
+    }
+    const raw = await fs.promises.readFile(dbPath, "utf-8");
+    const orders = JSON.parse(raw);
+    const matched = orders.filter((o: any) => o.email && o.email.toLowerCase() === email.toLowerCase());
+    res.json(matched);
+  } catch (err: any) {
+    console.error("Customer orders fetch error:", err);
+    res.status(500).json({ error: "Failed to fetch customer orders: " + err.message });
+  }
+});
+
+// GET public order status (securely strips recipient name, address, and phone)
+app.get("/api/orders/tracker/:id", async (req: express.Request, res: express.Response): Promise<void> => {
+  const { id } = req.params;
+  const targetId = id.trim().toUpperCase();
+  try {
+    let order: any = null;
+
+    if (isSupabaseConfigured) {
+      const { data, error } = await supabaseAdmin!
+        .from("orders")
+        .select("*")
+        .eq("id", targetId)
+        .maybeSingle();
+
+      if (error) throw new Error(error.message);
+      order = data;
+    } else {
+      const dbPath = path.join(process.cwd(), "data", "orders.json");
+      if (fs.existsSync(dbPath)) {
+        const raw = await fs.promises.readFile(dbPath, "utf-8");
+        const orders = JSON.parse(raw);
+        order = orders.find((o: any) => o.id.toUpperCase() === targetId);
+      }
+    }
+
+    if (!order) {
+      res.status(404).json({ error: "Order reference code not found." });
+      return;
+    }
+
+    // Strip out customer PII for public safety
+    const publicTrackerObj = {
+      id: order.id,
+      status: order.status,
+      createdAt: order.createdAt,
+      payment: {
+        submittedAt: order.payment?.submittedAt,
+        trxId: order.payment?.trxId
+      },
+      totalWeight: order.totalWeight,
+      items: order.items?.map((item: any) => ({
+        quantity: item.quantity,
+        selectedMaterial: item.selectedMaterial || item.material || "PLA (Matte)",
+        selectedColor: item.selectedColor || item.color || "Matte Black",
+        product: {
+          title: item.product?.title
+        }
+      }))
+    };
+
+    res.json(publicTrackerObj);
+  } catch (err: any) {
+    console.error("Public tracker error:", err);
+    res.status(500).json({ error: "Failed to query order tracker: " + err.message });
+  }
+});
+
 // ── Analytics Endpoint ───────────────────────────────────────────────
 app.get("/api/get-analytics", async (req: express.Request, res: express.Response): Promise<void> => {
   try {

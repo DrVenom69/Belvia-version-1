@@ -251,11 +251,69 @@ export default function ProductGrid({
           )}
         </div>
 
+        {/* Horizontal Category Scroll for Mobile */}
+        <div className="block lg:hidden w-full overflow-x-auto whitespace-nowrap scrollbar-none mb-4 -mx-4 px-4">
+          <div className="flex gap-2">
+            {categoriesSidebar.map((catGroup) => {
+              const isSelectedGroup = selectedCategoryGroup === catGroup.name;
+              return (
+                <button
+                  key={catGroup.name}
+                  onClick={() => {
+                    setSelectedCategoryGroup(catGroup.name);
+                    if (catGroup.mappedCategories === 'All') {
+                      onCategoryChange('All');
+                    } else {
+                      onCategoryChange(catGroup.mappedCategories);
+                    }
+                  }}
+                  className={`inline-flex items-center space-x-1.5 px-4 py-2 rounded-full font-mono text-[10px] font-bold tracking-tight transition-all duration-150 cursor-pointer border ${
+                    isSelectedGroup
+                      ? 'bg-accent text-text-on-accent border-accent font-extrabold shadow-sm'
+                      : 'bg-bg-surface text-text-secondary border-border-premium hover:text-text-primary'
+                  }`}
+                >
+                  <span>{catGroup.name.toUpperCase()}</span>
+                  <span className={`text-[8px] px-1 py-0.2 rounded font-mono ${isSelectedGroup ? 'bg-black/20 text-white' : 'bg-bg-base text-text-secondary border border-border-premium'}`}>
+                    {catGroup.count}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Mobile Subcategories Scroll */}
+        {categoriesSidebar.find(g => g.name === selectedCategoryGroup)?.subcategories && (
+          <div className="block lg:hidden w-full overflow-x-auto whitespace-nowrap scrollbar-none mb-6 -mx-4 px-4">
+            <div className="flex gap-1.5">
+              {categoriesSidebar
+                .find(g => g.name === selectedCategoryGroup)
+                ?.subcategories?.map((sub) => {
+                  const isSubActive = selectedCategory === sub.mappedCategory;
+                  return (
+                    <button
+                      key={sub.name}
+                      onClick={() => onCategoryChange(sub.mappedCategory)}
+                      className={`inline-flex items-center px-3.5 py-1.5 rounded-full font-mono text-[9px] font-semibold tracking-tight transition-all duration-150 cursor-pointer border ${
+                        isSubActive
+                          ? 'bg-accent/25 text-accent border-accent/45 font-bold'
+                          : 'bg-bg-surface/50 text-text-secondary border-border-premium hover:text-text-primary'
+                      }`}
+                    >
+                      {sub.name.toUpperCase()}
+                    </button>
+                  );
+                })}
+            </div>
+          </div>
+        )}
+
         {/* Dual Panel Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           
           {/* LEFT SIDEBAR PANEL: Categories Hierarchy */}
-          <div className="lg:col-span-1 space-y-4 text-left">
+          <div className="hidden lg:block lg:col-span-1 space-y-4 text-left">
             <div className="bg-bg-surface border border-border-premium rounded-2xl p-5 shadow-xl">
               <h3 className="font-display font-black text-xs text-text-primary uppercase tracking-widest mb-4 border-b border-border-premium pb-2">
                 Filter Categories

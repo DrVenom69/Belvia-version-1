@@ -120,17 +120,35 @@ export default function ProductDetailsModal({ product, onClose, onAddToCart, onE
 
   const productReviews = reviews.filter(rev => rev.productId === product.id);
 
-  const colorMap: Record<string, string> = {
-    'Matte Slate': '#475569', 'Chalk White': '#ffffff', 'Chalk White (Translucent Only)': '#cbd5e1',
-    'Emerald Green': '#10b981', 'Burnt Orange': '#f97316', 'Obsidian Black': '#1e293b',
-    'Jade Green': '#047857', 'Silk Copper': '#d97706', 'Neon Nebula': '#c084fc',
-    'Pastel Mint': '#6ee7b7', 'Sandstone Grey': '#8c8581', 'Terracotta': '#ea580c',
-    'Neon Violet': '#7c3aed', 'Cyber Yellow': '#eab308', 'Steel Blue': '#4682b4',
-    'Signal Orange': '#ff4500', 'Steel Gray': '#708090', 'Silver Pearl': '#c0c0c0',
+  const getTextureStyle = (col: string): React.CSSProperties => {
+    const textures: Record<string, React.CSSProperties> = {
+      'Matte Slate': { background: 'radial-gradient(circle at 35% 35%, #64748b 0%, #334155 70%, #1e293b 100%)' },
+      'Chalk White': { background: 'radial-gradient(circle at 35% 35%, #ffffff 0%, #f1f5f9 60%, #cbd5e1 100%)' },
+      'Chalk White (Translucent Only)': { background: 'radial-gradient(circle at 35% 35%, rgba(255,255,255,0.9) 0%, rgba(241,245,249,0.7) 60%, rgba(203,213,225,0.5) 100%)', backdropFilter: 'blur(2px)' },
+      'Emerald Green': { background: 'radial-gradient(circle at 35% 35%, #34d399 0%, #059669 70%, #064e3b 100%)' },
+      'Burnt Orange': { background: 'radial-gradient(circle at 35% 35%, #fb923c 0%, #ea580c 70%, #7c2d12 100%)' },
+      'Obsidian Black': { background: 'radial-gradient(circle at 35% 35%, #334155 0%, #0f172a 70%, #020617 100%)' },
+      'Jade Green': { background: 'radial-gradient(circle at 35% 35%, #059669 0%, #047857 70%, #022c22 100%)' },
+      'Silk Copper': { background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 30%, #b45309 60%, #f59e0b 80%, #78350f 100%)', boxShadow: 'inset 0 1px 3px rgba(255,255,255,0.4)' },
+      'Neon Nebula': { background: 'linear-gradient(135deg, #c084fc 0%, #818cf8 35%, #db2777 70%, #c084fc 100%)' },
+      'Pastel Mint': { background: 'radial-gradient(circle at 35% 35%, #a7f3d0 0%, #34d399 75%, #065f46 100%)' },
+      'Sandstone Grey': { background: 'radial-gradient(circle at 35% 35%, #a8a29e 0%, #78716c 70%, #44403c 100%)' },
+      'Terracotta': { background: 'radial-gradient(circle at 35% 35%, #f97316 0%, #c2410c 75%, #7c2d12 100%)' },
+      'Neon Violet': { background: 'radial-gradient(circle at 35% 35%, #a78bfa 0%, #6d28d9 75%, #4c1d95 100%)' },
+      'Cyber Yellow': { background: 'radial-gradient(circle at 35% 35%, #fef08a 0%, #eab308 70%, #854d0e 100%)' },
+      'Steel Blue': { background: 'radial-gradient(circle at 35% 35%, #60a5fa 0%, #2563eb 70%, #1e3a8a 100%)' },
+      'Signal Orange': { background: 'radial-gradient(circle at 35% 35%, #ff6b35 0%, #ff4500 70%, #990000 100%)' },
+      'Steel Gray': { background: 'linear-gradient(135deg, #94a3b8 0%, #64748b 30%, #475569 60%, #94a3b8 80%, #334155 100%)' },
+      'Silver Pearl': { background: 'linear-gradient(135deg, #f8fafc 0%, #cbd5e1 35%, #94a3b8 70%, #cbd5e1 100%)', boxShadow: 'inset 0 1px 3px rgba(255,255,255,0.5)' },
+    };
+    
+    return textures[col] || { background: `radial-gradient(circle at 35% 35%, #60a5fa 0%, #3b82f6 70%, #1d4ed8 100%)` };
   };
-  const getHexColor = (col: string) => colorMap[col] || '#3b82f6';
 
-  const adjustedBasePrice = product.price - Math.round(product.price * 0.12);
+  const isPre = !!product.isPreOrder;
+  const adjustedBasePrice = isPre
+    ? Math.round(product.price * ((product.depositPercentage || 50) / 100))
+    : product.price - Math.round(product.price * 0.12);
   const calculations = {
     filamentCost: Math.round(product.price * 0.18),
     assemblyCost: Math.round(product.price * 0.22),
@@ -157,13 +175,16 @@ export default function ProductDetailsModal({ product, onClose, onAddToCart, onE
   };
 
   const handleAddToCartSubmit = () => {
+    const finalPrice = adjustedBasePrice + (selectedResin ? (product.resin_price || 0) : 0);
     onAddToCart({
       product,
       selectedColor: getSelectedColorLabel(),
       selectedMaterial,
       quantity,
       selectedResin,
-      calculatedPrice: adjustedBasePrice + (selectedResin ? (product.resin_price || 0) : 0)
+      calculatedPrice: finalPrice,
+      isPreOrder: isPre,
+      depositAmount: isPre ? finalPrice : undefined
     });
     onClose();
   };
@@ -174,13 +195,16 @@ export default function ProductDetailsModal({ product, onClose, onAddToCart, onE
       handleAddToCartSubmit();
       return;
     }
+    const finalPrice = adjustedBasePrice + (selectedResin ? (product.resin_price || 0) : 0);
     onExpressOrder({
       product,
       selectedColor: getSelectedColorLabel(),
       selectedMaterial,
       quantity,
       selectedResin,
-      calculatedPrice: adjustedBasePrice + (selectedResin ? (product.resin_price || 0) : 0)
+      calculatedPrice: finalPrice,
+      isPreOrder: isPre,
+      depositAmount: isPre ? finalPrice : undefined
     });
     onClose();
   };
@@ -412,6 +436,7 @@ export default function ProductDetailsModal({ product, onClose, onAddToCart, onE
                             {product.colors.map((col) => (
                               <button
                                 key={col}
+                                disabled={isOutOfStock}
                                 onClick={() =>
                                   setSelectedColors((prev) => {
                                     const next = [...prev];
@@ -421,13 +446,13 @@ export default function ProductDetailsModal({ product, onClose, onAddToCart, onE
                                 }
                                 className={`flex items-center space-x-2 px-3 py-1.5 rounded-xl text-xs font-medium cursor-pointer transition border ${
                                   selectedColors[idx] === col
-                                    ? 'border-border-premium bg-bg-elevated text-text-primary'
+                                    ? 'border-accent/40 bg-bg-elevated text-text-primary'
                                     : 'border-border-premium bg-bg-surface text-text-secondary hover:text-text-primary'
-                                }`}
+                                } ${isOutOfStock ? 'opacity-40 cursor-not-allowed' : ''}`}
                               >
                                 <span
                                   className="w-3.5 h-3.5 rounded-full border border-white/10 shrink-0"
-                                  style={{ backgroundColor: getHexColor(col) }}
+                                  style={getTextureStyle(col)}
                                 />
                                 <span>{col}</span>
                               </button>

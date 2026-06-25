@@ -21,6 +21,7 @@ import MyAccountHub from './components/MyAccountHub';
 import ImportedPreOrders from './components/ImportedPreOrders';
 import ClientPortfolio from './components/ClientPortfolio';
 import ReviewStories from './components/ReviewStories';
+import AuthModal from './components/AuthModal';
 import { formatPrice } from './utils/format';
 
 import { AuthProvider, useAuth } from './contexts/AuthContext';
@@ -109,6 +110,34 @@ function FestivalBanner({ festival, onDismiss }: FestivalBannerProps) {
 function AppContent() {
 
   const { user } = useAuth();
+  const [isAuthOpen, setIsAuthOpen] = useState<boolean>(false);
+  const [pendingAction, setPendingAction] = useState<{ type: 'wishlist' | 'checkout' | 'express'; payload?: any } | null>(null);
+
+  // Execute pending gated action upon successful login
+  useEffect(() => {
+    if (user && pendingAction) {
+      if (pendingAction.type === 'wishlist' && pendingAction.payload) {
+        const product = pendingAction.payload;
+        setWishlist((prev) => {
+          const exists = prev.some((p) => p.id === product.id);
+          let updated: Product[];
+          if (exists) {
+            updated = prev.filter((p) => p.id !== product.id);
+          } else {
+            updated = [...prev, product];
+          }
+          localStorage.setItem('belvia_wishlist', JSON.stringify(updated));
+          return updated;
+        });
+      } else if (pendingAction.type === 'checkout') {
+        setIsCartOpen(true);
+      } else if (pendingAction.type === 'express' && pendingAction.payload) {
+        setExpressItem(pendingAction.payload);
+        setIsCartOpen(true);
+      }
+      setPendingAction(null);
+    }
+  }, [user, pendingAction]);
 
   // --- PROFILE NAME STATE (LIFTED & PERSISTED) ---
   const [firstName, setFirstName] = useState<string>("Guest");
@@ -193,12 +222,19 @@ function AppContent() {
   const [tabOpacity, setTabOpacity] = useState<boolean>(true);
 
   useEffect(() => {
+    let introTimer: NodeJS.Timeout;
     setTabOpacity(false);
     const timer = setTimeout(() => {
       setDisplayTab(activeTab);
-      setTabOpacity(true);
-    }, 200); // 200ms duration
-    return () => clearTimeout(timer);
+      // Wait for next render tick before fading back in to prevent React from skipping the intro transition
+      introTimer = setTimeout(() => {
+        setTabOpacity(true);
+      }, 40);
+    }, 200); // 200ms fade-out duration
+    return () => {
+      clearTimeout(timer);
+      if (introTimer) clearTimeout(introTimer);
+    };
   }, [activeTab]);
 
   // --- ADMIN AUTH STATE ---
@@ -207,17 +243,84 @@ function AppContent() {
   const [adminKeyInput, setAdminKeyInput] = useState<string>('');
   const [keyError, setKeyError] = useState<string>('');
 
-  // Private hash-based routing to admin tab
+  // Track if any modal is open using a ref to prevent stale closures in event listener
+  const modalOpenRef = React.useRef(false);
+  const anyModalOpen = isCartOpen || isWishlistOpen || !!selectedProduct || isAuthOpen;
+
+  React.useEffect(() => {
+    modalOpenRef.current = anyModalOpen;
+  }, [anyModalOpen]);
+
+  // Handle modal-open hash pushing and popping when UI close buttons are clicked
+  const isClosingRef = React.useRef(false);
+  React.useEffect(() => {
+    if (anyModalOpen) {
+      if (window.location.hash !== '#modal-open') {
+        window.location.hash = 'modal-open';
+      }
+    } else {
+      if (window.location.hash === '#modal-open' && !isClosingRef.current) {
+        isClosingRef.current = true;
+        window.history.back();
+        setTimeout(() => {
+          isClosingRef.current = false;
+        }, 100);
+      }
+    }
+  }, [anyModalOpen]);
+
+  // Private hash-based routing & browser back button modal interception
   useEffect(() => {
     const handleHashChange = () => {
-      if (window.location.hash === '#admin-portal') {
+      const hash = window.location.hash;
+
+      if (modalOpenRef.current) {
+        if (hash !== '#modal-open') {
+          // User clicked back: Close modals instead of navigating away
+          setIsCartOpen(false);
+          setIsWishlistOpen(false);
+          setSelectedProduct(null);
+          setIsAuthOpen(false);
+
+          // Update active tab to match the hash navigated back to
+          const tabFromHash = hash.substring(1);
+          if (tabFromHash === 'admin-portal') {
+            setActiveTab('admin');
+          } else {
+            const validTabs = ['home', 'ready-prints', 'imported', 'portfolio', 'tracker', 'custom', 'admin'];
+            if (validTabs.includes(tabFromHash)) {
+              setActiveTab(tabFromHash);
+            }
+          }
+          return;
+        }
+      }
+
+      if (hash === '#admin-portal' || hash === '#admin') {
         setActiveTab('admin');
+      } else {
+        const tabFromHash = hash.substring(1);
+        const validTabs = ['home', 'ready-prints', 'imported', 'portfolio', 'tracker', 'custom', 'admin'];
+        if (validTabs.includes(tabFromHash)) {
+          setActiveTab(tabFromHash);
+        }
       }
     };
+
     handleHashChange();
     window.addEventListener('hashchange', handleHashChange);
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
+
+  // Update hash when activeTab changes (only if no modals are open)
+  useEffect(() => {
+    if (anyModalOpen) return;
+    const currentHash = window.location.hash.substring(1);
+    const targetHash = activeTab === 'admin' ? 'admin-portal' : activeTab;
+    if (currentHash !== targetHash) {
+      window.location.hash = targetHash;
+    }
+  }, [activeTab, anyModalOpen]);
 
   // Verify localStorage key when the tab switches to admin
   useEffect(() => {
@@ -510,6 +613,11 @@ function AppContent() {
 
   // --- WISHLIST HANDLERS ---
   const handleToggleWishlist = (product: Product) => {
+    if (!user) {
+      setPendingAction({ type: 'wishlist', payload: product });
+      setIsAuthOpen(true);
+      return;
+    }
     setWishlist((prev) => {
       const exists = prev.some((p) => p.id === product.id);
       let updated: Product[];
@@ -668,13 +776,14 @@ function AppContent() {
   // --- CART HANDLERS ---
   const handleAddToCart = (item: CartItem) => {
     setCart((prev) => {
-      // Check if product with EXACT color & material selection already exists
+      // Check if product with EXACT color, material, resin & customization selection already exists
       const existingIdx = prev.findIndex(
         (c) =>
           c.product.id === item.product.id &&
           c.selectedColor === item.selectedColor &&
           c.selectedMaterial === item.selectedMaterial &&
-          !!c.selectedResin === !!item.selectedResin
+          !!c.selectedResin === !!item.selectedResin &&
+          JSON.stringify(c.customization || null) === JSON.stringify(item.customization || null)
       );
 
       let updated: CartItem[];
@@ -697,7 +806,8 @@ function AppContent() {
           c.product.id === item.product.id &&
           c.selectedColor === item.selectedColor &&
           c.selectedMaterial === item.selectedMaterial &&
-          !!c.selectedResin === !!item.selectedResin
+          !!c.selectedResin === !!item.selectedResin &&
+          JSON.stringify(c.customization || null) === JSON.stringify(item.customization || null)
       );
 
       let updated: CartItem[];
@@ -732,14 +842,15 @@ function AppContent() {
     setIsCartOpen(true);
   };
 
-  const handleUpdateCartQty = (productId: string, color: string, material: string, newQty: number, selectedResin?: boolean) => {
+  const handleUpdateCartQty = (productId: string, color: string, material: string, newQty: number, selectedResin?: boolean, customization?: any) => {
     setCart((prev) => {
       const updated = prev.map((item) => {
         if (
           item.product.id === productId &&
           item.selectedColor === color &&
           item.selectedMaterial === material &&
-          !!item.selectedResin === !!selectedResin
+          !!item.selectedResin === !!selectedResin &&
+          JSON.stringify(item.customization || null) === JSON.stringify(customization || null)
         ) {
           return { ...item, quantity: newQty };
         }
@@ -750,7 +861,7 @@ function AppContent() {
     });
   };
 
-  const handleRemoveCartItem = (productId: string, color: string, material: string, selectedResin?: boolean) => {
+  const handleRemoveCartItem = (productId: string, color: string, material: string, selectedResin?: boolean, customization?: any) => {
     setCart((prev) => {
       const updated = prev.filter(
         (item) =>
@@ -758,7 +869,8 @@ function AppContent() {
             item.product.id === productId &&
             item.selectedColor === color &&
             item.selectedMaterial === material &&
-            !!item.selectedResin === !!selectedResin
+            !!item.selectedResin === !!selectedResin &&
+            JSON.stringify(item.customization || null) === JSON.stringify(customization || null)
           )
       );
       localStorage.setItem('belvia_cart', JSON.stringify(updated));
@@ -775,6 +887,11 @@ function AppContent() {
   const [expressItem, setExpressItem] = useState<CartItem | undefined>(undefined);
 
   const handleExpressOrder = (item: CartItem) => {
+    if (!user) {
+      setPendingAction({ type: 'express', payload: item });
+      setIsAuthOpen(true);
+      return;
+    }
     setExpressItem(item);
     setIsCartOpen(true);
   };
@@ -888,7 +1005,7 @@ function AppContent() {
                   {products.filter(p => !p.isPreOrder).slice(0, 4).map((p) => {
                     const isWishlisted = wishlist.some(item => item.id === p.id);
                     return (
-                      <div key={p.id} className="group rounded-2xl bg-bg-surface/75 border border-bg-elevated hover:border-gray-750 transition overflow-hidden flex flex-col h-full relative">
+                      <div key={p.id} className="group rounded-2xl bg-bg-surface/75 border border-bg-elevated hover:border-accent/40 transition overflow-hidden flex flex-col h-full relative">
                         <div 
                           onClick={() => setSelectedProduct(p)}
                           className="aspect-square bg-bg-surface relative overflow-hidden cursor-pointer"
@@ -908,7 +1025,7 @@ function AppContent() {
                               e.stopPropagation();
                               handleToggleWishlist(p);
                             }}
-                            className="absolute top-3 right-3 p-1.5 rounded-lg bg-bg-base/95 text-gray-400 hover:text-red-500 border border-gray-850 backdrop-blur-xs z-10 cursor-pointer transition"
+                            className="absolute top-3 right-3 p-1.5 rounded-lg bg-bg-base/95 text-text-secondary hover:text-red-500 border border-border-premium backdrop-blur-xs z-10 cursor-pointer transition"
                             title="Save Model"
                           >
                             <Heart className={`w-3.5 h-3.5 ${isWishlisted ? "fill-current text-red-500" : ""}`} />
@@ -919,14 +1036,14 @@ function AppContent() {
                             <span className="text-[9px] font-mono font-bold text-accent uppercase tracking-wider">{p.category}</span>
                             <h3 
                               onClick={() => setSelectedProduct(p)}
-                              className="font-bold text-sm text-gray-100 group-hover:text-white mt-1 line-clamp-1 cursor-pointer hover:underline hover:text-accent transition"
+                              className="font-bold text-sm text-text-primary group-hover:text-accent mt-1 line-clamp-1 cursor-pointer hover:underline transition"
                             >
                               {p.title}
                             </h3>
-                            <p className="text-[11px] text-gray-400 mt-1 lines-clamp-2 leading-relaxed">{p.description}</p>
+                            <p className="text-[11px] text-text-secondary mt-1 lines-clamp-2 leading-relaxed">{p.description}</p>
                           </div>
-                          <div className="mt-4 pt-3 border-t border-gray-850/80 flex items-center justify-between">
-                            <span className="text-sm font-mono font-bold text-white">{formatPrice(p.isPreOrder ? p.price : (p.price - Math.round(p.price * 0.12)))}</span>
+                          <div className="mt-4 pt-3 border-t border-border-premium flex items-center justify-between">
+                            <span className="text-sm font-mono font-bold text-text-primary">{formatPrice(p.isPreOrder ? p.price : (p.price - Math.round(p.price * 0.12)))}</span>
                             <button
                               onClick={() => setSelectedProduct(p)}
                               className="text-[10px] font-mono tracking-wider text-accent hover:text-accent-hover cursor-pointer transition font-bold uppercase"
@@ -1126,6 +1243,11 @@ function AppContent() {
         bkashNumber={settings?.bkashNumber || "01712511193"}
         nagadNumber={settings?.nagadNumber || "01712511193"}
         userId={user?.id}
+        onAuthRequired={() => {
+          setPendingAction({ type: 'checkout' });
+          setIsCartOpen(false);
+          setIsAuthOpen(true);
+        }}
         expressItem={expressItem}
         skipCart={!!expressItem}
       />
@@ -1140,6 +1262,12 @@ function AppContent() {
           if (item) handleToggleWishlist(item);
         }}
         onAddToCartAndRemove={handleAddToCartAndRemoveFromWishlist}
+      />
+
+      {/* Auth Gate Modal */}
+      <AuthModal
+        isOpen={isAuthOpen}
+        onClose={() => setIsAuthOpen(false)}
       />
 
       {/* Persistent Client Care Support Chatbot Bubble */}

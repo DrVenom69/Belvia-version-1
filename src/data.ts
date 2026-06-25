@@ -243,6 +243,26 @@ export const INITIAL_PRODUCTS: Product[] = [
     depositPercentage: 25,
     originalImportCountry: 'United Kingdom',
     color_picker_count: 1
+  },
+  {
+    id: 'bv-keychain-template',
+    title: 'Custom Name Keychain',
+    description: 'Dynamic custom 3D printed keychain. Configured with custom text, font, size, and multi-color profiles.',
+    category: 'Keychains',
+    price: 150,
+    colors: ['Matte Slate', 'Chalk White', 'Emerald Green', 'Burnt Orange', 'Obsidian Black', 'Jade Green', 'Silk Copper', 'Neon Nebula'],
+    materials: ['PLA (Matte)', 'PETG (Durable)', 'TPU (Flexible)'],
+    rating: 5.0,
+    reviewsCount: 0,
+    printTime: '20m',
+    weightGrams: 10,
+    images: ['https://images.unsplash.com/photo-1614064641938-3bbee52942c7?auto=format&fit=crop&q=80&w=800'],
+    infill: '20% Grid',
+    dimensions: '80 x 25 x 4 mm',
+    isCustomizable: true,
+    color_picker_count: 2,
+    resin_enabled: true,
+    resin_price: 50
   }
 ];
 

@@ -2,17 +2,19 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Trash2, ShoppingBag, ShieldCheck, Zap, Copy, Check, Upload, ArrowLeft, Loader, AlertCircle, Tag, XCircle, Sparkles, Trophy, PartyPopper } from 'lucide-react';
 import { CartItem, Order, AppliedCoupon, DiscountResult, DiscountType } from '../types';
 import { formatPrice } from '../utils/format';
+import { useAuth } from '../contexts/AuthContext';
 
 interface CartDrawerProps {
   isOpen: boolean;
   onClose: () => void;
   cart: CartItem[];
-  onUpdateQty: (productId: string, color: string, material: string, newQty: number, selectedResin?: boolean) => void;
-  onRemoveItem: (productId: string, color: string, material: string, selectedResin?: boolean) => void;
+  onUpdateQty: (productId: string, color: string, material: string, newQty: number, selectedResin?: boolean, customization?: any) => void;
+  onRemoveItem: (productId: string, color: string, material: string, selectedResin?: boolean, customization?: any) => void;
   onClearCart: () => void;
   bkashNumber?: string;
   nagadNumber?: string;
   userId?: string; // Supabase user.id for auto-discount resolution
+  onAuthRequired?: () => void;
   // Express Order: skip cart step, use this single item directly
   expressItem?: CartItem;
   skipCart?: boolean;
@@ -40,9 +42,11 @@ export default function CartDrawer({
   bkashNumber = "01712511193",
   nagadNumber = "01712511193",
   userId,
+  onAuthRequired,
   expressItem,
   skipCart = false,
 }: CartDrawerProps) {
+  const { user } = useAuth();
   const [step, setStep] = useState<CheckoutStep>(skipCart ? 'shipping' : 'cart');
   const [checkoutSuccess, setCheckoutSuccess] = useState<string | null>(null);
 
@@ -105,8 +109,25 @@ export default function CartDrawer({
       setTrxId('');
       setScreenshotFile(null);
       setScreenshotPreview(null);
+
+      // Pre-fill fields from user profile / metadata if authenticated
+      if (user) {
+        const metaFirst = user.user_metadata?.first_name || user.user_metadata?.given_name || '';
+        const metaLast = user.user_metadata?.last_name || user.user_metadata?.family_name || '';
+        const fullName = [metaFirst, metaLast].filter(Boolean).join(' ') || localStorage.getItem('belvia_profile_first_name') || '';
+
+        setShippingName(fullName || user.email?.split('@')[0] || '');
+        setShippingEmail(user.email || '');
+        setShippingPhone(user.user_metadata?.phone || localStorage.getItem('belvia_profile_phone') || '');
+        setShippingAddress(user.user_metadata?.address || localStorage.getItem('belvia_profile_address') || '');
+      } else {
+        setShippingName('');
+        setShippingEmail('');
+        setShippingPhone(localStorage.getItem('belvia_profile_phone') || '');
+        setShippingAddress(localStorage.getItem('belvia_profile_address') || '');
+      }
     }
-  }, [isOpen, skipCart]);
+  }, [isOpen, skipCart, user]);
 
   // Fetch auto-discount whenever the cart opens or items change
   // Skipped in express mode — cart-level discounts don't apply to a standalone item
@@ -222,6 +243,10 @@ export default function CartDrawer({
 
   const handleProceedToShipping = () => {
     if (activeItems.length === 0) return;
+    if (!userId) {
+      if (onAuthRequired) onAuthRequired();
+      return;
+    }
     setStep('shipping');
   };
 
@@ -508,7 +533,7 @@ export default function CartDrawer({
                             <button
                               onClick={() => {
                                 if (item.quantity > 1) {
-                                  onUpdateQty(item.product.id, item.selectedColor, item.selectedMaterial, item.quantity - 1, item.selectedResin);
+                                  onUpdateQty(item.product.id, item.selectedColor, item.selectedMaterial, item.quantity - 1, item.selectedResin, item.customization);
                                 }
                               }}
                               className="w-7 h-7 sm:w-5 sm:h-5 flex items-center justify-center text-text-secondary hover:text-text-primary"
@@ -518,7 +543,7 @@ export default function CartDrawer({
                             <span className="w-7 sm:w-6 font-mono text-center text-text-primary">{item.quantity}</span>
                             <button
                               onClick={() => {
-                                onUpdateQty(item.product.id, item.selectedColor, item.selectedMaterial, item.quantity + 1, item.selectedResin);
+                                onUpdateQty(item.product.id, item.selectedColor, item.selectedMaterial, item.quantity + 1, item.selectedResin, item.customization);
                               }}
                               className="w-7 h-7 sm:w-5 sm:h-5 flex items-center justify-center text-text-secondary hover:text-text-primary"
                             >
@@ -528,7 +553,7 @@ export default function CartDrawer({
  
                           {/* Delete from cart */}
                           <button
-                            onClick={() => onRemoveItem(item.product.id, item.selectedColor, item.selectedMaterial, item.selectedResin)}
+                            onClick={() => onRemoveItem(item.product.id, item.selectedColor, item.selectedMaterial, item.selectedResin, item.customization)}
                             className="p-1 px-1.5 rounded hover:bg-red-500/10 text-red-400 hover:text-red-300 transition"
                           >
                             <Trash2 className="w-3.5 h-3.5" />

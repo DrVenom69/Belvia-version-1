@@ -70,6 +70,57 @@ function getStrokeWidth(fontSize: number): number {
 }
 
 export default function NameKeychainBuilder({ onAddToCart }: NameKeychainBuilderProps) {
+  const [isOutOfStock, setIsOutOfStock] = useState(false);
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem('belvia_products');
+      if (stored) {
+        const prodList = JSON.parse(stored);
+        const keychainTemplate = prodList.find((p: any) => p.id === 'bv-keychain-template');
+        if (keychainTemplate && keychainTemplate.stockQuantity === 0) {
+          setIsOutOfStock(true);
+        }
+      }
+    } catch (e) {
+      console.warn('Failed to parse products for stock check:', e);
+    }
+  }, []);
+
+  const getTextureStyle = (col: string): React.CSSProperties => {
+    const textures: Record<string, React.CSSProperties> = {
+      'Matte Slate': { background: 'radial-gradient(circle at 35% 35%, #64748b 0%, #334155 70%, #1e293b 100%)' },
+      'Chalk White': { background: 'radial-gradient(circle at 35% 35%, #ffffff 0%, #f1f5f9 60%, #cbd5e1 100%)' },
+      'Chalk White (Translucent Only)': { background: 'radial-gradient(circle at 35% 35%, rgba(255,255,255,0.9) 0%, rgba(241,245,249,0.7) 60%, rgba(203,213,225,0.5) 100%)', backdropFilter: 'blur(2px)' },
+      'Emerald Green': { background: 'radial-gradient(circle at 35% 35%, #34d399 0%, #059669 70%, #064e3b 100%)' },
+      'Burnt Orange': { background: 'radial-gradient(circle at 35% 35%, #fb923c 0%, #ea580c 70%, #7c2d12 100%)' },
+      'Obsidian Black': { background: 'radial-gradient(circle at 35% 35%, #334155 0%, #0f172a 70%, #020617 100%)' },
+      'Jade Green': { background: 'radial-gradient(circle at 35% 35%, #059669 0%, #047857 70%, #022c22 100%)' },
+      'Silk Copper': { background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 30%, #b45309 60%, #f59e0b 80%, #78350f 100%)', boxShadow: 'inset 0 1px 3px rgba(255,255,255,0.4)' },
+      'Neon Nebula': { background: 'linear-gradient(135deg, #c084fc 0%, #818cf8 35%, #db2777 70%, #c084fc 100%)' },
+      'Pastel Mint': { background: 'radial-gradient(circle at 35% 35%, #a7f3d0 0%, #34d399 75%, #065f46 100%)' },
+      'Sandstone Grey': { background: 'radial-gradient(circle at 35% 35%, #a8a29e 0%, #78716c 70%, #44403c 100%)' },
+      'Terracotta': { background: 'radial-gradient(circle at 35% 35%, #f97316 0%, #c2410c 75%, #7c2d12 100%)' },
+      'Neon Violet': { background: 'radial-gradient(circle at 35% 35%, #a78bfa 0%, #6d28d9 75%, #4c1d95 100%)' },
+      'Cyber Yellow': { background: 'radial-gradient(circle at 35% 35%, #fef08a 0%, #eab308 70%, #854d0e 100%)' },
+      'Steel Blue': { background: 'radial-gradient(circle at 35% 35%, #60a5fa 0%, #2563eb 70%, #1e3a8a 100%)' },
+      'Signal Orange': { background: 'radial-gradient(circle at 35% 35%, #ff6b35 0%, #ff4500 70%, #990000 100%)' },
+      'Steel Gray': { background: 'linear-gradient(135deg, #94a3b8 0%, #64748b 30%, #475569 60%, #94a3b8 80%, #334155 100%)' },
+      'Silver Pearl': { background: 'linear-gradient(135deg, #f8fafc 0%, #cbd5e1 35%, #94a3b8 70%, #cbd5e1 100%)', boxShadow: 'inset 0 1px 3px rgba(255,255,255,0.5)' },
+    };
+    return textures[col] || { background: col };
+  };
+
+  const availableColors = [
+    { name: 'Matte Slate', hex: '#475569' },
+    { name: 'Chalk White', hex: '#ffffff' },
+    { name: 'Emerald Green', hex: '#10b981' },
+    { name: 'Burnt Orange', hex: '#f97316' },
+    { name: 'Obsidian Black', hex: '#1e293b' },
+    { name: 'Jade Green', hex: '#047857' },
+    { name: 'Silk Copper', hex: '#d97706' },
+    { name: 'Neon Nebula', hex: '#c084fc' }
+  ];
+
   const [name, setName] = useState<string>('BELVIA');
   const [selectedFont, setSelectedFont] = useState<string>('Syne');
   const [textColor, setTextColor] = useState<string>('#ffffff');
@@ -593,9 +644,9 @@ export default function NameKeychainBuilder({ onAddToCart }: NameKeychainBuilder
 
           {/* Colors picker */}
           <div>
-            <div className="flex justify-between items-center mb-1.5">
+            <div className="flex justify-between items-center mb-2.5">
               <label className="block text-[10px] font-mono text-text-secondary uppercase tracking-widest">
-                Custom Colors & Preset Swatches:
+                Preset Dual Swatches:
               </label>
               <button
                 onClick={handleRandomize}
@@ -607,7 +658,7 @@ export default function NameKeychainBuilder({ onAddToCart }: NameKeychainBuilder
             </div>
 
             {/* Presets swatch row */}
-            <div className="flex gap-2 mb-3.5">
+            <div className="flex gap-2 mb-4.5">
               {PRESET_PALETTES.map((palette, idx) => (
                 <button
                   key={idx}
@@ -615,7 +666,7 @@ export default function NameKeychainBuilder({ onAddToCart }: NameKeychainBuilder
                     setTextColor(palette.text);
                     setStrokeColor(palette.stroke);
                   }}
-                  className="w-7 h-7 rounded-full border border-border-premium flex overflow-hidden cursor-pointer"
+                  className="w-7 h-7 rounded-full border border-border-premium flex overflow-hidden cursor-pointer hover:scale-105 transition-transform"
                   title={palette.name}
                 >
                   <div className="w-1/2 h-full" style={{ backgroundColor: palette.text }} />
@@ -624,31 +675,64 @@ export default function NameKeychainBuilder({ onAddToCart }: NameKeychainBuilder
               ))}
             </div>
 
-            {/* Exact hex pickers */}
-            <div className="grid grid-cols-2 gap-4 font-mono text-[10px] text-text-secondary">
-              <div className="bg-bg-base border border-border-premium p-2.5 rounded-xl flex items-center justify-between">
-                <div>
-                  <span>Letters Color</span>
-                  <span className="block text-text-primary font-bold">{textColor}</span>
+            {/* Filament Color Pickers */}
+            <div className="space-y-4">
+              {/* Letters Color picker row */}
+              <div>
+                <span className="block text-[10px] font-mono text-text-secondary uppercase tracking-widest mb-2">
+                  Letters Color (FDM Material):
+                </span>
+                <div className="flex flex-wrap gap-2">
+                  {availableColors.map((c) => {
+                    const isActive = textColor.toLowerCase() === c.hex.toLowerCase();
+                    return (
+                      <button
+                        type="button"
+                        key={`text-col-${c.name}`}
+                        disabled={isOutOfStock}
+                        onClick={() => setTextColor(c.hex)}
+                        className={`relative w-8 h-8 rounded-full border transition-all cursor-pointer ${
+                          isActive ? 'border-accent scale-110 shadow-lg' : 'border-border-premium hover:scale-105'
+                        } ${isOutOfStock ? 'opacity-40 cursor-not-allowed' : ''}`}
+                        style={getTextureStyle(c.name)}
+                        title={c.name}
+                      >
+                        {isActive && (
+                          <span className="absolute inset-0.5 rounded-full border border-white/50" />
+                        )}
+                      </button>
+                    );
+                  })}
                 </div>
-                <input
-                  type="color"
-                  value={textColor}
-                  onChange={(e) => setTextColor(e.target.value)}
-                  className="w-6 h-6 border-0 cursor-pointer bg-transparent rounded"
-                />
               </div>
-              <div className="bg-bg-base border border-border-premium p-2.5 rounded-xl flex items-center justify-between">
-                <div>
-                  <span>Backplate Color</span>
-                  <span className="block text-text-primary font-bold">{strokeColor}</span>
+
+              {/* Backplate Color picker row */}
+              <div>
+                <span className="block text-[10px] font-mono text-text-secondary uppercase tracking-widest mb-2">
+                  Backplate Color (FDM Material):
+                </span>
+                <div className="flex flex-wrap gap-2">
+                  {availableColors.map((c) => {
+                    const isActive = strokeColor.toLowerCase() === c.hex.toLowerCase();
+                    return (
+                      <button
+                        type="button"
+                        key={`stroke-col-${c.name}`}
+                        disabled={isOutOfStock}
+                        onClick={() => setStrokeColor(c.hex)}
+                        className={`relative w-8 h-8 rounded-full border transition-all cursor-pointer ${
+                          isActive ? 'border-accent scale-110 shadow-lg' : 'border-border-premium hover:scale-105'
+                        } ${isOutOfStock ? 'opacity-40 cursor-not-allowed' : ''}`}
+                        style={getTextureStyle(c.name)}
+                        title={c.name}
+                      >
+                        {isActive && (
+                          <span className="absolute inset-0.5 rounded-full border border-white/50" />
+                        )}
+                      </button>
+                    );
+                  })}
                 </div>
-                <input
-                  type="color"
-                  value={strokeColor}
-                  onChange={(e) => setStrokeColor(e.target.value)}
-                  className="w-6 h-6 border-0 cursor-pointer bg-transparent rounded"
-                />
               </div>
             </div>
           </div>
@@ -736,11 +820,11 @@ export default function NameKeychainBuilder({ onAddToCart }: NameKeychainBuilder
 
               <button
                 onClick={handleAddClick}
-                disabled={!validation.isValid}
+                disabled={!validation.isValid || isOutOfStock}
                 className="px-5 py-3 rounded-xl text-xs font-bold text-text-on-accent bg-gradient-to-r from-accent to-accent-secondary hover:from-accent-hover hover:to-accent-secondary-lt shadow transition flex items-center space-x-2 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
               >
                 <ShoppingCart className="w-3.5 h-3.5" />
-                <span>Queue print</span>
+                <span>{isOutOfStock ? 'OUT OF STOCK' : 'Queue print'}</span>
               </button>
             </div>
           </div>    </div>

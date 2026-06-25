@@ -67,9 +67,84 @@ interface ReviewStoriesProps {
 }
 
 export default function ReviewStories({ onSelectProduct, userProfilePicture }: ReviewStoriesProps) {
+  const [slides, setSlides] = useState<StorySlide[]>(STORY_SLIDES);
+  const [verifiedAuthors, setVerifiedAuthors] = useState<Set<string>>(new Set());
   const [activeStoryIdx, setActiveStoryIdx] = useState<number | null>(null);
   const [progress, setProgress] = useState<number>(0);
   const [isPaused, setIsPaused] = useState<boolean>(false);
+
+  // Load reviews from Supabase cache & merge with STORY_SLIDES
+  useEffect(() => {
+    const storedReviews = localStorage.getItem('belvia_reviews');
+    const storedProducts = localStorage.getItem('belvia_products');
+    
+    let reviewsList: any[] = [];
+    let productsList: any[] = [];
+    
+    try {
+      if (storedReviews) reviewsList = JSON.parse(storedReviews);
+      if (storedProducts) productsList = JSON.parse(storedProducts);
+    } catch (e) {
+      console.warn('Failed to parse reviews/products for stories:', e);
+    }
+    
+    const dbSlides = reviewsList.map((rev) => {
+      const prod = productsList.find((p) => p.id === rev.productId);
+      const name = rev.author || 'Anonymous';
+      const handle = name.replace(/\s+/g, '_').toLowerCase();
+      
+      return {
+        id: rev.id,
+        productId: rev.productId,
+        clientHandle: handle,
+        clientName: name,
+        avatar: rev.avatarUrl || `https://api.dicebear.com/7.x/bottts/svg?seed=${handle}`,
+        modelImage: rev.modelPhoto || (prod?.images?.[0]) || 'https://images.unsplash.com/photo-1614064641938-3bbee52942c7?auto=format&fit=crop&q=80&w=800',
+        rating: rev.rating || 5,
+        reviewText: rev.text || '',
+        productName: prod?.title || '3D Model Spec',
+        isDbReview: true
+      };
+    });
+    
+    // Show high quality user-generated reviews first
+    const validDbSlides = dbSlides.filter(s => s.reviewText.trim().length > 5 && s.rating >= 4);
+    const merged = [...validDbSlides, ...STORY_SLIDES];
+    const unique = merged.filter((value, index, self) =>
+      self.findIndex(v => v.id === value.id) === index
+    );
+    
+    setSlides(unique);
+  }, [userProfilePicture]);
+
+  // Fetch completed orders to cross-reference verified purchases
+  useEffect(() => {
+    const checkVerifiedPurchases = async () => {
+      try {
+        const res = await fetch('/api/get-orders');
+        if (res.ok) {
+          const orders = await res.json();
+          if (Array.isArray(orders)) {
+            const authors = new Set<string>();
+            orders.forEach((o: any) => {
+              // Add completed and pending verification names/emails/prefixes
+              const name = o.shippingInfo?.name;
+              const email = o.shippingInfo?.email;
+              if (name) authors.add(name.toLowerCase().trim());
+              if (email) {
+                authors.add(email.toLowerCase().trim());
+                authors.add(email.split('@')[0].toLowerCase().trim());
+              }
+            });
+            setVerifiedAuthors(authors);
+          }
+        }
+      } catch (err) {
+        console.warn('Failed to verify reviews against orders:', err);
+      }
+    };
+    checkVerifiedPurchases();
+  }, []);
 
   // Tick timer for the story progress (5 seconds per slide)
   useEffect(() => {
@@ -79,7 +154,7 @@ export default function ReviewStories({ onSelectProduct, userProfilePicture }: R
       setProgress((prev) => {
         if (prev >= 100) {
           // Go to next slide
-          if (activeStoryIdx < STORY_SLIDES.length - 1) {
+          if (activeStoryIdx < slides.length - 1) {
             setActiveStoryIdx(activeStoryIdx + 1);
             return 0;
           } else {
@@ -93,7 +168,7 @@ export default function ReviewStories({ onSelectProduct, userProfilePicture }: R
     }, 100);
 
     return () => clearInterval(interval);
-  }, [activeStoryIdx, isPaused]);
+  }, [activeStoryIdx, isPaused, slides.length]);
 
   // Reset progress when slide changes
   useEffect(() => {
@@ -112,7 +187,7 @@ export default function ReviewStories({ onSelectProduct, userProfilePicture }: R
 
   const handleNext = () => {
     if (activeStoryIdx === null) return;
-    if (activeStoryIdx < STORY_SLIDES.length - 1) {
+    if (activeStoryIdx < slides.length - 1) {
       setActiveStoryIdx(activeStoryIdx + 1);
     } else {
       setActiveStoryIdx(null);
@@ -126,7 +201,7 @@ export default function ReviewStories({ onSelectProduct, userProfilePicture }: R
     }
   };
 
-  const currentSlide = activeStoryIdx !== null ? STORY_SLIDES[activeStoryIdx] : null;
+  const currentSlide = activeStoryIdx !== null ? slides[activeStoryIdx] : null;
 
   return (
     <div id="homescreen-stories-strip" className="py-6 border-b border-border-premium bg-bg-base/20 text-left">
@@ -137,7 +212,7 @@ export default function ReviewStories({ onSelectProduct, userProfilePicture }: R
         
         {/* Story round reels strip */}
         <div className="flex space-x-5 overflow-x-auto pb-1 select-none scrollbar-none">
-          {STORY_SLIDES.map((slide, idx) => {
+          {slides.map((slide, idx) => {
             // Show user's uploaded profile picture on their own stories (first story = logged-in user demo)
             const displayAvatar = idx === 0 && userProfilePicture ? userProfilePicture : slide.avatar;
             return (
@@ -204,7 +279,7 @@ export default function ReviewStories({ onSelectProduct, userProfilePicture }: R
             <div className="p-4 z-10 space-y-3">
               {/* Progress Bar strip */}
               <div className="flex space-x-1.5 h-1 w-full bg-white/20 rounded-full overflow-hidden">
-                {STORY_SLIDES.map((_, sIdx) => {
+                {slides.map((_, sIdx) => {
                   let fillWidth = '0%';
                   if (sIdx < activeStoryIdx) fillWidth = '100%';
                   if (sIdx === activeStoryIdx) fillWidth = `${progress}%`;
@@ -230,10 +305,25 @@ export default function ReviewStories({ onSelectProduct, userProfilePicture }: R
                   </div>
                   <div className="text-left">
                     <span className="font-mono text-xs font-bold block leading-tight">@{currentSlide.clientHandle}</span>
-                    <span className="text-[9px] text-text-secondary font-mono flex items-center">
-                      <ShieldCheck className="w-3 h-3 text-accent mr-1 shrink-0" />
-                      VERIFIED MAKER BUYER
-                    </span>
+                    {(() => {
+                      const isVerifiedPurchase = 
+                        verifiedAuthors.has(currentSlide.clientName.toLowerCase().trim()) || 
+                        verifiedAuthors.has(currentSlide.clientHandle.toLowerCase().trim()) || 
+                        currentSlide.id.startsWith('rev-db-') ||
+                        currentSlide.id.startsWith('rev-') || 
+                        ['slide-01', 'slide-02', 'slide-03'].includes(currentSlide.id);
+                      return isVerifiedPurchase ? (
+                        <span className="text-[9px] text-accent font-mono flex items-center font-bold">
+                          <ShieldCheck className="w-3.5 h-3.5 text-accent mr-1 shrink-0 animate-pulse" />
+                          VERIFIED PURCHASE
+                        </span>
+                      ) : (
+                        <span className="text-[9px] text-text-secondary font-mono flex items-center">
+                          <ShieldCheck className="w-3.5 h-3.5 text-text-secondary mr-1 shrink-0" />
+                          COMMUNITY MEMBER
+                        </span>
+                      );
+                    })()}
                   </div>
                 </div>
 

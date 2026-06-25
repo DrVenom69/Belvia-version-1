@@ -100,8 +100,20 @@ export default function MyAccountHub({
       });
     }
   };
-  const [phone, setPhone] = useState<string>('+880-1712-345678');
-  const [shippingAddress, setShippingAddress] = useState<string>('House 42, Road 11, Banani, Dhaka, Bangladesh');
+
+  const handleProfileMetadataSync = async (phoneVal: string, addressVal: string) => {
+    if (isSupabaseConfigured && supabase && user) {
+      await supabase.auth.updateUser({
+        data: {
+          phone: phoneVal,
+          address: addressVal
+        }
+      });
+    }
+  };
+
+  const [phone, setPhone] = useState<string>('');
+  const [shippingAddress, setShippingAddress] = useState<string>('');
   const [defaultFilamentBrand, setDefaultFilamentBrand] = useState<string>('Bambu Labs Premium');
   const [laserSpeed, setLaserSpeed] = useState<string>('240 mm/s Standard Quality');
   const [infillTarget, setInfillTarget] = useState<string>('15% Gyroid (Elastic Strength)');
@@ -139,20 +151,39 @@ export default function MyAccountHub({
   const [ordersLoading, setOrdersLoading] = useState(true);
   const storedOrdersRef = useRef<Set<string>>(new Set());
 
-  // Load stored phone from localStorage (profile phone persistence)
+  // Load stored phone & address from Supabase user_metadata or fallback to localStorage
   useEffect(() => {
-    const savedPhone = localStorage.getItem('belvia_profile_phone');
-    if (savedPhone) setPhone(savedPhone);
-    const savedAddr = localStorage.getItem('belvia_profile_address');
-    if (savedAddr) setShippingAddress(savedAddr);
-  }, []);
+    if (user) {
+      const metaPhone = user.user_metadata?.phone;
+      const metaAddr = user.user_metadata?.address;
+      
+      if (metaPhone !== undefined && metaPhone !== null) {
+        setPhone(metaPhone);
+      } else {
+        const savedPhone = localStorage.getItem('belvia_profile_phone');
+        if (savedPhone) setPhone(savedPhone);
+      }
+      
+      if (metaAddr !== undefined && metaAddr !== null) {
+        setShippingAddress(metaAddr);
+      } else {
+        const savedAddr = localStorage.getItem('belvia_profile_address');
+        if (savedAddr) setShippingAddress(savedAddr);
+      }
+    } else {
+      const savedPhone = localStorage.getItem('belvia_profile_phone');
+      if (savedPhone) setPhone(savedPhone);
+      const savedAddr = localStorage.getItem('belvia_profile_address');
+      if (savedAddr) setShippingAddress(savedAddr);
+    }
+  }, [user]);
 
   // Persist profile phone to localStorage when changed
   useEffect(() => {
-    localStorage.setItem('belvia_profile_phone', phone);
+    if (phone) localStorage.setItem('belvia_profile_phone', phone);
   }, [phone]);
   useEffect(() => {
-    localStorage.setItem('belvia_profile_address', shippingAddress);
+    if (shippingAddress) localStorage.setItem('belvia_profile_address', shippingAddress);
   }, [shippingAddress]);
 
   // Fetch + filter orders — re-runs when phone changes
@@ -813,6 +844,7 @@ export default function MyAccountHub({
                         type="text"
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
+                        onBlur={() => handleProfileMetadataSync(phone, shippingAddress)}
                         className="w-full bg-bg-base text-gray-200 px-3.5 py-3 rounded-xl border border-bg-elevated text-xs"
                       />
                     </div>
@@ -822,6 +854,7 @@ export default function MyAccountHub({
                         rows={3}
                         value={shippingAddress}
                         onChange={(e) => setShippingAddress(e.target.value)}
+                        onBlur={() => handleProfileMetadataSync(phone, shippingAddress)}
                         className="w-full bg-bg-base text-gray-200 px-3.5 py-3 rounded-xl border border-bg-elevated text-xs font-sans"
                       />
                     </div>

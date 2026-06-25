@@ -2399,11 +2399,12 @@ async function loadProductsForValidation(productIds: string[]): Promise<Map<stri
       const batch = productIds.slice(i, i + batchSize);
       const { data } = await supabaseAdmin!
         .from("products")
-        .select("id, title, price, resin_price, resin_enabled, depositPercentage, weightGrams, isPreOrder, basePrice")
+        .select("id, title, \"startingPrice\", resin_price, resin_enabled, \"isPreOrder\", \"weightGrams\"")
         .in("id", batch);
       if (data) {
         for (const p of data) {
-          productMap.set(p.id, p);
+          const priceVal = p.startingPrice !== undefined ? p.startingPrice : p.price;
+          productMap.set(p.id, { ...p, price: priceVal });
         }
       }
     }
@@ -2416,13 +2417,28 @@ async function loadProductsForValidation(productIds: string[]): Promise<Map<stri
         const products = JSON.parse(raw);
         if (Array.isArray(products)) {
           for (const p of products) {
-            productMap.set(p.id, p);
+            const priceVal = p.startingPrice !== undefined ? p.startingPrice : p.price;
+            productMap.set(p.id, { ...p, price: priceVal });
           }
         }
       }
     } catch (e: any) {
       console.warn("[Order validation] Failed to load products from filesystem:", e.message);
     }
+  }
+
+  // Double insurance fallback for custom keychains virtual template
+  if (productIds.includes("bv-keychain-template") && !productMap.has("bv-keychain-template")) {
+    productMap.set("bv-keychain-template", {
+      id: "bv-keychain-template",
+      title: "Custom Name Keychain",
+      price: 150,
+      startingPrice: 150,
+      resin_enabled: true,
+      resin_price: 50,
+      weightGrams: 10,
+      isPreOrder: false
+    });
   }
 
   return productMap;
@@ -2486,9 +2502,9 @@ async function verifyOrderTotals(order: any): Promise<{
       unitPrice = specs.price;
       serverWeight += (specs.weightGrams || 0) * qty;
     } else if (isPreOrder) {
-      // Pre-order: raw product.price (deposit-based pricing)
-      unitPrice = Math.round(dbProduct.price);
+      // Pre-order: deposit-based pricing
       const depositPct = dbProduct.depositPercentage || 50;
+      unitPrice = Math.round(dbProduct.price * (depositPct / 100));
       if (!serverDepositPercentage || depositPct > serverDepositPercentage) {
         serverDepositPercentage = depositPct;
       }
@@ -2513,7 +2529,11 @@ async function verifyOrderTotals(order: any): Promise<{
     serverSubtotal += unitPrice * qty;
   }
 
-  // If there were unknown products, reject outright
+  if (isNaN(serverSubtotal)) {
+    errors.push("Server calculated subtotal is NaN. Please verify product price configuration.");
+  }
+
+  // If there were unknown products or calculation errors, reject outright
   if (errors.length > 0) {
     return { valid: false, errors, expectedTotal: 0, serverSubtotal: 0, serverDiscount: 0, corrected: false, productMap };
   }

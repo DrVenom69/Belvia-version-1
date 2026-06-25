@@ -112,6 +112,11 @@ function AppContent() {
   const { user } = useAuth();
   const [isAuthOpen, setIsAuthOpen] = useState<boolean>(false);
   const [pendingAction, setPendingAction] = useState<{ type: 'wishlist' | 'checkout' | 'express'; payload?: any } | null>(null);
+  const [isCartOpen, setIsCartOpen] = useState<boolean>(false);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [wishlist, setWishlist] = useState<Product[]>([]);
+  const [isWishlistOpen, setIsWishlistOpen] = useState<boolean>(false);
+  const [expressItem, setExpressItem] = useState<CartItem | undefined>(undefined);
 
   // Execute pending gated action upon successful login
   useEffect(() => {
@@ -399,12 +404,7 @@ function AppContent() {
     setActiveTab('home');
   };
 
-  const [isCartOpen, setIsCartOpen] = useState<boolean>(false);
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-
-  // Saved Wishlist states
-  const [wishlist, setWishlist] = useState<Product[]>([]);
-  const [isWishlistOpen, setIsWishlistOpen] = useState<boolean>(false);
+  // (Cart, selectedProduct, wishlist, isWishlistOpen state moved to top of AppContent to resolve TDZ ReferenceErrors)
 
   // Administrative logs stored locally for full workspace realism
   const [customRequests, setCustomRequests] = useState<CustomPrintRequest[]>([]);
@@ -884,7 +884,7 @@ function AppContent() {
   };
 
   // Express Order: open the drawer directly at shipping step with a single item, without touching the shared cart
-  const [expressItem, setExpressItem] = useState<CartItem | undefined>(undefined);
+  // (expressItem state moved to top of AppContent to resolve TDZ ReferenceErrors)
 
   const handleExpressOrder = (item: CartItem) => {
     if (!user) {

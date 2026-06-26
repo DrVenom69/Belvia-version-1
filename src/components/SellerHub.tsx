@@ -1172,6 +1172,7 @@ export default function SellerHub({
   const [newDepositPercentage, setNewDepositPercentage] = useState<number>(30);
   const [newOriginalImportCountry, setNewOriginalImportCountry] = useState<string>('Germany');
   const [newIsTrendy, setNewIsTrendy] = useState<boolean>(false);
+  const [colorStockInputs, setColorStockInputs] = useState<Record<string, number>>({});
 
   // --- MAKERWORLD SCRAPER VARIABLES ---
   const [makerworldUrl, setMakerworldUrl] = useState<string>('');
@@ -1540,7 +1541,8 @@ Colors suited: Burnt Orange with Matte Slate eyes or Chalk White body.`);
       needs_price_review: initialNeedsReview,
       resin_enabled: newResinEnabled,
       resin_price: newResinEnabled && newResinPrice ? Math.round(parseFloat(newResinPrice)) || 0 : null,
-      is_trendy: newIsTrendy
+      is_trendy: newIsTrendy,
+      colorStock: colorStockInputs
     };
 
     onAddProduct(readyProduct);
@@ -1553,6 +1555,7 @@ Colors suited: Burnt Orange with Matte Slate eyes or Chalk White body.`);
     setNewTitle('');
     setNewDesc('');
     setManualImages(['https://images.unsplash.com/photo-1545241047-6083a3684587?auto=format&fit=crop&q=80&w=800']);
+    setColorStockInputs({});
     setSelectedNewColors(['Matte Slate', 'Chalk White']);
     setSelectedNewMaterials(['PLA (Matte)']);
     setNewIsPreOrder(false);
@@ -3120,6 +3123,31 @@ Colors suited: Burnt Orange with Matte Slate eyes or Chalk White body.`);
                       + Add
                     </button>
                   </div>
+                  
+                  {selectedNewColors.length > 0 && (
+                    <div className="space-y-2 mt-2 bg-bg-surface border border-border-premium rounded-xl p-3.5">
+                      <span className="block text-[10px] font-mono text-text-secondary uppercase tracking-widest">
+                        Configure Color Stock Level (use -1 for unlimited, 0 for out of stock):
+                      </span>
+                      <div className="grid grid-cols-2 gap-3">
+                        {selectedNewColors.map((col) => (
+                          <div key={col} className="flex items-center justify-between border-b border-border-premium/50 pb-2 last:border-b-0">
+                            <span className="text-xs font-semibold text-text-primary">{col}</span>
+                            <input
+                              type="number"
+                              value={colorStockInputs[col] ?? -1}
+                              onChange={(e) => {
+                                const val = parseInt(e.target.value);
+                                setColorStockInputs(prev => ({ ...prev, [col]: isNaN(val) ? -1 : val }));
+                              }}
+                              className="w-20 bg-bg-base text-text-primary border border-border-premium rounded-lg py-1 px-2 text-xs focus:border-accent text-right font-mono"
+                              placeholder="-1"
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div>
@@ -3693,6 +3721,35 @@ Colors suited: Burnt Orange with Matte Slate eyes or Chalk White body.`);
                       + Add &amp; Assign
                     </button>
                   </div>
+
+                  {editingProduct.colors && editingProduct.colors.length > 0 && (
+                    <div className="space-y-2 mt-2 bg-bg-base border border-border-premium rounded-xl p-3.5">
+                      <span className="block text-[10px] font-mono text-text-secondary uppercase tracking-widest">
+                        Configure Color Stock Level (use -1 for unlimited, 0 for out of stock):
+                      </span>
+                      <div className="grid grid-cols-2 gap-3">
+                        {editingProduct.colors.map((col) => {
+                          const currentStock = editingProduct.colorStock?.[col] ?? -1;
+                          return (
+                            <div key={col} className="flex items-center justify-between border-b border-border-premium/50 pb-2 last:border-b-0">
+                              <span className="text-xs font-semibold text-text-primary">{col}</span>
+                              <input
+                                type="number"
+                                value={currentStock}
+                                onChange={(e) => {
+                                  const val = parseInt(e.target.value);
+                                  const nextStock = { ...(editingProduct.colorStock || {}), [col]: isNaN(val) ? -1 : val };
+                                  setEditingProduct({ ...editingProduct, colorStock: nextStock });
+                                }}
+                                className="w-20 bg-bg-surface text-text-primary border border-border-premium rounded-lg py-1 px-2 text-xs focus:border-accent text-right font-mono"
+                                placeholder="-1"
+                              />
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div>

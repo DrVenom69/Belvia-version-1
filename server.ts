@@ -2403,7 +2403,7 @@ async function loadProductsForValidation(productIds: string[]): Promise<Map<stri
         .in("id", batch);
       if (data) {
         for (const p of data) {
-          const priceVal = p.startingPrice !== undefined ? p.startingPrice : p.price;
+          const priceVal = p.startingPrice !== undefined ? p.startingPrice : (p as any).price;
           productMap.set(p.id, { ...p, price: priceVal });
         }
       }
@@ -2569,6 +2569,181 @@ async function verifyOrderTotals(order: any): Promise<{
   };
 }
 
+// POST submit product review — public, requires verified purchase
+app.post("/api/submit-review", async (req: express.Request, res: express.Response): Promise<void> => {
+  try {
+    const { productId, rating, text, author, userEmail } = req.body;
+    if (!productId || typeof rating !== "number" || !text?.trim() || !author?.trim()) {
+      res.status(400).json({ error: "Missing or invalid review fields." });
+      return;
+    }
+
+    let email = userEmail || "";
+
+    // 1. Secure token validation in production Supabase path
+    if (isSupabaseConfigured) {
+      const authHeader = req.headers.authorization;
+      if (!authHeader || !authHeader.startsWith("Bearer ")) {
+        res.status(401).json({ error: "Unauthorized. Missing authorization token." });
+        return;
+      }
+      const token = authHeader.split(" ")[1];
+      const { data: { user }, error: authErr } = await supabaseAdmin!.auth.getUser(token);
+      if (authErr || !user) {
+        res.status(401).json({ error: "Unauthorized. Invalid token." });
+        return;
+      }
+      email = user.email || "";
+    }
+
+    if (!email) {
+      res.status(400).json({ error: "User email is required to verify purchase." });
+      return;
+    }
+
+    // 2. Query customer's orders to verify they purchased this specific product
+    let orders: any[] = [];
+    if (isSupabaseConfigured) {
+      const { data, error } = await supabaseAdmin!
+        .from("orders")
+        .select("*")
+        .eq("email", email);
+      if (error) throw new Error(error.message);
+      orders = data || [];
+    } else {
+      // Local dev fallback
+      const dbPath = path.join(process.cwd(), "data", "orders.json");
+      if (fs.existsSync(dbPath)) {
+        const raw = await fs.promises.readFile(dbPath, "utf-8");
+        orders = JSON.parse(raw);
+      }
+      // Filter by email in shippingInfo
+      orders = orders.filter((o: any) => o.shippingInfo?.email === email);
+    }
+
+    // Check if there is any completed/delivered order containing the productId
+    const hasCompletedOrder = orders.some((o: any) => {
+      const isCompleted = o.status === "Completed" || o.status === "Delivered";
+      if (!isCompleted) return false;
+      let items = o.items;
+      if (typeof items === "string") {
+        try { items = JSON.parse(items); } catch { items = []; }
+      }
+      return Array.isArray(items) && items.some((item: any) => item.product?.id === productId);
+    });
+
+    if (!hasCompletedOrder) {
+      res.status(403).json({ error: "Only verified purchasers with a completed order can review this product." });
+      return;
+    }
+
+    // 3. Append review, update average rating and reviewCount
+    let updatedReviews: any[] = [];
+    if (isSupabaseConfigured) {
+      // Fetch product
+      const { data: product, error: prodErr } = await supabaseAdmin!
+        .from("products")
+        .select("reviews, rating, \"reviewCount\"")
+        .eq("id", productId)
+        .single();
+
+      if (prodErr || !product) {
+        res.status(404).json({ error: "Product not found." });
+        return;
+      }
+
+      let reviewsArray = product.reviews || [];
+      if (typeof reviewsArray === "string") {
+        try { reviewsArray = JSON.parse(reviewsArray); } catch { reviewsArray = []; }
+      }
+      if (!Array.isArray(reviewsArray)) {
+        reviewsArray = [];
+      }
+
+      const newReview = {
+        userName: author,
+        rating: rating,
+        comment: text.trim(),
+        date: new Date().toISOString(),
+        verified: true
+      };
+
+      updatedReviews = [...reviewsArray, newReview];
+      const newCount = updatedReviews.length;
+      const sumRatings = updatedReviews.reduce((sum, r) => sum + r.rating, 0);
+      const avgRating = Number((sumRatings / newCount).toFixed(2));
+
+      const { error: updateErr } = await supabaseAdmin!
+        .from("products")
+        .update({
+          reviews: updatedReviews,
+          reviewCount: newCount,
+          rating: avgRating
+        })
+        .eq("id", productId);
+
+      if (updateErr) throw new Error(updateErr.message);
+    } else {
+      // Filesystem fallback
+      const prodPath = path.join(process.cwd(), "data", "products.json");
+      if (!fs.existsSync(prodPath)) {
+        res.status(500).json({ error: "Product database not found." });
+        return;
+      }
+
+      const rawProds = await fs.promises.readFile(prodPath, "utf-8");
+      const products = JSON.parse(rawProds);
+      const targetProd = products.find((p: any) => p.id === productId);
+      if (!targetProd) {
+        res.status(404).json({ error: "Product not found." });
+        return;
+      }
+
+      let reviewsArray = targetProd.reviews || [];
+      if (typeof reviewsArray === "string") {
+        try { reviewsArray = JSON.parse(reviewsArray); } catch { reviewsArray = []; }
+      }
+      if (!Array.isArray(reviewsArray)) {
+        reviewsArray = [];
+      }
+
+      const newReview = {
+        userName: author,
+        rating: rating,
+        comment: text.trim(),
+        date: new Date().toISOString(),
+        verified: true
+      };
+
+      reviewsArray.push(newReview);
+      targetProd.reviews = reviewsArray;
+      targetProd.reviewCount = reviewsArray.length;
+      targetProd.reviewsCount = reviewsArray.length;
+      const sumRatings = reviewsArray.reduce((sum: number, r: any) => sum + r.rating, 0);
+      targetProd.rating = Number((sumRatings / reviewsArray.length).toFixed(2));
+
+      await fs.promises.writeFile(prodPath, JSON.stringify(products, null, 2), "utf-8");
+      updatedReviews = reviewsArray;
+    }
+
+    // Map and return list of reviews in client format
+    const responseReviews = updatedReviews.map((r: any, rIdx: number) => ({
+      id: `rev-db-${productId}-${rIdx}`,
+      productId: productId,
+      author: r.userName,
+      rating: r.rating,
+      text: r.comment,
+      createdAt: r.date ? new Date(r.date).toISOString() : new Date().toISOString(),
+      isVerified: r.verified || false
+    }));
+
+    res.json({ success: true, reviews: responseReviews });
+  } catch (err: any) {
+    console.error("Submit review error:", err);
+    res.status(500).json({ error: "Failed to submit review: " + err.message });
+  }
+});
+
 // POST save single order — public, no admin auth required
 // Validates required fields server-side and appends the new order (avoids
 // the insecure pattern of accepting a full array from the client to overwrite).
@@ -2649,27 +2824,69 @@ app.post("/api/save-order", async (req: express.Request, res: express.Response):
 
       if (insertError) throw new Error(insertError.message);
 
-      // ── Decrement stock_quantity for each ordered item ──
+      // ── Decrement stock_quantity and colorStock for each ordered item ──
       if (order.items && Array.isArray(order.items)) {
         for (const item of order.items) {
           const productId = item.product?.id;
           const qty = item.quantity || 1;
           if (!productId) continue;
 
-          const { data: currentProduct } = await supabaseAdmin!
-            .from("products")
-            .select("stockQuantity")
-            .eq("id", productId)
-            .single();
-
-          const currentStock = currentProduct?.stockQuantity;
-          if (currentStock !== undefined && currentStock !== null && currentStock > 0) {
-            const newStock = Math.max(0, currentStock - qty);
-            await supabaseAdmin!
+          try {
+            const { data: currentProduct } = await supabaseAdmin!
               .from("products")
-              .update({ stockQuantity: newStock, updated_at: new Date().toISOString() })
-              .eq("id", productId);
-            console.log(`[Stock] Decremented ${productId}: ${currentStock} → ${newStock}`);
+              .select("stockQuantity, colorStock")
+              .eq("id", productId)
+              .single();
+
+            if (currentProduct) {
+              const currentStock = currentProduct.stockQuantity;
+              const updates: any = {};
+
+              if (currentStock !== undefined && currentStock !== null && currentStock > 0) {
+                updates.stockQuantity = Math.max(0, currentStock - qty);
+              }
+
+              let colorStock = currentProduct.colorStock;
+              if (typeof colorStock === "string") {
+                try { colorStock = JSON.parse(colorStock); } catch { colorStock = {}; }
+              }
+              if (colorStock && typeof colorStock === "object" && !Array.isArray(colorStock)) {
+                const selectedColorStr = item.selectedColor || "";
+                const orderedColors = [];
+                if (selectedColorStr.includes(",")) {
+                  const parts = selectedColorStr.split(",");
+                  for (const part of parts) {
+                    const colonIdx = part.indexOf(":");
+                    const name = colonIdx > -1 ? part.substring(colonIdx + 1) : part;
+                    orderedColors.push(name.trim());
+                  }
+                } else {
+                  orderedColors.push(selectedColorStr.trim());
+                }
+
+                let stockChanged = false;
+                for (const col of orderedColors) {
+                  if (col && colorStock[col] !== undefined && colorStock[col] > 0) {
+                    colorStock[col] = Math.max(0, colorStock[col] - qty);
+                    stockChanged = true;
+                  }
+                }
+                if (stockChanged) {
+                  updates.colorStock = colorStock;
+                }
+              }
+
+              if (Object.keys(updates).length > 0) {
+                updates.updated_at = new Date().toISOString();
+                await supabaseAdmin!
+                  .from("products")
+                  .update(updates)
+                  .eq("id", productId);
+                console.log(`[Stock] Decremented ${productId} updates:`, updates);
+              }
+            }
+          } catch (err) {
+            console.error(`Failed to decrement stock for product ${productId}:`, err);
           }
         }
       }
@@ -2693,6 +2910,69 @@ app.post("/api/save-order", async (req: express.Request, res: express.Response):
     }
     existingOrders.unshift(order);
     await fs.promises.writeFile(dbPath, JSON.stringify(existingOrders, null, 2), "utf-8");
+
+    // Decrement stock in data/products.json
+    const productsPath = path.join(process.cwd(), "data", "products.json");
+    if (fs.existsSync(productsPath)) {
+      try {
+        const rawProds = await fs.promises.readFile(productsPath, "utf-8");
+        const localProducts = JSON.parse(rawProds);
+        if (Array.isArray(localProducts) && order.items && Array.isArray(order.items)) {
+          let productsChanged = false;
+          for (const item of order.items) {
+            const productId = item.product?.id;
+            const qty = item.quantity || 1;
+            if (!productId) continue;
+
+            const prodIdx = localProducts.findIndex((p: any) => p.id === productId);
+            if (prodIdx > -1) {
+              const product = localProducts[prodIdx];
+              if (product.stockQuantity !== undefined && product.stockQuantity !== null && product.stockQuantity > 0) {
+                product.stockQuantity = Math.max(0, product.stockQuantity - qty);
+                productsChanged = true;
+              }
+
+              let colorStock = product.colorStock;
+              if (typeof colorStock === "string") {
+                try { colorStock = JSON.parse(colorStock); } catch { colorStock = {}; }
+              }
+              if (colorStock && typeof colorStock === "object" && !Array.isArray(colorStock)) {
+                const selectedColorStr = item.selectedColor || "";
+                const orderedColors = [];
+                if (selectedColorStr.includes(",")) {
+                  const parts = selectedColorStr.split(",");
+                  for (const part of parts) {
+                    const colonIdx = part.indexOf(":");
+                    const name = colonIdx > -1 ? part.substring(colonIdx + 1) : part;
+                    orderedColors.push(name.trim());
+                  }
+                } else {
+                  orderedColors.push(selectedColorStr.trim());
+                }
+
+                let colorChanged = false;
+                for (const col of orderedColors) {
+                  if (col && colorStock[col] !== undefined && colorStock[col] > 0) {
+                    colorStock[col] = Math.max(0, colorStock[col] - qty);
+                    colorChanged = true;
+                    productsChanged = true;
+                  }
+                }
+                if (colorChanged) {
+                  product.colorStock = colorStock;
+                }
+              }
+            }
+          }
+          if (productsChanged) {
+            await fs.promises.writeFile(productsPath, JSON.stringify(localProducts, null, 2), "utf-8");
+            console.log("[Stock] Local filesystem inventory decremented successfully.");
+          }
+        }
+      } catch (err) {
+        console.error("Failed to decrement local products stock:", err);
+      }
+    }
 
     if (!order._confirmationSent) {
       sendOrderConfirmationEmail(order);

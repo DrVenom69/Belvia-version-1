@@ -1,26 +1,37 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { X, Star, BadgeDollarSign, ShoppingCart, Shield, ChevronLeft, ChevronRight, ZoomIn, HelpCircle } from 'lucide-react';
-import { Product, CartItem, Review } from '../types';
+import { X, Star, BadgeDollarSign, ShoppingCart, Shield, ChevronLeft, ChevronRight, ZoomIn, HelpCircle, Lock, Loader2 } from 'lucide-react';
+import { Product, CartItem, Review, Order } from '../types';
 import { getStoredReviews, saveStoredReview } from '../data';
 import { formatPrice } from '../utils/format';
 import { useChat } from '../contexts/ChatContext';
+import { useAuth } from '../contexts/AuthContext';
 
 interface ProductDetailsModalProps {
   product: Product | null;
   onClose: () => void;
   onAddToCart: (item: CartItem) => void;
   onExpressOrder?: (item: CartItem) => void;
+  onOpenAuth?: () => void;
 }
 
-export default function ProductDetailsModal({ product, onClose, onAddToCart, onExpressOrder }: ProductDetailsModalProps) {
+export default function ProductDetailsModal({ product, onClose, onAddToCart, onExpressOrder, onOpenAuth }: ProductDetailsModalProps) {
   if (!product) return null;
 
   const { triggerChat } = useChat();
 
+  const { user, session } = useAuth();
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [ordersLoading, setOrdersLoading] = useState<boolean>(false);
+
   const colorCount = product.color_picker_count ?? 1;
-  const [selectedColors, setSelectedColors] = useState<string[]>(() =>
-    colorCount === 0 ? [] : product.colors.slice(0, colorCount)
-  );
+  const colorStock = product.colorStock || {};
+  const availableColors = product.colors.filter(col => colorStock[col] === undefined || colorStock[col] !== 0);
+
+  const [selectedColors, setSelectedColors] = useState<string[]>(() => {
+    if (colorCount === 0) return [];
+    const srcColors = availableColors.length > 0 ? availableColors : product.colors;
+    return Array.from({ length: colorCount }, (_, i) => srcColors[i % srcColors.length] || '');
+  });
   const [selectedMaterial, setSelectedMaterial] = useState<string>(product.materials[0] || 'PLA (Matte)');
   const [quantity, setQuantity] = useState<number>(1);
   const [activeImageIdx, setActiveImageIdx] = useState<number>(0);
@@ -70,13 +81,80 @@ export default function ProductDetailsModal({ product, onClose, onAddToCart, onE
   // Sync selectors when product changes
   useEffect(() => {
     const cCount = product.color_picker_count ?? 1;
-    setSelectedColors(cCount === 0 ? [] : product.colors.slice(0, cCount));
+    const cStock = product.colorStock || {};
+    const availCols = product.colors.filter(col => cStock[col] === undefined || cStock[col] !== 0);
+    const srcColors = availCols.length > 0 ? availCols : product.colors;
+
+    setSelectedColors(
+      cCount === 0 
+        ? [] 
+        : Array.from({ length: cCount }, (_, i) => srcColors[i % srcColors.length] || '')
+    );
     setSelectedMaterial(product.materials[0] || 'PLA (Matte)');
     setQuantity(1);
     setActiveImageIdx(0);
     setLightboxOpen(false);
     setSelectedResin(false);
   }, [product]);
+
+  useEffect(() => {
+    if (!user?.email || !product?.id) {
+      setOrders([]);
+      return;
+    }
+    let isMounted = true;
+    const fetchOrders = async () => {
+      setOrdersLoading(true);
+      try {
+        const headers: Record<string, string> = {};
+        if (session?.access_token) {
+          headers['Authorization'] = `Bearer ${session.access_token}`;
+        }
+        const res = await fetch(`/api/customer/orders?email=${encodeURIComponent(user.email || '')}`, { headers });
+        if (!res.ok) throw new Error('Failed to fetch orders');
+        const data = await res.json();
+        if (isMounted) {
+          setOrders(data || []);
+        }
+      } catch (err) {
+        console.error('Failed to fetch customer orders in ProductDetailsModal:', err);
+      } finally {
+        if (isMounted) {
+          setOrdersLoading(false);
+        }
+      }
+    };
+    fetchOrders();
+    return () => {
+      isMounted = false;
+    };
+  }, [user?.email, product?.id, session?.access_token]);
+
+  useEffect(() => {
+    if (user) {
+      const userFirstName = user.user_metadata?.first_name || '';
+      const userLastName = user.user_metadata?.last_name || '';
+      const displayName = userFirstName || userLastName
+        ? `${userFirstName} ${userLastName}`.trim()
+        : user.email?.split('@')[0] || '';
+      setAuthorName(displayName);
+    } else {
+      setAuthorName('');
+    }
+  }, [user]);
+
+  const hasCompletedOrder = orders.some(o => 
+    (o.status === 'Completed' || o.status === 'Delivered') && 
+    o.items && 
+    o.items.some((item: any) => item.product?.id === product.id)
+  );
+
+  const pendingOrder = orders.find(o => 
+    o.status !== 'Completed' && 
+    o.status !== 'Delivered' && 
+    o.items && 
+    o.items.some((item: any) => item.product?.id === product.id)
+  );
 
   // Keyboard navigation
   const goNext = useCallback(() => {
@@ -100,22 +178,53 @@ export default function ProductDetailsModal({ product, onClose, onAddToCart, onE
     return () => window.removeEventListener('keydown', handleKey);
   }, [lightboxOpen, goNext, goPrev, onClose]);
 
-  const handleSubmitReview = () => {
+  const handleSubmitReview = async () => {
     if (!authorName.trim() || !reviewText.trim()) return;
-    const newRev: Review = {
-      id: `rev-${Date.now()}`,
-      productId: product.id,
-      author: authorName.trim(),
-      rating: newRating,
-      text: reviewText.trim(),
-      createdAt: new Date().toISOString(),
-      isVerified: true
-    };
-    const updated = saveStoredReview(newRev);
-    setReviews(updated);
-    setAuthorName('');
-    setReviewText('');
-    setNewRating(5);
+    const formattedAuthor = authorName.includes('(@verified_belvia)') 
+      ? authorName.trim() 
+      : `${authorName.trim()} (@verified_belvia)`;
+
+    try {
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (session?.access_token) {
+        headers['Authorization'] = `Bearer ${session.access_token}`;
+      }
+      const response = await fetch('/api/submit-review', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          productId: product.id,
+          rating: newRating,
+          text: reviewText.trim(),
+          author: formattedAuthor,
+          userEmail: user?.email
+        })
+      });
+
+      if (!response.ok) {
+        const errData = await response.json();
+        throw new Error(errData.error || 'Failed to submit review');
+      }
+
+      const resData = await response.json();
+      if (resData.success && Array.isArray(resData.reviews)) {
+        // Merge this product's reviews back into stored reviews
+        const allStored = getStoredReviews();
+        // Remove old local reviews for this product
+        const filteredStored = allStored.filter(r => r.productId !== product.id);
+        // Combine and save
+        const updated = [...resData.reviews, ...filteredStored];
+        localStorage.setItem('belvia_reviews', JSON.stringify(updated));
+        // Update components state
+        setReviews(updated);
+      }
+      
+      setReviewText('');
+      setNewRating(5);
+    } catch (err: any) {
+      console.error('Error submitting review:', err);
+      alert(err.message || 'Failed to submit review. Please try again.');
+    }
   };
 
   const productReviews = reviews.filter(rev => rev.productId === product.id);
@@ -433,7 +542,7 @@ export default function ProductDetailsModal({ product, onClose, onAddToCart, onE
                             {colorCount === 1 ? 'Color' : `Color ${idx + 1}`}:
                           </span>
                           <div className="flex flex-wrap gap-2">
-                            {product.colors.map((col) => (
+                            {availableColors.map((col) => (
                               <button
                                 key={col}
                                 disabled={isOutOfStock}
@@ -605,48 +714,103 @@ export default function ProductDetailsModal({ product, onClose, onAddToCart, onE
                   )}
                 </div>
 
-                <div id="review-submission-card" className="lg:col-span-5 p-5 bg-bg-surface border border-border-premium rounded-2xl space-y-4">
-                  <h4 className="font-sans font-extrabold text-sm text-text-primary">Post Your Build Review</h4>
-                  <div className="space-y-4 text-xs">
-                    <div className="space-y-1">
-                      <label className="block text-[10px] font-mono text-text-muted uppercase tracking-widest">Star Rating</label>
-                      <div className="flex space-x-1">
-                        {[1,2,3,4,5].map((s) => (
-                          <button key={s} onClick={() => setNewRating(s)} className="p-1 cursor-pointer hover:scale-110 transition">
-                            <Star className={`w-5 h-5 ${s <= newRating ? 'fill-current text-orange-500' : 'text-text-muted'}`} />
-                          </button>
-                        ))}
-                      </div>
+                {ordersLoading ? (
+                  <div id="review-submission-card" className="lg:col-span-5 p-5 bg-bg-surface border border-border-premium rounded-2xl flex flex-col items-center justify-center space-y-3 min-h-[200px]">
+                    <Loader2 className="w-6 h-6 animate-spin text-accent" />
+                    <span className="text-xs font-mono text-text-secondary">Syncing order history...</span>
+                  </div>
+                ) : !user ? (
+                  /* Guest state */
+                  <div id="review-submission-card" className="lg:col-span-5 p-5 bg-bg-surface border border-border-premium rounded-2xl text-center flex flex-col items-center justify-center space-y-3.5 min-h-[220px]">
+                    <div className="w-10 h-10 rounded-full bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-500">
+                      <Lock className="w-5 h-5" />
                     </div>
-                    <div className="space-y-1">
-                      <label className="block text-[10px] font-mono text-text-muted uppercase tracking-widest">Name</label>
-                      <input
-                        type="text"
-                        value={authorName}
-                        onChange={(e) => setAuthorName(e.target.value)}
-                        placeholder="e.g. Lucas Vance (@gotech_customs)"
-                        className="w-full bg-bg-base text-text-primary px-3.5 py-3 rounded-xl border border-border-premium focus:border-accent focus:outline-none text-xs"
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <label className="block text-[10px] font-mono text-text-muted uppercase tracking-widest">Review</label>
-                      <textarea
-                        rows={3}
-                        value={reviewText}
-                        onChange={(e) => setReviewText(e.target.value)}
-                        placeholder="Describe dimensions, layer quality, material finish..."
-                        className="w-full bg-bg-base text-text-primary px-3.5 py-3 rounded-xl border border-border-premium focus:border-accent focus:outline-none text-xs resize-none"
-                      />
+                    <div>
+                      <h4 className="font-sans font-extrabold text-sm text-text-primary">Verified Purchase Required</h4>
+                      <p className="text-text-secondary text-[11px] mt-1.5 leading-relaxed max-w-[280px] mx-auto font-sans">
+                        Only logged-in clients with a completed order for this build can submit a review.
+                      </p>
                     </div>
                     <button
-                      onClick={handleSubmitReview}
-                      disabled={!authorName.trim() || !reviewText.trim()}
-                      className="w-full py-3 bg-accent-secondary hover:bg-accent-hover disabled:opacity-30 disabled:cursor-not-allowed text-text-on-accent font-bold text-xs rounded-xl cursor-pointer transition"
+                      onClick={onOpenAuth}
+                      className="w-full max-w-[200px] py-2.5 bg-accent hover:bg-accent-hover text-text-on-accent font-bold text-xs rounded-xl cursor-pointer transition shadow-md"
                     >
-                      Publish Verified Review
+                      Sign In / Register
                     </button>
                   </div>
-                </div>
+                ) : !hasCompletedOrder ? (
+                  /* User exists but does not have a completed order */
+                  pendingOrder ? (
+                    /* User has a pending order */
+                    <div id="review-submission-card" className="lg:col-span-5 p-5 bg-bg-surface border border-border-premium rounded-2xl text-center flex flex-col items-center justify-center space-y-3.5 min-h-[220px]">
+                      <div className="w-10 h-10 rounded-full bg-accent/10 border border-accent/20 flex items-center justify-center text-accent">
+                        <Loader2 className="w-5 h-5 animate-pulse" />
+                      </div>
+                      <div>
+                        <h4 className="font-sans font-extrabold text-sm text-text-primary">Order in Progress</h4>
+                        <p className="text-text-secondary text-[11px] mt-1.5 leading-relaxed max-w-[280px] mx-auto font-sans">
+                          Your order <code className="bg-bg-base px-1.5 py-0.5 rounded text-[10px] text-text-primary border border-border-premium">{pendingOrder.id}</code> is currently <span className="font-bold text-accent">{pendingOrder.status}</span>. You can post your review once the build is delivered.
+                        </p>
+                      </div>
+                    </div>
+                  ) : (
+                    /* User has never ordered */
+                    <div id="review-submission-card" className="lg:col-span-5 p-5 bg-bg-surface border border-border-premium rounded-2xl text-center flex flex-col items-center justify-center space-y-3.5 min-h-[220px]">
+                      <div className="w-10 h-10 rounded-full bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-orange-500">
+                        <Shield className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <h4 className="font-sans font-extrabold text-sm text-text-primary">Verified Purchase Required</h4>
+                        <p className="text-text-secondary text-[11px] mt-1.5 leading-relaxed max-w-[280px] mx-auto font-sans">
+                          We couldn't find a matching order for this product. Ensure you are signed in with the same email used during checkout.
+                        </p>
+                      </div>
+                    </div>
+                  )
+                ) : (
+                  /* Fully enabled state */
+                  <div id="review-submission-card" className="lg:col-span-5 p-5 bg-bg-surface border border-border-premium rounded-2xl space-y-4">
+                    <h4 className="font-sans font-extrabold text-sm text-text-primary">Post Your Build Review</h4>
+                    <div className="space-y-4 text-xs">
+                      <div className="space-y-1">
+                        <label className="block text-[10px] font-mono text-text-muted uppercase tracking-widest">Star Rating</label>
+                        <div className="flex space-x-1">
+                          {[1,2,3,4,5].map((s) => (
+                            <button key={s} onClick={() => setNewRating(s)} className="p-1 cursor-pointer hover:scale-110 transition">
+                              <Star className={`w-5 h-5 ${s <= newRating ? 'fill-current text-orange-500' : 'text-text-muted'}`} />
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="space-y-1">
+                        <label className="block text-[10px] font-mono text-text-muted uppercase tracking-widest">Verified Client Name</label>
+                        <input
+                          type="text"
+                          value={authorName}
+                          disabled
+                          className="w-full bg-bg-base/70 text-text-secondary px-3.5 py-3 rounded-xl border border-border-premium cursor-not-allowed text-xs font-semibold"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="block text-[10px] font-mono text-text-muted uppercase tracking-widest">Review Details</label>
+                        <textarea
+                          rows={3}
+                          value={reviewText}
+                          onChange={(e) => setReviewText(e.target.value)}
+                          placeholder="Describe dimensions, layer quality, material finish..."
+                          className="w-full bg-bg-base text-text-primary px-3.5 py-3 rounded-xl border border-border-premium focus:border-accent focus:outline-none text-xs resize-none"
+                        />
+                      </div>
+                      <button
+                        onClick={handleSubmitReview}
+                        disabled={!authorName.trim() || !reviewText.trim()}
+                        className="w-full py-3 bg-accent-secondary hover:bg-accent-hover disabled:opacity-30 disabled:cursor-not-allowed text-text-on-accent font-bold text-xs rounded-xl cursor-pointer transition shadow-md"
+                      >
+                        Publish Verified Review
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 

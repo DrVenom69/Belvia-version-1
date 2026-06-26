@@ -41,6 +41,18 @@ export default function Navbar({
   const dropdownRef = useRef<HTMLDivElement>(null);
   const dropdownTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  const [shouldAnimateCart, setShouldAnimateCart] = useState(false);
+  const prevTotalItemsRef = useRef(totalItems);
+
+  useEffect(() => {
+    if (totalItems > prevTotalItemsRef.current) {
+      setShouldAnimateCart(true);
+      const timer = setTimeout(() => setShouldAnimateCart(false), 600);
+      return () => clearTimeout(timer);
+    }
+    prevTotalItemsRef.current = totalItems;
+  }, [totalItems]);
+
   const navLinks = [
     { id: 'home', name: 'Home', icon: Home },
     { id: 'ready-prints', name: 'Store', icon: Layers },
@@ -160,9 +172,9 @@ export default function Navbar({
               onClick={() => setIsCartOpen(true)}
               className="relative text-text-secondary hover:text-accent transition cursor-pointer group p-1"
             >
-              <ShoppingBag className="w-6 h-6 sm:w-5 sm:h-5 group-hover:scale-105 transition-transform" />
+              <ShoppingBag className={`w-6 h-6 sm:w-5 sm:h-5 group-hover:scale-105 transition-all duration-300 ${shouldAnimateCart ? 'animate-cart-pop text-accent' : ''}`} />
               {totalItems > 0 && (
-                <span className="absolute -top-1 -right-1 w-4.5 h-4.5 sm:w-4 sm:h-4 rounded-full bg-accent-secondary text-white text-[9px] font-mono font-bold flex items-center justify-center animate-bounce shadow-sm">
+                <span className={`absolute -top-1 -right-1 w-4.5 h-4.5 sm:w-4 sm:h-4 rounded-full bg-accent-secondary text-white text-[9px] font-mono font-bold flex items-center justify-center shadow-sm transition-all duration-300 ${shouldAnimateCart ? 'scale-125 bg-accent text-text-on-accent font-black shadow-lg shadow-accent/20' : 'animate-bounce'}`}>
                   {totalItems}
                 </span>
               )}

@@ -39,6 +39,7 @@ export interface Product {
   estimatedArrival?: string; // e.g., "Arriving July 20"
   depositPercentage?: number; // e.g., 30 for 30% deposit
   stockQuantity?: number; // -1 = unlimited/untracked, 0 = out of stock, >0 = available
+  colorStock?: Record<string, number>; // Maps color name to stock: -1 = unlimited, 0 = out of stock, >0 = quantity
   originalImportCountry?: string; // e.g., "Germany", "Japan"
   makerWorldUrl?: string; // MakerWorld source page URL
   tags?: string[]; // MakerWorld scraped tags

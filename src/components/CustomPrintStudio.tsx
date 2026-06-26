@@ -188,10 +188,10 @@ export default function CustomPrintStudio({ onAddCustomQuote, onAddBulkOrder, on
           <span className="text-xs font-mono font-black text-accent uppercase tracking-widest bg-accent/10 border border-accent/20 px-3.5 py-1.5 rounded-full shadow-sm">
             Additive Printing Services
           </span>
-          <h2 className="font-display text-3xl sm:text-4xl font-extrabold text-white tracking-tight mt-4">
+          <h2 className="font-display text-3xl sm:text-4xl font-extrabold text-text-primary tracking-tight mt-4">
             {activeSubTab === 'individual' ? 'Upload & Slice Custom STL Files' : 'Enterprise & Corporate Bulk Fabrication'}
           </h2>
-          <p className="text-gray-400 text-sm mt-3 leading-relaxed">
+          <p className="text-text-secondary text-sm mt-3 leading-relaxed">
             {activeSubTab === 'individual'
               ? 'Upload your custom design files. Our simulated cloud compiler compiles polygon facets, overlay limits, filament densities, and computes instant manufacturing price estimations.'
               : 'Scale your production with massive structural volume discounts. Ideal for bulk promotional items, custom gears, unique retail merchandise, and corporate gifts with premium tolerances.'}
@@ -200,7 +200,7 @@ export default function CustomPrintStudio({ onAddCustomQuote, onAddBulkOrder, on
 
         {/* Sub-tab selection row */}
         <div className="flex justify-center mb-12 animate-fade-in">
-          <div className="inline-flex p-1 bg-bg-base border border-gray-850 rounded-2xl shadow-lg">
+          <div className="inline-flex p-1 bg-bg-elevated border border-border-premium rounded-2xl shadow-lg">
             <button
               onClick={() => {
                 setActiveSubTab('individual');
@@ -209,7 +209,7 @@ export default function CustomPrintStudio({ onAddCustomQuote, onAddBulkOrder, on
               className={`flex items-center space-x-2 px-6 py-2.5 rounded-xl font-display text-xs font-bold transition-all duration-200 cursor-pointer ${
                 activeSubTab === 'individual'
                   ? 'bg-accent text-white shadow-md shadow-accent/15'
-                  : 'text-gray-400 hover:text-white hover:bg-bg-surface/40'
+                  : 'text-text-secondary hover:text-text-primary hover:bg-bg-surface/40'
               }`}
             >
               <Sparkles className="w-3.5 h-3.5" />
@@ -223,7 +223,7 @@ export default function CustomPrintStudio({ onAddCustomQuote, onAddBulkOrder, on
               className={`flex items-center space-x-2 px-6 py-2.5 rounded-xl font-display text-xs font-bold transition-all duration-200 cursor-pointer ${
                 activeSubTab === 'keychain'
                   ? 'bg-accent text-white shadow-md shadow-accent/15'
-                  : 'text-gray-400 hover:text-white hover:bg-bg-surface/40'
+                  : 'text-text-secondary hover:text-text-primary hover:bg-bg-surface/40'
               }`}
             >
               <Sparkles className="w-3.5 h-3.5" />
@@ -237,7 +237,7 @@ export default function CustomPrintStudio({ onAddCustomQuote, onAddBulkOrder, on
               className={`flex items-center space-x-2 px-6 py-2.5 rounded-xl font-display text-xs font-bold transition-all duration-200 cursor-pointer ${
                 activeSubTab === 'bulk'
                   ? 'bg-accent text-white shadow-md shadow-accent/15'
-                  : 'text-gray-400 hover:text-white hover:bg-bg-surface/40'
+                  : 'text-text-secondary hover:text-text-primary hover:bg-bg-surface/40'
               }`}
             >
               <Send className="w-3.5 h-3.5" />
@@ -247,29 +247,29 @@ export default function CustomPrintStudio({ onAddCustomQuote, onAddBulkOrder, on
         </div>
 
         {activeSubTab === 'bulk' ? (
-          <div className="max-w-4xl mx-auto bg-bg-base/20 border border-gray-850 rounded-2xl p-2.5 shadow-2xl animate-in fade-in slide-in-from-bottom-3 duration-300">
+          <div className="max-w-4xl mx-auto bg-bg-surface/20 border border-border-premium rounded-2xl p-2.5 shadow-2xl animate-in fade-in slide-in-from-bottom-3 duration-300">
             <BulkOrders onAddBulkOrder={onAddBulkOrder} />
           </div>
         ) : activeSubTab === 'keychain' ? (
-          <div className="max-w-5xl mx-auto bg-bg-base/20 border border-gray-850 rounded-2xl p-2.5 shadow-2xl animate-in fade-in slide-in-from-bottom-3 duration-300">
+          <div className="max-w-5xl mx-auto bg-bg-surface/20 border border-border-premium rounded-2xl p-2.5 shadow-2xl animate-in fade-in slide-in-from-bottom-3 duration-300">
             <NameKeychainBuilder onAddToCart={onAddToCart} />
           </div>
         ) : submitSuccess ? (
           /* Confirmation tracking visual card */
-          <div className="max-w-2xl mx-auto bg-[#070b13] border border-green-500/30 p-8 rounded-2xl shadow-xl text-center space-y-6">
+          <div className="max-w-2xl mx-auto bg-bg-surface border border-border-premium p-8 rounded-2xl shadow-xl text-center space-y-6">
             <div className="w-16 h-16 rounded-full bg-green-500/10 border border-green-500/30 flex items-center justify-center mx-auto mb-4">
               <CheckCircle2 className="w-9 h-9 text-green-400" />
             </div>
             
             <div className="space-y-1">
-              <h3 className="font-display font-bold text-xl text-white">Quotation Registration Successful</h3>
-              <p className="text-gray-400 text-xs">Your additive manufacturing job is registered under tracking reference:</p>
-              <div className="inline-block px-4 py-1.5 rounded bg-gray-900 border border-bg-elevated text-sm font-mono font-bold text-accent mt-2">
+              <h3 className="font-display font-bold text-xl text-text-primary">Quotation Registration Successful</h3>
+              <p className="text-text-secondary text-xs">Your additive manufacturing job is registered under tracking reference:</p>
+              <div className="inline-block px-4 py-1.5 rounded bg-bg-elevated border border-border-premium text-sm font-mono font-bold text-accent mt-2">
                 {submitSuccess}
               </div>
             </div>
 
-            <p className="text-gray-400 text-xs leading-relaxed max-w-md mx-auto">
+            <p className="text-text-secondary text-xs leading-relaxed max-w-md mx-auto">
               Our print farm coordinators have reserved machine capacity. A final verified slicing G-code confirmation sheet was sent to your email. We will reach out within 2 hours.
             </p>
 
@@ -292,8 +292,8 @@ export default function CustomPrintStudio({ onAddCustomQuote, onAddBulkOrder, on
                 onDragOver={handleDrag}
                 onDragLeave={handleDrag}
                 onDrop={handleDrop}
-                className={`border-2 border-dashed rounded-2xl bg-[#070c17]/50 flex flex-col items-center justify-center py-14 px-8 text-center transition-all duration-300 relative overflow-hidden group ${
-                  dragActive ? 'border-accent bg-accent/5' : 'border-bg-elevated hover:border-gray-700'
+                className={`border-2 border-dashed rounded-2xl bg-bg-surface/50 flex flex-col items-center justify-center py-14 px-8 text-center transition-all duration-300 relative overflow-hidden group ${
+                  dragActive ? 'border-accent bg-accent/5' : 'border-border-premium hover:border-accent/40'
                 }`}
               >
                 {/* Background grid */}
@@ -315,8 +315,8 @@ export default function CustomPrintStudio({ onAddCustomQuote, onAddBulkOrder, on
                       <UploadCloud className="w-8 h-8 text-accent" />
                     </div>
                     <div>
-                      <p className="text-gray-200 font-medium text-sm">Drag and drop model file here, or <span className="text-accent font-semibold underline">browse directories</span></p>
-                      <p className="text-gray-500 text-xs mt-1.5 font-mono">SUPPORTS: .STL, .3MF, .OBJ (MAX 50MB)</p>
+                      <p className="text-text-primary font-medium text-sm">Drag and drop model file here, or <span className="text-accent font-semibold underline">browse directories</span></p>
+                      <p className="text-text-secondary text-xs mt-1.5 font-mono">SUPPORTS: .STL, .3MF, .OBJ (MAX 50MB)</p>
                     </div>
                   </div>
                 ) : isParsing ? (
@@ -325,39 +325,39 @@ export default function CustomPrintStudio({ onAddCustomQuote, onAddBulkOrder, on
                     <div className="flex items-center space-x-3.5 max-w-sm mx-auto justify-center">
                       <FileCode className="w-8 h-8 text-accent animate-pulse" />
                       <div className="text-left">
-                        <p className="text-gray-200 font-bold text-sm">Cura Engine Working...</p>
-                        <p className="text-gray-500 text-xs font-mono">Compiling Mesh Coordinates</p>
+                        <p className="text-text-primary font-bold text-sm">Cura Engine Working...</p>
+                        <p className="text-text-secondary text-xs font-mono">Compiling Mesh Coordinates</p>
                       </div>
                     </div>
                     {/* Progress slider bar */}
-                    <div className="w-full max-w-md mx-auto bg-gray-900 h-1.5 rounded-full overflow-hidden border border-bg-elevated">
+                    <div className="w-full max-w-md mx-auto bg-bg-base h-1.5 rounded-full overflow-hidden border border-border-premium">
                       <div 
                         className="bg-gradient-to-r from-accent to-accent-secondary h-full rounded-full transition-all duration-300"
                         style={{ width: `${parsingProgress}%` }}
                       />
                     </div>
                     {/* Output log entries */}
-                    <div className="bg-bg-base rounded-xl p-4.5 border border-bg-elevated font-mono text-[10px] text-left text-gray-400 h-40 overflow-y-auto max-w-md mx-auto space-y-1 select-none">
+                    <div className="bg-bg-elevated rounded-xl p-4.5 border border-border-premium font-mono text-[10px] text-left text-text-secondary h-40 overflow-y-auto max-w-md mx-auto space-y-1 select-none">
                       {parseSteps.map((log, index) => (
                         <div key={index} className="flex justify-between">
                           <span className="text-accent">{log}</span>
-                          <span className="text-gray-600">SUCCESS</span>
+                          <span className="text-text-secondary/60">SUCCESS</span>
                         </div>
                       ))}
-                      <div className="animate-pulse text-gray-500">_ compiling code commands...</div>
+                      <div className="animate-pulse text-text-secondary">_ compiling code commands...</div>
                     </div>
                   </div>
                 ) : (
                   /* File Upload Completed Display Specs */
                   <div className="w-full p-4 space-y-6 relative z-10">
-                    <div className="flex items-center justify-between border-b border-bg-elevated pb-4">
+                    <div className="flex items-center justify-between border-b border-border-premium pb-4">
                       <div className="flex items-center space-x-3 text-left">
                         <div className="w-12 h-12 rounded-lg bg-accent/10 border border-accent/20 flex items-center justify-center text-accent">
                           <HardDrive className="w-6 h-6 animate-pulse" />
                         </div>
                         <div>
-                          <p className="text-gray-200 text-sm font-bold line-clamp-1">{file.name}</p>
-                          <p className="text-gray-500 text-xs font-mono">{file.size} • {file.type}</p>
+                          <p className="text-text-primary text-sm font-bold line-clamp-1">{file.name}</p>
+                          <p className="text-text-secondary text-xs font-mono">{file.size} • {file.type}</p>
                         </div>
                       </div>
                       <button
@@ -371,20 +371,20 @@ export default function CustomPrintStudio({ onAddCustomQuote, onAddBulkOrder, on
                     {/* Extracted 3D geometric specs */}
                     {calculatedSpecs && (
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-left font-mono">
-                        <div className="bg-bg-base border border-gray-850 p-4 rounded-xl">
-                          <span className="block text-[8px] text-gray-500 uppercase tracking-widest">triangles</span>
-                          <span className="text-sm font-bold text-gray-200">{calculatedSpecs.triangles}</span>
+                        <div className="bg-bg-elevated border border-border-premium p-4 rounded-xl">
+                          <span className="block text-[8px] text-text-secondary uppercase tracking-widest">triangles</span>
+                          <span className="text-sm font-bold text-text-primary">{calculatedSpecs.triangles}</span>
                         </div>
-                        <div className="bg-bg-base border border-gray-850 p-4 rounded-xl">
-                          <span className="block text-[8px] text-gray-500 uppercase tracking-widest">Bounding Box</span>
-                          <span className="text-sm font-bold text-gray-200 line-clamp-1" title={calculatedSpecs.dimensions}>{calculatedSpecs.dimensions}</span>
+                        <div className="bg-bg-elevated border border-border-premium p-4 rounded-xl">
+                          <span className="block text-[8px] text-text-secondary uppercase tracking-widest">Bounding Box</span>
+                          <span className="text-sm font-bold text-text-primary line-clamp-1" title={calculatedSpecs.dimensions}>{calculatedSpecs.dimensions}</span>
                         </div>
-                        <div className="bg-bg-base border border-gray-850 p-4 rounded-xl">
-                          <span className="block text-[8px] text-gray-500 uppercase tracking-widest">RESIN Volume</span>
-                          <span className="text-sm font-bold text-gray-200">{calculatedSpecs.volume}</span>
+                        <div className="bg-bg-elevated border border-border-premium p-4 rounded-xl">
+                          <span className="block text-[8px] text-text-secondary uppercase tracking-widest">RESIN Volume</span>
+                          <span className="text-sm font-bold text-text-primary">{calculatedSpecs.volume}</span>
                         </div>
-                        <div className="bg-bg-base border border-gray-850 p-4 rounded-xl">
-                          <span className="block text-[8px] text-gray-500 uppercase tracking-widest">Net Fil. weight</span>
+                        <div className="bg-bg-elevated border border-border-premium p-4 rounded-xl">
+                          <span className="block text-[8px] text-text-secondary uppercase tracking-widest">Net Fil. weight</span>
                           <span className="text-sm font-bold text-accent">{calculatedSpecs.weight}</span>
                         </div>
                       </div>
@@ -394,12 +394,12 @@ export default function CustomPrintStudio({ onAddCustomQuote, onAddBulkOrder, on
               </div>
 
               {/* Requirements card */}
-              <div className="bg-[#070b13] border border-bg-elevated/80 rounded-2xl p-6 text-left">
+              <div className="bg-bg-surface border border-border-premium rounded-2xl p-6 text-left">
                 <div className="flex items-center space-x-2 text-indigo-400 font-semibold text-sm mb-3">
                   <AlertCircle className="w-5 h-5 shrink-0" />
                   <span>3D Design Requirements & Alignment</span>
                 </div>
-                <ul className="text-xs text-gray-400 space-y-2 leading-relaxed">
+                <ul className="text-xs text-text-secondary space-y-2 leading-relaxed">
                   <li className="flex items-start space-x-2">
                     <span className="text-accent shrink-0 select-none">•</span>
                     <span>Verify that your model contains closed manifolds and no stray intersecting face groups.</span>
@@ -419,25 +419,25 @@ export default function CustomPrintStudio({ onAddCustomQuote, onAddBulkOrder, on
 
             {/* Right Box: Quote Customizer and Form Contact capture column */}
             <div className="lg:col-span-5">
-              <div className="bg-[#070b13] border border-bg-elevated rounded-2xl p-6 text-left shadow-2xl relative">
+              <div className="bg-bg-surface border border-border-premium rounded-2xl p-6 text-left shadow-2xl relative">
                 
                 {/* Visual Glow Indicator */}
                 {file && <div className="absolute top-0 right-10 w-24 h-px bg-accent/30 blur-sm animate-pulse" />}
 
-                <h3 className="font-display font-extrabold text-lg text-white mb-6">Quote Selector & contact details</h3>
+                <h3 className="font-display font-extrabold text-lg text-text-primary mb-6">Quote Selector & contact details</h3>
                 
                 <form onSubmit={handleFormSubmit} className="space-y-4">
                   
                   {/* Select Material */}
                   <div>
-                    <label className="block text-[10px] font-mono text-gray-500 uppercase tracking-widest mb-1">
+                    <label className="block text-[10px] font-mono text-text-secondary uppercase tracking-widest mb-1">
                       Additive Resin Material:
                     </label>
                     <select
                       value={material}
                       onChange={(e) => setMaterial(e.target.value)}
                       disabled={!file}
-                      className="w-full bg-bg-base text-gray-300 border border-bg-elevated rounded-xl py-2 px-3 text-xs focus:border-accent disabled:opacity-40"
+                      className="w-full bg-bg-base text-text-primary border border-border-premium rounded-xl py-2 px-3 text-xs focus:border-accent disabled:opacity-40"
                     >
                       {materials_list.map((m) => (
                         <option key={m} value={m}>{m}</option>
@@ -447,14 +447,14 @@ export default function CustomPrintStudio({ onAddCustomQuote, onAddBulkOrder, on
 
                   {/* Select Color */}
                   <div>
-                    <label className="block text-[10px] font-mono text-gray-500 uppercase tracking-widest mb-1">
+                    <label className="block text-[10px] font-mono text-text-secondary uppercase tracking-widest mb-1">
                       Filament Core Color:
                     </label>
                     <select
                       value={color}
                       onChange={(e) => setColor(e.target.value)}
                       disabled={!file}
-                      className="w-full bg-bg-base text-gray-300 border border-bg-elevated rounded-xl py-2 px-3 text-xs focus:border-accent disabled:opacity-40"
+                      className="w-full bg-bg-base text-text-primary border border-border-premium rounded-xl py-2 px-3 text-xs focus:border-accent disabled:opacity-40"
                     >
                       {colors_list.map((c) => (
                         <option key={c} value={c}>{c}</option>
@@ -464,14 +464,14 @@ export default function CustomPrintStudio({ onAddCustomQuote, onAddBulkOrder, on
 
                   {/* Select Infill Layout */}
                   <div>
-                    <label className="block text-[10px] font-mono text-gray-500 uppercase tracking-widest mb-1">
+                    <label className="block text-[10px] font-mono text-text-secondary uppercase tracking-widest mb-1">
                       Infill Pattern &amp; Density:
                     </label>
                     <select
                       value={infill}
                       onChange={(e) => setInfill(e.target.value)}
                       disabled={!file}
-                      className="w-full bg-bg-base text-gray-300 border border-bg-elevated rounded-xl py-2 px-3 text-xs focus:border-accent disabled:opacity-40"
+                      className="w-full bg-bg-base text-text-primary border border-border-premium rounded-xl py-2 px-3 text-xs focus:border-accent disabled:opacity-40"
                     >
                       {infills_list.map((inf) => (
                         <option key={inf} value={inf}>{inf}</option>
@@ -481,24 +481,24 @@ export default function CustomPrintStudio({ onAddCustomQuote, onAddBulkOrder, on
 
                   {/* Quantity and Sizer */}
                   <div>
-                    <label className="block text-[10px] font-mono text-gray-500 uppercase tracking-widest mb-1.5">
+                    <label className="block text-[10px] font-mono text-text-secondary uppercase tracking-widest mb-1.5">
                       Batch Quantity (QTY):
                     </label>
-                    <div className="flex items-center bg-bg-base border border-bg-elevated rounded-xl p-1 justify-between max-w-[140px]">
+                    <div className="flex items-center bg-bg-base border border-border-premium rounded-xl p-1 justify-between max-w-[140px]">
                       <button
                         type="button"
                         onClick={() => setQuantity(Math.max(1, quantity - 1))}
                         disabled={!file}
-                        className="w-7 h-7 flex items-center justify-center text-gray-400 hover:text-white hover:bg-gray-800 rounded text-sm disabled:opacity-30"
+                        className="w-7 h-7 flex items-center justify-center text-text-secondary hover:text-text-primary hover:bg-bg-elevated rounded text-sm disabled:opacity-30"
                       >
                         -
                       </button>
-                      <span className="font-mono text-white text-xs font-bold">{quantity}</span>
+                      <span className="font-mono text-text-primary text-xs font-bold">{quantity}</span>
                       <button
                         type="button"
                         onClick={() => setQuantity(quantity + 1)}
                         disabled={!file}
-                        className="w-7 h-7 flex items-center justify-center text-gray-400 hover:text-white hover:bg-gray-800 rounded text-sm disabled:opacity-30"
+                        className="w-7 h-7 flex items-center justify-center text-text-secondary hover:text-text-primary hover:bg-bg-elevated rounded text-sm disabled:opacity-30"
                       >
                         +
                       </button>
@@ -506,10 +506,10 @@ export default function CustomPrintStudio({ onAddCustomQuote, onAddBulkOrder, on
                   </div>
 
                   {/* Contact Block */}
-                  <div className="border-t border-gray-850 pt-4 space-y-3.5">
+                  <div className="border-t border-border-premium pt-4 space-y-3.5">
                     
                     <div>
-                      <label className="block text-[10px] font-mono text-gray-500 uppercase tracking-widest mb-1">
+                      <label className="block text-[10px] font-mono text-text-secondary uppercase tracking-widest mb-1">
                         Full Name:
                       </label>
                       <input
@@ -518,12 +518,12 @@ export default function CustomPrintStudio({ onAddCustomQuote, onAddBulkOrder, on
                         value={userName}
                         onChange={(e) => setUserName(e.target.value)}
                         placeholder="John Doe"
-                        className="w-full bg-bg-base text-gray-300 border border-bg-elevated rounded-xl py-2 px-3 text-xs focus:border-accent"
+                        className="w-full bg-bg-base text-text-primary border border-border-premium rounded-xl py-2 px-3 text-xs focus:border-accent"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-[10px] font-mono text-gray-500 uppercase tracking-widest mb-1">
+                      <label className="block text-[10px] font-mono text-text-secondary uppercase tracking-widest mb-1">
                         Corporate / Personal Email:
                       </label>
                       <input
@@ -532,12 +532,12 @@ export default function CustomPrintStudio({ onAddCustomQuote, onAddBulkOrder, on
                         value={userEmail}
                         onChange={(e) => setUserEmail(e.target.value)}
                         placeholder="johndoe@belvia.com"
-                        className="w-full bg-bg-base text-gray-300 border border-bg-elevated rounded-xl py-2 px-3 text-xs focus:border-accent"
+                        className="w-full bg-bg-base text-text-primary border border-border-premium rounded-xl py-2 px-3 text-xs focus:border-accent"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-[10px] font-mono text-gray-500 uppercase tracking-widest mb-1">
+                      <label className="block text-[10px] font-mono text-text-secondary uppercase tracking-widest mb-1">
                         Printing notes (Layer height or uses):
                       </label>
                       <textarea
@@ -545,7 +545,7 @@ export default function CustomPrintStudio({ onAddCustomQuote, onAddBulkOrder, on
                         onChange={(e) => setDetails(e.target.value)}
                         rows={2}
                         placeholder="Please use structural organic supports..."
-                        className="w-full bg-bg-base text-gray-300 border border-bg-elevated rounded-xl py-2 px-3 text-xs focus:border-accent resize-none"
+                        className="w-full bg-bg-base text-text-primary border border-border-premium rounded-xl py-2 px-3 text-xs focus:border-accent resize-none"
                       />
                     </div>
 
@@ -555,7 +555,7 @@ export default function CustomPrintStudio({ onAddCustomQuote, onAddBulkOrder, on
                   {file && calculatedSpecs && (
                     <div className="bg-bg-elevated border border-accent/30 p-4 rounded-xl flex items-center justify-between font-mono mt-4">
                       <div className="text-left">
-                        <span className="block text-[8px] text-gray-500 uppercase tracking-widest">Instant quote estimate</span>
+                        <span className="block text-[8px] text-text-secondary uppercase tracking-widest">Instant quote estimate</span>
                         <span className="text-xl font-bold text-accent">{formatPrice(calculatedSpecs.rawPrice)}</span>
                       </div>
                       <span className="text-[10px] text-accent font-bold bg-accent/10 px-2 py-1 rounded">G-CODE READY</span>

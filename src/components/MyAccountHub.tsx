@@ -370,32 +370,57 @@ export default function MyAccountHub({
     }
   };
 
-  const handlePostReviewSubmit = (e: React.FormEvent) => {
+  const handlePostReviewSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedReviewOrder || !reviewTextText.trim()) return;
 
-    const newRev: Review = {
-      id: `rev-client-${Date.now()}`,
-      productId: selectedReviewOrder.productId,
-      author: `${firstName} ${lastName} (@verified_belvia)`,
-      rating: reviewRating,
-      text: reviewTextText.trim(),
-      createdAt: new Date().toISOString(),
-      isVerified: true,
-      avatarUrl: profilePicture || undefined
-    };
+    const formattedAuthor = `${firstName} ${lastName} (@verified_belvia)`;
 
-    saveStoredReview(newRev);
-    // Refresh visual state
-    setGlobalReviews(getStoredReviews());
-    setReviewSuccessMsg(`Review successfully cataloged under "${selectedReviewOrder.title}"! It is now active on the home highlights and product detail tabs.`);
-    setReviewTextText('');
-    setReviewRating(5);
-    
-    setTimeout(() => {
-      setSelectedReviewOrder(null);
-      setReviewSuccessMsg('');
-    }, 4000);
+    try {
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (session?.access_token) {
+        headers['Authorization'] = `Bearer ${session.access_token}`;
+      }
+      const response = await fetch('/api/submit-review', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          productId: selectedReviewOrder.productId,
+          rating: reviewRating,
+          text: reviewTextText.trim(),
+          author: formattedAuthor,
+          userEmail: user?.email
+        })
+      });
+
+      if (!response.ok) {
+        const errData = await response.json();
+        throw new Error(errData.error || 'Failed to submit review');
+      }
+
+      const resData = await response.json();
+      if (resData.success && Array.isArray(resData.reviews)) {
+        // Merge back into stored reviews
+        const allStored = getStoredReviews();
+        const filteredStored = allStored.filter(r => r.productId !== selectedReviewOrder.productId);
+        const updated = [...resData.reviews, ...filteredStored];
+        localStorage.setItem('belvia_reviews', JSON.stringify(updated));
+        // Update components state
+        setGlobalReviews(updated);
+      }
+
+      setReviewSuccessMsg(`Review successfully cataloged under "${selectedReviewOrder.title}"! It is now active on the home highlights and product detail tabs.`);
+      setReviewTextText('');
+      setReviewRating(5);
+      
+      setTimeout(() => {
+        setSelectedReviewOrder(null);
+        setReviewSuccessMsg('');
+      }, 4000);
+    } catch (err: any) {
+      console.error('Error submitting review in Account Hub:', err);
+      alert(err.message || 'Failed to submit review. Please try again.');
+    }
   };
 
   const handleAuthSubmit = async (e: React.FormEvent) => {
@@ -424,22 +449,22 @@ export default function MyAccountHub({
         
         {/* AUTH LOADING STATE — session still being checked */}
         {isAuthLoading ? (
-          <div className="max-w-md mx-auto bg-[#070b13] border border-bg-elevated rounded-2xl p-8 shadow-2xl relative overflow-hidden text-center">
+          <div className="max-w-md mx-auto bg-bg-surface border border-border-premium rounded-2xl p-8 shadow-2xl relative overflow-hidden text-center">
             <Loader className="w-8 h-8 animate-spin text-accent mx-auto mb-3" />
-            <p className="text-gray-400 text-xs font-mono">Verifying session...</p>
+            <p className="text-text-secondary text-xs font-mono">Verifying session...</p>
           </div>
         ) : !isLoggedIn ? (
-          <div className="max-w-md mx-auto bg-[#070b13] border border-bg-elevated rounded-2xl p-8 shadow-2xl relative overflow-hidden">
+          <div className="max-w-md mx-auto bg-bg-surface border border-border-premium rounded-2xl p-8 shadow-2xl relative overflow-hidden">
             <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-accent to-accent-secondary" />
             
             <div className="text-center mb-8">
               <div className="w-12 h-12 bg-accent/10 border border-accent/30 rounded-xl flex items-center justify-center mx-auto mb-3">
                 <Code className="w-6 h-6 text-accent" />
               </div>
-              <h3 className="font-display font-black text-xl text-white">
+              <h3 className="font-display font-black text-xl text-text-primary">
                 {isRegisterMode ? 'Create Belvia Account' : 'Belvia Secure Portal'}
               </h3>
-              <p className="text-gray-400 text-xs mt-1.5 leading-relaxed font-mono">
+              <p className="text-text-secondary text-xs mt-1.5 leading-relaxed font-mono">
                 {isRegisterMode 
                   ? 'Sign up to register customized STL slicing jobs, track additive bed history and post client reviews.' 
                   : 'Settle slicing quotes, review shipment telemetry, and access your personalized print queues.'
@@ -449,14 +474,14 @@ export default function MyAccountHub({
 
             <form onSubmit={handleAuthSubmit} className="space-y-4">
               <div className="space-y-1">
-                <label className="block text-[10px] font-mono text-gray-500 uppercase tracking-widest font-black">Email Address</label>
+                <label className="block text-[10px] font-mono text-text-secondary uppercase tracking-widest font-black">Email Address</label>
                 <input
                   type="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="name@domain.com"
-                  className="w-full bg-bg-base text-gray-200 px-3.5 py-2.5 rounded-xl border border-bg-elevated focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent/30 text-xs font-mono"
+                  className="w-full bg-bg-base text-text-primary px-3.5 py-2.5 rounded-xl border border-border-premium focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent/30 text-xs font-mono"
                 />
               </div>
 
@@ -495,9 +520,9 @@ export default function MyAccountHub({
 
               <div className="relative my-4 flex items-center justify-center">
                 <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-bg-elevated"></div>
+                  <div className="w-full border-t border-border-premium"></div>
                 </div>
-                <span className="relative px-3 bg-[#070b13] text-[9px] font-mono text-gray-500 uppercase tracking-widest">Or continue with</span>
+                <span className="relative px-3 bg-bg-surface text-[9px] font-mono text-text-secondary uppercase tracking-widest">Or continue with</span>
               </div>
 
               <button
@@ -514,7 +539,7 @@ export default function MyAccountHub({
                     setAuthErrorMsg(r.message);
                   }
                 }}
-                className="w-full py-2.5 border border-bg-elevated bg-[#0b1329] hover:bg-bg-surface text-white rounded-xl transition text-xs font-mono font-bold cursor-pointer flex items-center justify-center space-x-2 shadow-md"
+                className="w-full py-2.5 border border-border-premium bg-bg-base hover:bg-bg-elevated text-text-primary rounded-xl transition text-xs font-mono font-bold cursor-pointer flex items-center justify-center space-x-2 shadow-md"
               >
                 <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24">
                   <path
@@ -549,7 +574,7 @@ export default function MyAccountHub({
                       else setAuthErrorMsg(r.message);
                     });
                   }}
-                  className="w-full py-2.5 border border-bg-elevated bg-[#090f1f] hover:bg-bg-surface text-gray-400 hover:text-white rounded-xl transition text-[11px] font-mono font-bold cursor-pointer"
+                  className="w-full py-2.5 border border-border-premium bg-bg-base hover:bg-bg-elevated text-text-secondary hover:text-text-primary rounded-xl transition text-[11px] font-mono font-bold cursor-pointer"
                 >
                   DEMO QUICK SIGN-IN (iffat2000bd@gmail.com)
                 </button>
@@ -573,7 +598,7 @@ export default function MyAccountHub({
             {/* Left Column Profile Summary & Controls */}
             <div className="lg:col-span-4 space-y-6">
               {/* User Bio Card */}
-              <div className="bg-[#070b13] border border-bg-elevated rounded-2xl p-6 shadow-xl relative overflow-hidden">
+              <div className="bg-bg-surface border border-border-premium rounded-2xl p-6 shadow-xl relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-accent/10 to-transparent rounded-full pointer-events-none" />
 
                 {/* Hidden profile pic input */}
@@ -612,13 +637,13 @@ export default function MyAccountHub({
                       <span className="text-[9px] text-white font-mono mt-0.5">Upload</span>
                     </div>
                     {/* Tiny camera badge */}
-                    <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-accent border-2 border-[#070b13] flex items-center justify-center shadow">
+                    <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-accent border-2 border-bg-surface flex items-center justify-center shadow">
                       <Camera className="w-3 h-3 text-white" />
                     </div>
                   </button>
 
                   <div>
-                    <h3 className="font-display font-black text-lg text-white">
+                    <h3 className="font-display font-black text-lg text-text-primary">
                       {firstName} {lastName}
                     </h3>
                     <span className="inline-flex items-center space-x-1.5 px-2 py-0.5 rounded bg-accent/10 text-accent font-mono text-[9px] font-extrabold border border-accent/25">
@@ -636,7 +661,7 @@ export default function MyAccountHub({
                   </div>
                 </div>
 
-                <div className="mt-6 pt-5 border-t border-gray-850/80 space-y-3 font-mono text-xs text-gray-400">
+                <div className="mt-6 pt-5 border-t border-border-premium space-y-3 font-mono text-xs text-text-secondary">
                   <div className="flex items-center space-x-2">
                     <Mail className="w-4 h-4 text-accent shrink-0" />
                     <span className="truncate">{authEmail}</span>
@@ -648,20 +673,20 @@ export default function MyAccountHub({
                 </div>
 
                 {/* Subview controllers */}
-                <div className="mt-6 pt-5 border-t border-gray-850 space-y-2">
+                <div className="mt-6 pt-5 border-t border-border-premium space-y-2">
                   <button
                     onClick={() => setActiveSubView('orders')}
                     className={`w-full text-left px-3.5 py-2.5 rounded-xl font-mono text-xs flex items-center justify-between cursor-pointer transition ${
                       activeSubView === 'orders' 
                         ? 'bg-accent/10 text-accent border border-accent/20 font-bold' 
-                        : 'text-gray-400 hover:text-white hover:bg-bg-surface border border-transparent'
+                        : 'text-text-secondary hover:text-text-primary hover:bg-bg-elevated border border-transparent'
                     }`}
                   >
                     <span className="flex items-center space-x-2">
                       <ClipboardList className="w-4 h-4" />
                       <span>ORDER LOGS &amp; LOGISTICS</span>
                     </span>
-                    <span className="bg-[#0b1625] px-2 py-0.5 rounded text-[10px] text-gray-400">{pastOrders.length}</span>
+                    <span className="bg-bg-base px-2 py-0.5 rounded text-[10px] text-text-secondary">{pastOrders.length}</span>
                   </button>
 
                   <button
@@ -669,14 +694,14 @@ export default function MyAccountHub({
                     className={`w-full text-left px-3.5 py-2.5 rounded-xl font-mono text-xs flex items-center justify-between cursor-pointer transition ${
                       activeSubView === 'profile' 
                         ? 'bg-accent/10 text-accent border border-accent/20 font-bold' 
-                        : 'text-gray-400 hover:text-white hover:bg-bg-surface border border-transparent'
+                        : 'text-text-secondary hover:text-text-primary hover:bg-bg-elevated border border-transparent'
                     }`}
                   >
                     <span className="flex items-center space-x-2">
                       <Settings className="w-4 h-4" />
                       <span>DENSITY PREFERENCES</span>
                     </span>
-                    <span className="text-[10px] text-gray-500">SAVED</span>
+                    <span className="text-[10px] text-text-secondary">SAVED</span>
                   </button>
 
                   <button
@@ -684,21 +709,21 @@ export default function MyAccountHub({
                     className={`w-full text-left px-3.5 py-2.5 rounded-xl font-mono text-xs flex items-center justify-between cursor-pointer transition ${
                       activeSubView === 'wishlist' 
                         ? 'bg-accent/10 text-accent border border-accent/20 font-bold' 
-                        : 'text-gray-400 hover:text-white hover:bg-bg-surface border border-transparent'
+                        : 'text-text-secondary hover:text-text-primary hover:bg-bg-elevated border border-transparent'
                     }`}
                   >
                     <span className="flex items-center space-x-2">
                       <Heart className="w-4 h-4" />
                       <span>WISHLIST SPECIFICATIONS</span>
                     </span>
-                    <span className="bg-[#1c0d11] px-2 py-0.5 rounded text-[10px] text-red-400 font-bold">{wishlist.length}</span>
+                    <span className="bg-red-500/10 px-2 py-0.5 rounded text-[10px] text-red-500 font-bold">{wishlist.length}</span>
                   </button>
                 </div>
 
                 {/* Log out trigger */}
                 <button
                   onClick={() => signOut()}
-                  className="mt-6 w-full py-2 rounded-xl bg-bg-base border border-gray-850 hover:bg-red-950/20 hover:border-red-900/40 text-gray-500 hover:text-red-400 transition font-mono text-[10px] cursor-pointer flex items-center justify-center space-x-1.5"
+                  className="mt-6 w-full py-2 rounded-xl bg-bg-base border border-border-premium hover:bg-red-500/10 hover:border-red-500/20 text-text-secondary hover:text-red-500 transition font-mono text-[10px] cursor-pointer flex items-center justify-center space-x-1.5"
                 >
                   <LogOut className="w-3.5 h-3.5" />
                   <span>LOG OUT HUB</span>
@@ -714,9 +739,9 @@ export default function MyAccountHub({
                 ? Math.min(100, ((completedCount - tier.minOrders) / (nextTier.minOrders - tier.minOrders)) * 100)
                 : 100;
               return (
-                <div className="bg-[#070b13] border border-bg-elevated rounded-2xl p-5 space-y-3">
+                <div className="bg-bg-surface border border-border-premium rounded-2xl p-5 space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-[9px] font-mono font-black text-gray-500 tracking-widest uppercase">Loyalty Status</span>
+                    <span className="text-[9px] font-mono font-black text-text-secondary tracking-widest uppercase">Loyalty Status</span>
                     <Trophy className="w-4 h-4" style={{ color: tier.color }} />
                   </div>
                   <div className="flex items-center space-x-2">
@@ -730,13 +755,13 @@ export default function MyAccountHub({
                     )}
                   </div>
                   <div className="space-y-1.5">
-                    <div className="w-full h-1.5 bg-bg-elevated rounded-full overflow-hidden">
+                    <div className="w-full h-1.5 bg-bg-base rounded-full overflow-hidden">
                       <div
                         className="h-full rounded-full transition-all duration-500"
                         style={{ width: `${progress}%`, background: tier.color }}
                       />
                     </div>
-                    <p className="text-[10px] font-mono text-gray-400">
+                    <p className="text-[10px] font-mono text-text-secondary">
                       {getLoyaltyProgress(completedCount)}
                     </p>
                   </div>
@@ -763,15 +788,15 @@ export default function MyAccountHub({
             })()}
 
               {/* Instant tracking lookup utility right under */}
-              <div className="bg-[#070b13] border border-bg-elevated rounded-2xl p-5.5 text-left text-xs space-y-3 font-mono">
-                <span className="block text-[9px] text-gray-500 tracking-widest uppercase font-black">Direct G-Code Shipment Search</span>
+              <div className="bg-bg-surface border border-border-premium rounded-2xl p-5.5 text-left text-xs space-y-3 font-mono">
+                <span className="block text-[9px] text-text-secondary tracking-widest uppercase font-black">Direct G-Code Shipment Search</span>
                 <div className="flex space-x-2">
                   <input
                     type="text"
                     value={shipmentSearchCode}
                     onChange={(e) => setShipmentSearchCode(e.target.value)}
                     placeholder="e.g. BLV-SHIP-71510"
-                    className="flex-grow bg-bg-base px-3 py-2 rounded-xl border border-bg-elevated focus:outline-none focus:border-accent text-[11px]"
+                    className="flex-grow bg-bg-base px-3 py-2 rounded-xl border border-border-premium focus:outline-none focus:border-accent text-[11px] text-text-primary"
                   />
                   <button
                     onClick={() => handleTrackerSearch(shipmentSearchCode)}
@@ -784,21 +809,21 @@ export default function MyAccountHub({
                 {/* Search Result Quick Preview */}
                 {testedCode && (
                   shipmentResult ? (
-                    <div className="p-3.5 rounded-lg bg-accent/10 border border-accent/10 text-[11px] text-gray-300 space-y-2">
+                    <div className="p-3.5 rounded-lg bg-bg-base border border-border-premium text-[11px] text-text-secondary space-y-2">
                       <div className="flex justify-between items-center text-[10px] font-bold">
                         <span className="text-accent">{shipmentResult.id}</span>
-                        <span className="text-gray-400">{shipmentResult.status}</span>
+                        <span className="text-text-secondary">{shipmentResult.status}</span>
                       </div>
-                      <p className="font-sans font-bold leading-tight line-clamp-1">{shipmentResult.productName}</p>
+                      <p className="font-sans font-bold leading-tight line-clamp-1 text-text-primary">{shipmentResult.productName}</p>
                       {shipmentResult.telemetry && (
-                        <p className="text-[10px] text-gray-400 animate-pulse font-mono">
+                        <p className="text-[10px] text-text-secondary animate-pulse font-mono">
                           Layer: {shipmentResult.telemetry.layer} // Temp: {shipmentResult.telemetry.nozzleTemp}
                         </p>
                       )}
-                      <p className="text-gray-500 text-[9px]">ETA: {shipmentResult.estimatedArrival}</p>
+                      <p className="text-text-secondary/80 text-[9px]">ETA: {shipmentResult.estimatedArrival}</p>
                     </div>
                   ) : (
-                    <div className="p-2.5 rounded-lg bg-red-950/10 border border-red-500/10 text-[10px] text-red-400 text-center">
+                    <div className="p-2.5 rounded-lg bg-red-500/10 border border-red-500/15 text-[10px] text-red-500 text-center font-bold">
                       Code "{testedCode}" not found in local registries.
                     </div>
                   )
@@ -811,64 +836,64 @@ export default function MyAccountHub({
               
               {/* SUBVIEW A: PROFILE EDIT DETAILS */}
               {activeSubView === 'profile' && (
-                <div className="bg-[#070b13] border border-bg-elevated rounded-2xl p-6 sm:p-8 space-y-6">
+                <div className="bg-bg-surface border border-border-premium rounded-2xl p-6 sm:p-8 space-y-6">
                   <div>
-                    <h3 className="font-display font-black text-xl text-white">Client Customization Profile</h3>
-                    <p className="text-gray-400 text-xs mt-1">Adjust air cargo delivery coordinates and baseline slicing variables.</p>
+                    <h3 className="font-display font-black text-xl text-text-primary">Client Customization Profile</h3>
+                    <p className="text-text-secondary text-xs mt-1">Adjust air cargo delivery coordinates and baseline slicing variables.</p>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
                     <div className="space-y-1">
-                      <label className="block text-[10px] font-mono text-gray-500 uppercase tracking-widest">First Name</label>
+                      <label className="block text-[10px] font-mono text-text-secondary uppercase tracking-widest">First Name</label>
                       <input
                         type="text"
                         value={firstName}
                         onChange={(e) => setFirstName(e.target.value)}
                         onBlur={handleProfileNameSync}
-                        className="w-full bg-bg-base text-gray-200 px-3.5 py-3 rounded-xl border border-bg-elevated text-xs"
+                        className="w-full bg-bg-base text-text-primary px-3.5 py-3 rounded-xl border border-border-premium text-xs focus:border-accent"
                       />
                     </div>
                     <div className="space-y-1">
-                      <label className="block text-[10px] font-mono text-gray-500 uppercase tracking-widest">Last Name</label>
+                      <label className="block text-[10px] font-mono text-text-secondary uppercase tracking-widest">Last Name</label>
                       <input
                         type="text"
                         value={lastName}
                         onChange={(e) => setLastName(e.target.value)}
                         onBlur={handleProfileNameSync}
-                        className="w-full bg-bg-base text-gray-200 px-3.5 py-3 rounded-xl border border-bg-elevated text-xs"
+                        className="w-full bg-bg-base text-text-primary px-3.5 py-3 rounded-xl border border-border-premium text-xs focus:border-accent"
                       />
                     </div>
                     <div className="space-y-1 col-span-1 md:col-span-2">
-                      <label className="block text-[10px] font-mono text-gray-500 uppercase tracking-widest">Phone Number</label>
+                      <label className="block text-[10px] font-mono text-text-secondary uppercase tracking-widest">Phone Number</label>
                       <input
                         type="text"
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
                         onBlur={() => handleProfileMetadataSync(phone, shippingAddress)}
-                        className="w-full bg-bg-base text-gray-200 px-3.5 py-3 rounded-xl border border-bg-elevated text-xs"
+                        className="w-full bg-bg-base text-text-primary px-3.5 py-3 rounded-xl border border-border-premium text-xs focus:border-accent"
                       />
                     </div>
                     <div className="space-y-1 col-span-1 md:col-span-2">
-                      <label className="block text-[10px] font-mono text-gray-500 uppercase tracking-widest">Shipping &amp; Cargo Destination Address</label>
+                      <label className="block text-[10px] font-mono text-text-secondary uppercase tracking-widest">Shipping &amp; Cargo Destination Address</label>
                       <textarea
                         rows={3}
                         value={shippingAddress}
                         onChange={(e) => setShippingAddress(e.target.value)}
                         onBlur={() => handleProfileMetadataSync(phone, shippingAddress)}
-                        className="w-full bg-bg-base text-gray-200 px-3.5 py-3 rounded-xl border border-bg-elevated text-xs font-sans"
+                        className="w-full bg-bg-base text-text-primary px-3.5 py-3 rounded-xl border border-border-premium text-xs font-sans focus:border-accent resize-none"
                       />
                     </div>
 
-                    <div className="col-span-1 md:col-span-2 pt-4 border-t border-gray-850">
-                      <h4 className="text-white font-bold font-sans text-sm mb-3">Preferred Core 3D Slicing Archetypes</h4>
+                    <div className="col-span-1 md:col-span-2 pt-4 border-t border-border-premium">
+                      <h4 className="text-text-primary font-bold font-sans text-sm mb-3">Preferred Core 3D Slicing Archetypes</h4>
                     </div>
 
                     <div className="space-y-1">
-                      <label className="block text-[10px] font-mono text-gray-500 tracking-widest uppercase">Default Filament Manufacturer</label>
+                      <label className="block text-[10px] font-mono text-text-secondary tracking-widest uppercase">Default Filament Manufacturer</label>
                       <select
                         value={defaultFilamentBrand}
                         onChange={(e) => setDefaultFilamentBrand(e.target.value)}
-                        className="w-full bg-bg-base text-gray-200 p-3 rounded-xl border border-bg-elevated focus:outline-none"
+                        className="w-full bg-bg-base text-text-primary p-3 rounded-xl border border-border-premium focus:outline-none focus:border-accent cursor-pointer"
                       >
                         <option value="Bambu Labs Premium">Bambu Labs Original Spools</option>
                         <option value="Prism Exotic Silk">Prism Multi-Chroma Import</option>
@@ -877,11 +902,11 @@ export default function MyAccountHub({
                     </div>
 
                     <div className="space-y-1">
-                      <label className="block text-[10px] font-mono text-gray-500 tracking-widest uppercase">Target Printbed Speed</label>
+                      <label className="block text-[10px] font-mono text-text-secondary tracking-widest uppercase">Target Printbed Speed</label>
                       <select
                         value={laserSpeed}
                         onChange={(e) => setLaserSpeed(e.target.value)}
-                        className="w-full bg-bg-base text-gray-200 p-3 rounded-xl border border-bg-elevated focus:outline-none"
+                        className="w-full bg-bg-base text-text-primary p-3 rounded-xl border border-border-premium focus:outline-none focus:border-accent cursor-pointer"
                       >
                         <option value="120 mm/s High Density">120 mm/s Additive Detail Print</option>
                         <option value="240 mm/s Standard Quality">240 mm/s Balanced Speed / Quality</option>
@@ -890,11 +915,11 @@ export default function MyAccountHub({
                     </div>
 
                     <div className="space-y-1 col-span-1 md:col-span-2">
-                      <label className="block text-[10px] font-mono text-gray-500 tracking-widest uppercase">Baseline Infill Strategy</label>
+                      <label className="block text-[10px] font-mono text-text-secondary tracking-widest uppercase">Baseline Infill Strategy</label>
                       <select
                         value={infillTarget}
                         onChange={(e) => setInfillTarget(e.target.value)}
-                        className="w-full bg-bg-base text-gray-200 p-3 rounded-xl border border-bg-elevated focus:outline-none"
+                        className="w-full bg-bg-base text-text-primary p-3 rounded-xl border border-border-premium focus:outline-none focus:border-accent cursor-pointer"
                       >
                         <option value="10% Lightning (Decorative Only)">10% Lightning (Fastest, low mass weight)</option>
                         <option value="15% Gyroid (Elastic Strength)">15% Gyroid (MakerWorld favorite, excellent shear durability)</option>
@@ -914,17 +939,16 @@ export default function MyAccountHub({
               {/* SUBVIEW B: PAST ORDERS & WRITING VERIFIED REVIEWS */}
               {activeSubView === 'orders' && (
                 <div className="space-y-6">
-                  
                   {/* Push Notifications Opt-In Card */}
-                  <div className="bg-[#070b13] border border-accent/20 rounded-2xl p-6 text-left relative overflow-hidden shadow-lg">
+                  <div className="bg-bg-surface border border-border-premium rounded-2xl p-6 text-left relative overflow-hidden shadow-lg">
                     {/* Subtle cyber glow in the corner */}
                     <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-accent/5 to-transparent rounded-full pointer-events-none" />
                     
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 relative">
                       <div className="space-y-1.5 max-w-xl">
                         <div className="flex items-center space-x-2">
-                          <Bell className={`w-4 h-4 ${isSubscribed ? 'text-accent animate-bounce' : 'text-gray-400'}`} />
-                          <h4 className="font-display font-black text-sm text-white uppercase tracking-wider">
+                          <Bell className={`w-4 h-4 ${isSubscribed ? 'text-accent animate-bounce' : 'text-text-secondary'}`} />
+                          <h4 className="font-display font-black text-sm text-text-primary uppercase tracking-wider">
                             Get Notified About Your Order
                           </h4>
                           {isSubscribed && (
@@ -933,7 +957,7 @@ export default function MyAccountHub({
                             </span>
                           )}
                         </div>
-                        <p className="text-gray-400 text-xs leading-relaxed font-sans">
+                        <p className="text-text-secondary text-xs leading-relaxed font-sans">
                           Receive instant push notifications on your device when printing begins, payments are verified, or your package ships.
                         </p>
                         
@@ -946,8 +970,8 @@ export default function MyAccountHub({
                         
                         {/* iOS / Browser limitations note */}
                         {!isSubscribed && (
-                          <div className="text-[10px] text-gray-500 font-mono space-y-1 mt-2 border-t border-gray-900 pt-2">
-                            <p>💡 Subscriptions are linked to your phone number: <code className="text-gray-300 font-bold">{phone || 'None (Set in settings)'}</code></p>
+                          <div className="text-[10px] text-text-secondary font-mono space-y-1 mt-2 border-t border-border-premium pt-2">
+                            <p>💡 Subscriptions are linked to your phone number: <code className="text-text-primary font-bold">{phone || 'None (Set in settings)'}</code></p>
                             <p className="text-accent/80">📱 iOS Safari: Tap the Share menu and select "Add to Home Screen" first, then launch Belvia from your home screen to enable push connection.</p>
                           </div>
                         )}
@@ -959,7 +983,7 @@ export default function MyAccountHub({
                             type="button"
                             disabled={isPushLoading}
                             onClick={() => unsubscribePush()}
-                            className="px-4 py-2 bg-slate-900 hover:bg-red-950/20 text-gray-400 hover:text-red-400 border border-gray-850 hover:border-red-900/30 rounded-xl font-bold font-mono text-[10px] transition cursor-pointer disabled:opacity-50"
+                            className="px-4 py-2 bg-bg-base hover:bg-red-500/15 text-text-secondary hover:text-red-500 border border-border-premium hover:border-red-500/30 rounded-xl font-bold font-mono text-[10px] transition cursor-pointer disabled:opacity-50"
                           >
                             {isPushLoading ? 'DISCONNECTING...' : 'DISABLE NOTIFICATIONS'}
                           </button>
@@ -994,7 +1018,7 @@ export default function MyAccountHub({
                     <div className="bg-bg-elevated border border-accent/30 rounded-2xl p-6 text-left relative animate-in slide-in-from-top-4 duration-300">
                       <button 
                         onClick={() => setSelectedReviewOrder(null)}
-                        className="absolute top-4 right-4 text-gray-400 hover:text-white p-1 rounded-md"
+                        className="absolute top-4 right-4 text-text-secondary hover:text-text-primary p-1 rounded-md"
                       >
                         <X className="w-4 h-4" />
                       </button>
@@ -1004,16 +1028,16 @@ export default function MyAccountHub({
                         <span>VERIFIED PURCHASE CONSTR_CHECK</span>
                       </div>
 
-                      <h4 className="font-display font-black text-white text-base">
+                      <h4 className="font-display font-black text-text-primary text-base">
                         Write Verified Review: {selectedReviewOrder.title}
                       </h4>
-                      <p className="text-gray-400 text-xs mt-1 leading-normal">
-                        Your purchase of <code className="bg-bg-surface px-1 py-0.5 text-[10px] rounded">{selectedReviewOrder.id}</code> is logged under client id {authEmail}. Leave a review regarding G-code precision, infill strength or shipping finish below.
+                      <p className="text-text-secondary text-xs mt-1 leading-normal">
+                        Your purchase of <code className="bg-bg-base px-1 py-0.5 text-[10px] rounded">{selectedReviewOrder.id}</code> is logged under client id {authEmail}. Leave a review regarding G-code precision, infill strength or shipping finish below.
                       </p>
 
                       <form onSubmit={handlePostReviewSubmit} className="mt-4 space-y-3">
                         <div className="flex items-center space-x-4">
-                          <span className="text-xs text-gray-400 font-mono">STAR RATING:</span>
+                          <span className="text-xs text-text-secondary font-mono">STAR RATING:</span>
                           <div className="flex space-x-1">
                             {[1, 2, 3, 4, 5].map((s) => (
                               <button
@@ -1022,7 +1046,7 @@ export default function MyAccountHub({
                                 onClick={() => setReviewRating(s)}
                                 className="hover:scale-110 active:scale-95 transition cursor-pointer"
                               >
-                                <Star className={`w-5 h-5 ${s <= reviewRating ? 'fill-current text-amber-500' : 'text-gray-600'}`} />
+                                <Star className={`w-5 h-5 ${s <= reviewRating ? 'fill-current text-amber-500' : 'text-text-secondary/50'}`} />
                               </button>
                             ))}
                           </div>
@@ -1035,7 +1059,7 @@ export default function MyAccountHub({
                             value={reviewTextText}
                             onChange={(e) => setReviewTextText(e.target.value)}
                             placeholder="Provide your exact experiences (e.g. Dimensions were precise down to millimeters. Adhesion on heated smooth build bed was perfect!)"
-                            className="w-full bg-bg-base font-sans text-xs text-gray-200 px-3 py-2 border border-bg-elevated rounded-xl focus:border-accent focus:ring-1 focus:ring-accent/20 focus:outline-none"
+                            className="w-full bg-bg-base font-sans text-xs text-text-primary px-3 py-2 border border-border-premium rounded-xl focus:border-accent focus:ring-1 focus:ring-accent/20 focus:outline-none"
                           />
                         </div>
 
@@ -1049,7 +1073,7 @@ export default function MyAccountHub({
                           <button
                             type="button"
                             onClick={() => setSelectedReviewOrder(null)}
-                            className="px-4 py-2 rounded-xl bg-bg-surface hover:bg-slate-850 text-gray-400 hover:text-white font-mono text-[10px] transition font-bold"
+                            className="px-4 py-2 rounded-xl bg-bg-base hover:bg-bg-elevated text-text-secondary hover:text-text-primary font-mono text-[10px] transition font-bold"
                           >
                             DISCARD
                           </button>
@@ -1066,19 +1090,19 @@ export default function MyAccountHub({
                   )}
 
                   {/* Active Shipments Live Slices Feed */}
-                  <div className="bg-[#070b13] border border-bg-elevated rounded-2xl p-6 text-left">
-                    <h3 className="font-display font-black text-lg text-white mb-1">Queue &amp; Active Production Telemetry</h3>
-                    <p className="text-gray-400 text-xs mb-5">Continuous printing jobs mapped to your active registered client address.</p>
+                  <div className="bg-bg-surface border border-border-premium rounded-2xl p-6 text-left">
+                    <h3 className="font-display font-black text-lg text-text-primary mb-1">Queue &amp; Active Production Telemetry</h3>
+                    <p className="text-text-secondary text-xs mb-5">Continuous printing jobs mapped to your active registered client address.</p>
 
                     {ordersLoading ? (
                       <div className="flex items-center justify-center space-x-2 py-8">
                         <Loader className="w-4 h-4 animate-spin text-accent" />
-                        <span className="text-xs font-mono text-gray-400">Syncing order data...</span>
+                        <span className="text-xs font-mono text-text-secondary">Syncing order data...</span>
                       </div>
                     ) : (
                       <div className="space-y-4">
                         {pastOrders.filter(o => o.status === 'Active Printing' || o.status === 'In Progress').length === 0 ? (
-                          <p className="text-gray-500 text-xs font-mono text-center py-6">No active printing jobs found. All clear!</p>
+                          <p className="text-text-secondary text-xs font-mono text-center py-6">No active printing jobs found. All clear!</p>
                         ) : (
                           pastOrders.filter(o => o.status === 'Active Printing' || o.status === 'In Progress').map((o) => (
                             <div key={o.id} className="border border-[#10b981]/20 bg-accent/5 rounded-xl p-4.5 space-y-3">
@@ -1087,35 +1111,35 @@ export default function MyAccountHub({
                               <span className="text-[9px] font-mono text-accent bg-accent/15 px-2 py-0.5 rounded font-black border border-[#10b981]/20">
                                 MANUFACTURING QUEUE // NOZZLE B4 ACTIVE
                               </span>
-                              <h4 className="font-sans font-bold text-sm text-gray-100 mt-1.5">{o.title}</h4>
-                              <p className="text-[10px] font-mono text-gray-400 mt-0.5">
+                              <h4 className="font-sans font-bold text-sm text-text-primary mt-1.5">{o.title}</h4>
+                              <p className="text-[10px] font-mono text-text-secondary mt-0.5">
                                 Spec: {o.material} ({o.color}) // Order reference: <code className="text-accent text-[11px] font-mono">{o.id}</code>
                               </p>
                             </div>
                             <div className="text-right">
-                              <span className="block text-[8px] font-mono text-gray-500">LIVE HEAT SENSOR</span>
+                              <span className="block text-[8px] font-mono text-text-secondary">LIVE HEAT SENSOR</span>
                               <span className="text-accent text-xs font-mono font-bold animate-pulse">218°C Stable</span>
                             </div>
                           </div>
 
                           {/* Machine slices simulation */}
-                          <div className="bg-[#050912] p-3 rounded-lg border border-gray-850 grid grid-cols-2 sm:grid-cols-3 gap-2 text-[10px] font-mono text-gray-400">
+                          <div className="bg-bg-base p-3 rounded-lg border border-border-premium grid grid-cols-2 sm:grid-cols-3 gap-2 text-[10px] font-mono text-text-secondary">
                             <div>
-                              <span className="block text-gray-500 text-[8px]">LAYER STATUS:</span>
+                              <span className="text-text-secondary/70 text-[8px]">LAYER STATUS:</span>
                               <span className="text-accent font-bold">1640 / 2250</span>
                             </div>
                             <div>
-                              <span className="block text-gray-500 text-[8px]">FEED SPEED:</span>
+                              <span className="text-text-secondary/70 text-[8px]">FEED SPEED:</span>
                               <span>280 mm/s</span>
                             </div>
                             <div>
-                              <span className="block text-gray-500 text-[8px]">K-BED POSITION:</span>
+                              <span className="text-text-secondary/70 text-[8px]">K-BED POSITION:</span>
                               <span>[X:142.4, Y:092.1]</span>
                             </div>
                           </div>
 
                           <div className="flex justify-between items-center pt-1.5">
-                            <span className="text-[10px] font-mono text-gray-500">ETA: June 09 via air parcel</span>
+                            <span className="text-[10px] font-mono text-text-secondary">ETA: June 09 via air parcel</span>
                             
                             <button
                               onClick={() => {
@@ -1136,19 +1160,19 @@ export default function MyAccountHub({
                   </div>
 
                   {/* Historical logs list */}
-                  <div className="bg-[#070b13] border border-bg-elevated rounded-2xl p-6 text-left">
-                    <h3 className="font-display font-black text-lg text-white mb-1">Delivered Fabrications Logs</h3>
-                    <p className="text-gray-400 text-xs mb-5">History of physical spools dispatched, with verified client feedback links.</p>
+                  <div className="bg-bg-surface border border-border-premium rounded-2xl p-6 text-left">
+                    <h3 className="font-display font-black text-lg text-text-primary mb-1">Delivered Fabrications Logs</h3>
+                    <p className="text-text-secondary text-xs mb-5">History of physical spools dispatched, with verified client feedback links.</p>
 
                     {ordersLoading ? (
                       <div className="flex items-center justify-center space-x-2 py-8">
                         <Loader className="w-4 h-4 animate-spin text-accent" />
-                        <span className="text-xs font-mono text-gray-400">Syncing order data...</span>
+                        <span className="text-xs font-mono text-text-secondary">Syncing order data...</span>
                       </div>
                     ) : (
                     <div className="space-y-4">
                       {pastOrders.filter(o => o.status === 'Delivered').length === 0 ? (
-                        <p className="text-gray-500 text-xs font-mono text-center py-6">No completed deliveries yet.</p>
+                        <p className="text-text-secondary text-xs font-mono text-center py-6">No completed deliveries yet.</p>
                       ) : (
                         pastOrders.filter(o => o.status === 'Delivered').map((o) => {
                         // Check if a review already exists from this client for this product
@@ -1157,10 +1181,10 @@ export default function MyAccountHub({
                         );
 
                         return (
-                          <div key={o.id} className="p-4 rounded-xl bg-bg-base/60 border border-gray-850 hover:border-gray-750 transition flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 text-xs font-mono">
+                          <div key={o.id} className="p-4 rounded-xl bg-bg-base/60 border border-border-premium hover:border-accent/40 transition flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 text-xs font-mono">
                             <div className="space-y-1 text-left">
                               <div className="flex items-center space-x-2">
-                                <span className="text-[9px] bg-bg-surface border border-bg-elevated text-gray-400 px-1.5 py-0.5 rounded font-black">
+                                <span className="text-[9px] bg-bg-surface border border-border-premium text-text-secondary px-1.5 py-0.5 rounded font-black">
                                   {o.id}
                                 </span>
                                 <span className="text-accent font-bold flex items-center text-[10px] text-accent">
@@ -1168,8 +1192,8 @@ export default function MyAccountHub({
                                   COMPLETED &amp; SIGNED
                                 </span>
                               </div>
-                              <h4 className="font-sans font-bold text-sm text-gray-200 mt-1 font-sans">{o.title}</h4>
-                              <p className="text-gray-500 text-[10px]">
+                              <h4 className="font-sans font-bold text-sm text-text-primary mt-1 font-sans">{o.title}</h4>
+                              <p className="text-text-secondary text-[10px]">
                                 Dispatched {o.date} // Weight: {o.productId === 'bv-005' ? '210' : '165'}g // Value: {formatPrice(o.price)}
                                 {o.design_credit_enabled && o.design_credit_amount && ` (includes Design Credit: +৳${o.design_credit_amount})`}
                               </p>
@@ -1181,7 +1205,7 @@ export default function MyAccountHub({
                                   setShipmentSearchCode(o.trackingCode);
                                   handleTrackerSearch(o.trackingCode);
                                 }}
-                                className="px-3 py-1.5 bg-[#0e172a] hover:bg-[#1e293b] border border-bg-elevated hover:border-gray-700 text-accent hover:text-white rounded-lg transition text-[9px] font-bold"
+                                className="px-3 py-1.5 bg-bg-base hover:bg-bg-elevated border border-border-premium text-accent rounded-lg transition text-[9px] font-bold"
                               >
                                 LOGISTICS HIST
                               </button>
@@ -1211,18 +1235,18 @@ export default function MyAccountHub({
 
               {/* SUBVIEW C: WISHLIST OVERVIEW */}
               {activeSubView === 'wishlist' && (
-                <div className="bg-[#070b13] border border-bg-elevated rounded-2xl p-6 sm:p-8 space-y-6">
+                <div className="bg-bg-surface border border-border-premium rounded-2xl p-6 sm:p-8 space-y-6">
                   <div>
-                    <h3 className="font-display font-black text-xl text-white">Saved Slices &amp; Wishlist</h3>
-                    <p className="text-gray-400 text-xs mt-1">High-performance geometries pinned for future CAD custom slicing.</p>
+                    <h3 className="font-display font-black text-xl text-text-primary">Saved Slices &amp; Wishlist</h3>
+                    <p className="text-text-secondary text-xs mt-1">High-performance geometries pinned for future CAD custom slicing.</p>
                   </div>
 
                   {wishlist.length === 0 ? (
-                    <div className="text-center py-16 bg-bg-base/40 border border-gray-850/60 rounded-2xl space-y-3.5">
-                      <Heart className="w-10 h-10 text-gray-750 mx-auto animate-pulse" />
+                    <div className="text-center py-16 bg-bg-base/40 border border-border-premium rounded-2xl space-y-3.5">
+                      <Heart className="w-10 h-10 text-text-secondary/50 mx-auto animate-pulse" />
                       <div>
-                        <h4 className="text-white font-bold font-display text-sm">Your Additive Wishlist is Clear</h4>
-                        <p className="text-gray-500 text-xs max-w-xs mx-auto mt-1 leading-normal font-sans">
+                        <h4 className="text-text-primary font-bold font-display text-sm">Your Additive Wishlist is Clear</h4>
+                        <p className="text-text-secondary text-xs max-w-xs mx-auto mt-1 leading-normal font-sans">
                           Click the customizable heart badge on any design card in the Ready-Made store to store it here.
                         </p>
                       </div>
@@ -1232,19 +1256,19 @@ export default function MyAccountHub({
                       {wishlist.map((w) => (
                         <div
                           key={w.id}
-                          className="p-3 bg-bg-base/50 border border-gray-850 rounded-xl flex items-center space-x-3 text-xs justify-between"
+                          className="p-3 bg-bg-base/50 border border-border-premium rounded-xl flex items-center space-x-3 text-xs justify-between"
                         >
                           <div className="flex items-center space-x-3 text-left">
                             <img 
                               src={w.images[0]} 
                               alt={w.title} 
-                              className="w-12 h-12 rounded-lg object-cover border border-bg-elevated" 
+                              className="w-12 h-12 rounded-lg object-cover border border-border-premium" 
                               onError={(e) => {
                                 e.currentTarget.src = '/images/placeholder.png';
                               }}
                             />
                             <div>
-                              <h4 className="font-sans font-bold text-gray-200 line-clamp-1">{w.title}</h4>
+                              <h4 className="font-sans font-bold text-text-primary line-clamp-1">{w.title}</h4>
                               <span className="font-mono text-[10px] text-accent">{formatPrice(w.isPreOrder ? w.price : (w.price - Math.round(w.price * 0.12)))}</span>
                             </div>
                           </div>
@@ -1252,7 +1276,7 @@ export default function MyAccountHub({
                           <div className="flex space-x-1.5 shrink-0">
                             <button
                               onClick={() => onQuickView(w)}
-                              className="p-1.5 rounded-lg bg-bg-surface border border-bg-elevated text-gray-405 hover:text-white cursor-pointer"
+                              className="p-1.5 rounded-lg bg-bg-base border border-border-premium text-text-secondary hover:text-text-primary cursor-pointer"
                               title="Inspect swatches"
                             >
                               <Info className="w-3.5 h-3.5" />
@@ -1266,7 +1290,7 @@ export default function MyAccountHub({
                             </button>
                             <button
                               onClick={() => onToggleWishlist(w)}
-                              className="p-1.5 text-red-500 hover:text-red-400 bg-bg-surface border border-bg-elevated rounded-lg cursor-pointer"
+                              className="p-1.5 text-red-500 hover:text-red-400 bg-bg-base border border-border-premium rounded-lg cursor-pointer"
                               title="Remove"
                             >
                               <Heart className="w-3.5 h-3.5 fill-current" />

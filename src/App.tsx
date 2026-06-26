@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.5
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Navbar from './components/Navbar';
 import HeroSection from './components/HeroSection';
 import ProductGrid from './components/ProductGrid';
@@ -29,6 +29,11 @@ import { ChatProvider } from './contexts/ChatContext';
 import { Product, CartItem, CustomPrintRequest, BulkOrderRequest, ActiveFestival } from './types';
 import { getStoredProducts, saveStoredProducts, resetToSeedData } from './data';
 import { Heart, Sparkles, X, Loader2 } from 'lucide-react';
+
+// ── Pull-to-Refresh ───────────────────────────────────────────────────────────
+import { usePullToRefresh } from './hooks/usePullToRefresh';
+import PullToRefreshIndicator from './components/PullToRefreshIndicator';
+const PTR_THRESHOLD = 80;
 
 // Helper: returns headers with the admin API key from localStorage
 function adminHeaders(): Record<string, string> {
@@ -111,7 +116,7 @@ function AppContent() {
 
   const { user } = useAuth();
   const [isAuthOpen, setIsAuthOpen] = useState<boolean>(false);
-  const [pendingAction, setPendingAction] = useState<{ type: 'wishlist' | 'checkout' | 'express'; payload?: any } | null>(null);
+  const [pendingAction, setPendingAction] = useState<{ type: 'checkout' | 'express'; payload?: any } | null>(null);
   const [isCartOpen, setIsCartOpen] = useState<boolean>(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [wishlist, setWishlist] = useState<Product[]>([]);
@@ -121,20 +126,7 @@ function AppContent() {
   // Execute pending gated action upon successful login
   useEffect(() => {
     if (user && pendingAction) {
-      if (pendingAction.type === 'wishlist' && pendingAction.payload) {
-        const product = pendingAction.payload;
-        setWishlist((prev) => {
-          const exists = prev.some((p) => p.id === product.id);
-          let updated: Product[];
-          if (exists) {
-            updated = prev.filter((p) => p.id !== product.id);
-          } else {
-            updated = [...prev, product];
-          }
-          localStorage.setItem('belvia_wishlist', JSON.stringify(updated));
-          return updated;
-        });
-      } else if (pendingAction.type === 'checkout') {
+      if (pendingAction.type === 'checkout') {
         setIsCartOpen(true);
       } else if (pendingAction.type === 'express' && pendingAction.payload) {
         setExpressItem(pendingAction.payload);
@@ -255,6 +247,24 @@ function AppContent() {
   React.useEffect(() => {
     modalOpenRef.current = anyModalOpen;
   }, [anyModalOpen]);
+
+  // ── Pull-to-Refresh ────────────────────────────────────────────────────────
+  const handleRefresh = useCallback(() => {
+    // Hard reload is the most reliable refresh for a PWA — matches the
+    // Instagram/Twitter UX where pull-to-refresh gives you a fresh state.
+    window.location.reload();
+  }, []);
+
+  const {
+    pullDistance,
+    isRefreshing,
+    pullToRefreshHandlers,
+  } = usePullToRefresh({
+    onRefresh: handleRefresh,
+    threshold: PTR_THRESHOLD,
+    disabled: anyModalOpen,
+  });
+  // ── End Pull-to-Refresh ────────────────────────────────────────────────────
 
   // Handle modal-open hash pushing and popping when UI close buttons are clicked
   const isClosingRef = React.useRef(false);
@@ -401,6 +411,10 @@ function AppContent() {
   const handleLogout = async () => {
     await signOut();
     handleAdminLogout();
+    setCart([]);
+    setWishlist([]);
+    localStorage.removeItem('belvia_cart');
+    localStorage.removeItem('belvia_wishlist');
     setActiveTab('home');
   };
 
@@ -486,6 +500,9 @@ function AppContent() {
             let rawMaterials = item.materials;
             if (typeof rawMaterials === 'string') { try { rawMaterials = JSON.parse(rawMaterials); } catch { rawMaterials = []; } }
 
+            let rawColorStock = item.colorStock;
+            if (typeof rawColorStock === 'string') { try { rawColorStock = JSON.parse(rawColorStock); } catch { rawColorStock = {}; } }
+
             let specs = item.specifications;
             if (typeof specs === 'string') { try { specs = JSON.parse(specs); } catch { specs = {}; } }
 
@@ -516,6 +533,7 @@ function AppContent() {
               resin_price: item.resin_price !== undefined && item.resin_price !== null ? (typeof item.resin_price === 'number' ? item.resin_price : parseFloat(item.resin_price) || 0) : null,
               color_picker_count: typeof item.color_picker_count === 'number' ? item.color_picker_count : 1,
               is_trendy: item.is_trendy || false,
+              colorStock: (rawColorStock && typeof rawColorStock === 'object' && !Array.isArray(rawColorStock)) ? rawColorStock : {},
               updated_at: item.updated_at
             };
           };
@@ -613,11 +631,6 @@ function AppContent() {
 
   // --- WISHLIST HANDLERS ---
   const handleToggleWishlist = (product: Product) => {
-    if (!user) {
-      setPendingAction({ type: 'wishlist', payload: product });
-      setIsAuthOpen(true);
-      return;
-    }
     setWishlist((prev) => {
       const exists = prev.some((p) => p.id === product.id);
       let updated: Product[];
@@ -634,9 +647,11 @@ function AppContent() {
   const getDefaultColorLabel = (product: Product): string => {
     const cCount = product.color_picker_count ?? 1;
     if (cCount === 0) return '';
-    if (cCount === 1) return product.colors[0] || '';
-    return product.colors
-      .slice(0, cCount)
+    const colorStock = product.colorStock || {};
+    const availCols = product.colors.filter(col => colorStock[col] === undefined || colorStock[col] !== 0);
+    const srcColors = availCols.length > 0 ? availCols : product.colors;
+    if (cCount === 1) return srcColors[0] || '';
+    return Array.from({ length: cCount }, (_, i) => srcColors[i % srcColors.length] || '')
       .map((col, i) => `Color ${i + 1}: ${col}`)
       .join(', ');
   };
@@ -917,8 +932,19 @@ function AppContent() {
   };
 
   return (
-    <div id="belvia-root" className="min-h-screen bg-bg-base flex flex-col text-text-primary antialiased selection:bg-accent/20 font-sans transition-colors duration-300">
-      
+    <div
+      id="belvia-root"
+      className="min-h-screen bg-bg-base flex flex-col text-text-primary antialiased selection:bg-accent/20 font-sans transition-colors duration-300"
+      {...pullToRefreshHandlers}
+    >
+
+      {/* Pull-to-Refresh visual indicator (fixed, overlays everything) */}
+      <PullToRefreshIndicator
+        pullDistance={pullDistance}
+        isRefreshing={isRefreshing}
+        threshold={PTR_THRESHOLD}
+      />
+
       {/* FESTIVAL COUNTDOWN BANNER */}
       {activeFestival && !festivalBannerDismissed && (
         <FestivalBanner
@@ -1230,6 +1256,7 @@ function AppContent() {
         onClose={() => setSelectedProduct(null)}
         onAddToCart={handleAddToCart}
         onExpressOrder={handleExpressOrder}
+        onOpenAuth={() => setIsAuthOpen(true)}
       />
 
       {/* Drawer B: Shopping Cart Item Checklist (also serves Express Order when skipCart=true) */}

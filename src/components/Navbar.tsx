@@ -120,10 +120,10 @@ export default function Navbar({
             onClick={() => setActiveTab('home')}
             className="flex items-center group cursor-pointer focus:outline-none py-1"
           >
-            <img 
-              src="/logo.png" 
-              alt="Belvia Logo" 
-              className="h-14 sm:h-20 w-auto object-contain transition-transform group-hover:scale-105 duration-300 filter drop-shadow-[0_0_10px_rgba(245,175,25,0.15)]" 
+            <img
+              src={theme === 'dark' ? '/logo-dark.png' : '/logo-light.png'}
+              alt="Belvia Logo"
+              className="h-14 sm:h-20 w-auto object-contain transition-transform group-hover:scale-105 duration-300 filter drop-shadow-[0_0_10px_rgba(245,175,25,0.15)]"
             />
           </button>
 

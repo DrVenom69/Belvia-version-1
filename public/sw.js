@@ -7,8 +7,8 @@
 // On iOS Safari, push only works if the site is installed to Home Screen (iOS 16.4+).
 // ══════════════════════════════════════════════════════════════════════
 
-const BELVIA_ICON  = '/logo.png';
-const BELVIA_BADGE = '/logo.png'; // Small monochrome icon shown in Android status bar
+const BELVIA_ICON  = '/icon-192x192.png';
+const BELVIA_BADGE = '/icon-192x192.png'; // Small monochrome icon shown in Android status bar
 
 // ── Push Event ─────────────────────────────────────────────────────────
 // Fired by the browser when the server sends a push message.

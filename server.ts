@@ -3515,8 +3515,8 @@ async function sendPushNotification(
   const notifPayload = JSON.stringify({
     title:  payload.title,
     body:   payload.body,
-    icon:   payload.icon  || "/logo.png",
-    badge:  payload.badge || "/logo.png",
+    icon:   payload.icon  || "/icon-192x192.png",
+    badge:  payload.badge || "/icon-192x192.png",
     data:   payload.data  || {},
   });
 

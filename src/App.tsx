@@ -168,6 +168,14 @@ function AppContent() {
 
   // --- GLOBAL PERSISTENT STATE ---
   const [products, setProducts] = useState<Product[]>([]);
+  const [activeColors, setActiveColors] = useState<{ name: string, hex: string }[]>(() => {
+    try {
+      const stored = localStorage.getItem('belvia_active_colors');
+      return stored ? JSON.parse(stored) : [];
+    } catch {
+      return [];
+    }
+  });
   const [cart, setCart] = useState<CartItem[]>([]);
 
   // Settings from server (payment numbers, store info)
@@ -549,6 +557,20 @@ function AppContent() {
           setProducts(serverProducts);
           localStorage.setItem('belvia_products', JSON.stringify(serverProducts));
           serverFetchSucceeded = true;
+
+          // Fetch active colors from server
+          try {
+            const colorRes = await fetch('/api/active-colors');
+            if (colorRes.ok) {
+              const colorData = await colorRes.json();
+              if (colorData.success && Array.isArray(colorData.activeColors)) {
+                setActiveColors(colorData.activeColors);
+                localStorage.setItem('belvia_active_colors', JSON.stringify(colorData.activeColors));
+              }
+            }
+          } catch (e) {
+            console.warn('Failed to fetch active colors from server:', e);
+          }
 
           // Sync reviews from server data
           const dbReviews: any[] = [];
@@ -1151,6 +1173,7 @@ function AppContent() {
                 onAddCustomQuote={handleAddCustomQuote} 
                 onAddBulkOrder={handleAddBulkOrder} 
                 onAddToCart={handleAddToCart}
+                activeColors={activeColors}
               />
             </div>
           )}
@@ -1257,6 +1280,7 @@ function AppContent() {
         onAddToCart={handleAddToCart}
         onExpressOrder={handleExpressOrder}
         onOpenAuth={() => setIsAuthOpen(true)}
+        activeColors={activeColors}
       />
 
       {/* Drawer B: Shopping Cart Item Checklist (also serves Express Order when skipCart=true) */}

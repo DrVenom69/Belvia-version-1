@@ -6,6 +6,7 @@ import { formatPrice } from '../utils/format';
 
 interface NameKeychainBuilderProps {
   onAddToCart: (item: CartItem) => void;
+  activeColors?: { name: string, hex: string }[];
 }
 
 const FONT_OPTIONS = [
@@ -69,8 +70,11 @@ function getStrokeWidth(fontSize: number): number {
   return Math.round(fontSize * 0.45);
 }
 
-export default function NameKeychainBuilder({ onAddToCart }: NameKeychainBuilderProps) {
+export default function NameKeychainBuilder({ onAddToCart, activeColors = [] }: NameKeychainBuilderProps) {
   const [isOutOfStock, setIsOutOfStock] = useState(false);
+  const [textColor, setTextColor] = useState<string>('#ffffff');
+  const [strokeColor, setStrokeColor] = useState<string>('#f5af19');
+
   useEffect(() => {
     try {
       const stored = localStorage.getItem('belvia_products');
@@ -85,6 +89,16 @@ export default function NameKeychainBuilder({ onAddToCart }: NameKeychainBuilder
       console.warn('Failed to parse products for stock check:', e);
     }
   }, []);
+
+  // Update default colors if they are out of stock
+  useEffect(() => {
+    if (activeColors.length > 0) {
+      const hasTextCol = activeColors.some(c => c.hex.toLowerCase() === textColor.toLowerCase());
+      const hasStrokeCol = activeColors.some(c => c.hex.toLowerCase() === strokeColor.toLowerCase());
+      if (!hasTextCol) setTextColor(activeColors[0].hex);
+      if (!hasStrokeCol) setStrokeColor(activeColors[Math.min(1, activeColors.length - 1)].hex);
+    }
+  }, [activeColors]);
 
   const getTextureStyle = (col: string): React.CSSProperties => {
     const textures: Record<string, React.CSSProperties> = {
@@ -110,21 +124,10 @@ export default function NameKeychainBuilder({ onAddToCart }: NameKeychainBuilder
     return textures[col] || { background: col };
   };
 
-  const availableColors = [
-    { name: 'Matte Slate', hex: '#475569' },
-    { name: 'Chalk White', hex: '#ffffff' },
-    { name: 'Emerald Green', hex: '#10b981' },
-    { name: 'Burnt Orange', hex: '#f97316' },
-    { name: 'Obsidian Black', hex: '#1e293b' },
-    { name: 'Jade Green', hex: '#047857' },
-    { name: 'Silk Copper', hex: '#d97706' },
-    { name: 'Neon Nebula', hex: '#c084fc' }
-  ];
+  const availableColors = activeColors;
 
   const [name, setName] = useState<string>('BELVIA');
   const [selectedFont, setSelectedFont] = useState<string>('Syne');
-  const [textColor, setTextColor] = useState<string>('#ffffff');
-  const [strokeColor, setStrokeColor] = useState<string>('#f5af19');
   const [size, setSize] = useState<'Small' | 'Medium' | 'Large'>('Medium');
   const [theme, setTheme] = useState<'standard' | 'floral' | 'dogtag' | 'numberplate' | 'football'>('standard');
   const [quantity, setQuantity] = useState<number>(1);
@@ -385,10 +388,10 @@ export default function NameKeychainBuilder({ onAddToCart }: NameKeychainBuilder
       </svg>
 
       {/* Left Side: 3D Preview Stage */}
-      <div className="lg:col-span-6 flex flex-col justify-between bg-bg-surface border border-border-premium rounded-2xl p-6 relative overflow-hidden shadow-2xl min-h-[420px]">
+      <div className="lg:col-span-6 sticky top-[88px] lg:top-[136px] z-30 lg:self-start lg:max-h-[calc(100vh-120px-32px)] flex flex-col justify-between bg-bg-surface/90 backdrop-blur-md border border-border-premium rounded-2xl p-2.5 sm:p-4 lg:p-6 relative overflow-hidden shadow-2xl h-32 lg:h-auto lg:min-h-[420px]">
         <div className="absolute inset-0 bg-grid-ambient opacity-15 pointer-events-none" />
         
-        <div className="flex items-center justify-between z-10">
+        <div className="hidden lg:flex items-center justify-between z-10">
           <span className="text-[9px] font-mono text-text-secondary uppercase tracking-widest">
             Live print telemetry preview
           </span>
@@ -404,7 +407,7 @@ export default function NameKeychainBuilder({ onAddToCart }: NameKeychainBuilder
 
         {/* Interactive 3D Perspective viewport */}
         <div 
-          className="flex-grow flex items-center justify-center py-16 cursor-grab active:cursor-grabbing select-none"
+          className="flex-grow flex items-center justify-center py-2 lg:py-16 cursor-grab active:cursor-grabbing select-none"
           style={{ perspective: '800px' }}
           onPointerMove={handlePointerMove}
           onPointerLeave={handlePointerLeave}
@@ -555,7 +558,7 @@ export default function NameKeychainBuilder({ onAddToCart }: NameKeychainBuilder
         </div>
 
         {/* Sizing & Material Metrics bottom bar */}
-        <div className="border-t border-border-premium pt-4 grid grid-cols-3 gap-3 font-mono text-center z-10">
+        <div className="hidden lg:grid border-t border-border-premium pt-4 grid-cols-3 gap-3 font-mono text-center z-10">
           <div className="bg-bg-base border border-border-premium p-2.5 rounded-xl">
             <span className="block text-[8px] text-text-secondary uppercase tracking-widest">Dimensions</span>
             <span className="text-[10px] font-bold text-text-primary">{specs.dimensions}</span>
@@ -577,6 +580,22 @@ export default function NameKeychainBuilder({ onAddToCart }: NameKeychainBuilder
         
         <div className="space-y-6">
           <h3 className="font-display font-extrabold text-lg text-text-primary">Configure Custom Name Keychain</h3>
+
+          {/* Mobile-only Sizing & Material Metrics bar */}
+          <div className="lg:hidden grid grid-cols-3 gap-2.5 font-mono text-center border border-border-premium p-3 rounded-xl bg-bg-base/40">
+            <div>
+              <span className="block text-[8px] text-text-secondary uppercase tracking-widest">Dimensions</span>
+              <span className="text-[10px] font-bold text-text-primary">{specs.dimensions}</span>
+            </div>
+            <div>
+              <span className="block text-[8px] text-text-secondary uppercase tracking-widest">Est Weight</span>
+              <span className="text-[10px] font-bold text-accent">{specs.weightGrams}g</span>
+            </div>
+            <div>
+              <span className="block text-[8px] text-text-secondary uppercase tracking-widest">Print Duration</span>
+              <span className="text-[10px] font-bold text-text-primary">{specs.printTimeMinutes} min</span>
+            </div>
+          </div>
           
           {/* Name input */}
           <div>

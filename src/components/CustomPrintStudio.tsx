@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { UploadCloud, CheckCircle2, FileCode, AlertCircle, Sparkles, HelpCircle, HardDrive, Send } from 'lucide-react';
 import { CustomPrintRequest, BulkOrderRequest, CartItem } from '../types';
 import { formatPrice } from '../utils/format';
@@ -9,9 +9,10 @@ interface CustomPrintStudioProps {
   onAddCustomQuote: (quote: CustomPrintRequest) => void;
   onAddBulkOrder: (order: BulkOrderRequest) => void;
   onAddToCart: (item: CartItem) => void;
+  activeColors?: { name: string, hex: string }[];
 }
 
-export default function CustomPrintStudio({ onAddCustomQuote, onAddBulkOrder, onAddToCart }: CustomPrintStudioProps) {
+export default function CustomPrintStudio({ onAddCustomQuote, onAddBulkOrder, onAddToCart, activeColors = [] }: CustomPrintStudioProps) {
   const [activeSubTab, setActiveSubTab] = useState<'individual' | 'keychain' | 'bulk'>('individual');
   const [dragActive, setDragActive] = useState<boolean>(false);
   const [file, setFile] = useState<{ name: string; size: string; type: string } | null>(null);
@@ -29,10 +30,18 @@ export default function CustomPrintStudio({ onAddCustomQuote, onAddBulkOrder, on
   const [details, setDetails] = useState<string>('');
   const [submitSuccess, setSubmitSuccess] = useState<string | null>(null);
 
+  // Set default color if not in stock
+  useEffect(() => {
+    const colors_list = activeColors.map(c => c.name);
+    if (colors_list.length > 0 && !colors_list.includes(color)) {
+      setColor(colors_list[0]);
+    }
+  }, [activeColors]);
+
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Constants
-  const colors_list = ['Matte Slate', 'Chalk White', 'Emerald Green', 'Burnt Orange', 'Obsidian Black', 'Jade Green', 'Silk Copper', 'Neon Nebula'];
+  const colors_list = activeColors.map(c => c.name);
   const materials_list = ['PLA (Matte)', 'PLA (Silk Pearl)', 'PETG (Durable)', 'ABS (High-Impact)', 'TPU (Flexible)'];
   const infills_list = ['10% Lightning', '15% Gyroid', '20% Grid', '30% Grid', '40% Gyroid (High Strength)', '100% Solid'];
 
@@ -252,7 +261,7 @@ export default function CustomPrintStudio({ onAddCustomQuote, onAddBulkOrder, on
           </div>
         ) : activeSubTab === 'keychain' ? (
           <div className="max-w-5xl mx-auto bg-bg-surface/20 border border-border-premium rounded-2xl p-2.5 shadow-2xl animate-in fade-in slide-in-from-bottom-3 duration-300">
-            <NameKeychainBuilder onAddToCart={onAddToCart} />
+            <NameKeychainBuilder onAddToCart={onAddToCart} activeColors={activeColors} />
           </div>
         ) : submitSuccess ? (
           /* Confirmation tracking visual card */

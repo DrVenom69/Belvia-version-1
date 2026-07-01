@@ -12,9 +12,10 @@ interface ProductDetailsModalProps {
   onAddToCart: (item: CartItem) => void;
   onExpressOrder?: (item: CartItem) => void;
   onOpenAuth?: () => void;
+  activeColors?: { name: string, hex: string }[];
 }
 
-export default function ProductDetailsModal({ product, onClose, onAddToCart, onExpressOrder, onOpenAuth }: ProductDetailsModalProps) {
+export default function ProductDetailsModal({ product, onClose, onAddToCart, onExpressOrder, onOpenAuth, activeColors = [] }: ProductDetailsModalProps) {
   if (!product) return null;
 
   const { triggerChat } = useChat();
@@ -25,11 +26,17 @@ export default function ProductDetailsModal({ product, onClose, onAddToCart, onE
 
   const colorCount = product.color_picker_count ?? 1;
   const colorStock = product.colorStock || {};
-  const availableColors = product.colors.filter(col => colorStock[col] === undefined || colorStock[col] !== 0);
+  const availableColors = product.colors.filter(col => {
+    const override = colorStock[col];
+    if (override !== undefined) {
+      return override !== 0;
+    }
+    return activeColors.some(ac => ac.name.toLowerCase() === col.toLowerCase());
+  });
 
   const [selectedColors, setSelectedColors] = useState<string[]>(() => {
     if (colorCount === 0) return [];
-    const srcColors = availableColors.length > 0 ? availableColors : product.colors;
+    const srcColors = availableColors;
     return Array.from({ length: colorCount }, (_, i) => srcColors[i % srcColors.length] || '');
   });
   const [selectedMaterial, setSelectedMaterial] = useState<string>(product.materials[0] || 'PLA (Matte)');
@@ -82,8 +89,14 @@ export default function ProductDetailsModal({ product, onClose, onAddToCart, onE
   useEffect(() => {
     const cCount = product.color_picker_count ?? 1;
     const cStock = product.colorStock || {};
-    const availCols = product.colors.filter(col => cStock[col] === undefined || cStock[col] !== 0);
-    const srcColors = availCols.length > 0 ? availCols : product.colors;
+    const availCols = product.colors.filter(col => {
+      const override = cStock[col];
+      if (override !== undefined) {
+        return override !== 0;
+      }
+      return activeColors.some(ac => ac.name.toLowerCase() === col.toLowerCase());
+    });
+    const srcColors = availCols;
 
     setSelectedColors(
       cCount === 0 

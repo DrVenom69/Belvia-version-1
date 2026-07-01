@@ -1455,6 +1455,68 @@ async function recalculatePricesForFilament(filamentName: string): Promise<void>
   }
 }
 
+// Helper to generate a deterministic hex color code from a color name
+function getDeterministicHex(name: string): string {
+  const colorsMap: Record<string, string> = {
+    'matte slate': '#475569',
+    'chalk white': '#ffffff',
+    'emerald green': '#10b981',
+    'burnt orange': '#f97316',
+    'obsidian black': '#1e293b',
+    'jade green': '#047857',
+    'silk copper': '#d97706',
+    'neon nebula': '#c084fc'
+  };
+  const normalized = name.toLowerCase().trim();
+  if (colorsMap[normalized]) return colorsMap[normalized];
+  
+  let hash = 0;
+  for (let i = 0; i < normalized.length; i++) {
+    hash = normalized.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  let color = '#';
+  for (let i = 0; i < 3; i++) {
+    const value = (hash >> (i * 8)) & 0xFF;
+    color += ('00' + value.toString(16)).slice(-2);
+  }
+  return color;
+}
+
+// GET /api/active-colors — Public
+app.get("/api/active-colors", async (_req, res) => {
+  try {
+    let filamentsList: any[] = [];
+    if (isSupabaseConfigured) {
+      const { data, error } = await supabaseAdmin!
+        .from("filaments")
+        .select("name, color, grams_remaining, is_empty");
+      if (error) throw error;
+      filamentsList = data || [];
+    } else {
+      filamentsList = await loadFilaments();
+    }
+
+    const inStockColors = filamentsList
+      .filter((f: any) => !f.is_empty && f.grams_remaining > 0)
+      .map((f: any) => ({
+        name: f.name,
+        hex: f.color?.trim() || getDeterministicHex(f.name)
+      }));
+
+    // Filter duplicates by color name
+    const uniqueColorsMap = new Map<string, { name: string, hex: string }>();
+    inStockColors.forEach(c => {
+      if (!uniqueColorsMap.has(c.name.toLowerCase())) {
+        uniqueColorsMap.set(c.name.toLowerCase(), c);
+      }
+    });
+
+    res.json({ success: true, activeColors: Array.from(uniqueColorsMap.values()) });
+  } catch (err: any) {
+    res.status(500).json({ error: "Failed to get active colors: " + err.message });
+  }
+});
+
 // GET /api/filaments — Public
 app.get("/api/filaments", async (_req, res) => {
   try {

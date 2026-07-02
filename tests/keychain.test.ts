@@ -44,20 +44,20 @@ import { calculateKeychainSpecs, validateKeychainInput } from '../src/utils/keyc
 
 console.log('Running Task 2 Calculations & Validation Tests...');
 
-// Test 1: Medium size, Floral theme, Standard font, 6 chars (name: 'Belvia')
+// Test 1: Medium size, Standard theme, Standard font, 6 chars (name: 'Belvia')
 const spec1 = calculateKeychainSpecs({
   name: 'Belvia',
   font: 'DM Sans',
   textColor: '#ffffff',
   strokeColor: '#f5af19',
   size: 'Medium',
-  theme: 'floral',
+  theme: 'standard',
   customizationVersion: 1
 });
-// Pricing formula: (Base price 500 * Size multiplier 1.4) + Theme price offset 150 + complexity fee 50 = 700 + 150 + 50 = 900
-assert.strictEqual(spec1.price, 900);
-// printTime formula: (Base print time 40 + Theme time offset 10) * complexity mult 1.1x = 50 * 1.1 = 55
-assert.strictEqual(spec1.printTimeMinutes, 55);
+// Pricing formula: (Base price 500 * Size multiplier 1.4) + Theme price offset 0 = 700
+assert.strictEqual(spec1.price, 700);
+// printTime formula: (Base print time 40 + Theme time offset 0) * complexity mult 1.0 = 40
+assert.strictEqual(spec1.printTimeMinutes, 40);
 
 // Test 2: Bangla character surcharge + cursive font check
 const specBangla = calculateKeychainSpecs({
@@ -86,6 +86,22 @@ assert.strictEqual(valSymbols.error, 'Contains unsupported characters. Only alph
 
 const valContrast = validateKeychainInput('Contrast', '#ffffff', '#ffffff');
 assert.strictEqual(valContrast.contrastWarning, true);
+
+// Test 4: License Plate theme calculations
+const specLicensePlate = calculateKeychainSpecs({
+  name: 'Dhaka-1234',
+  font: 'Syne',
+  textColor: '#000000',
+  strokeColor: '#ffffff',
+  size: 'Medium',
+  theme: 'licenseplate',
+  licensePlateRegion: 'Dhaka Metro',
+  customizationVersion: 1
+});
+// Pricing: (Base price 500 * Size multiplier 1.4) + Theme price offset 200 + complexity fee 0 + 4 char excess surcharge 60 = 700 + 200 + 60 = 960
+assert.strictEqual(specLicensePlate.price, 960);
+// printTime: (Base print time 40 + Theme time offset 8) * complexity mult 1.0 = 48 + 8 (length) = 56
+assert.strictEqual(specLicensePlate.printTimeMinutes, 56);
 
 console.log('Task 2 Tests Passed!');
 

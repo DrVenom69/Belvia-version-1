@@ -93,7 +93,8 @@ export interface KeychainConfig {
   textColor: string;
   strokeColor: string;
   size: 'Small' | 'Medium' | 'Large';
-  theme: 'standard' | 'floral' | 'dogtag' | 'numberplate' | 'football';
+  theme: 'standard' | 'licenseplate';
+  licensePlateRegion?: string;
   customizationVersion: number;
 }
 

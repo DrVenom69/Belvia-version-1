@@ -23,10 +23,7 @@ const FONT_OPTIONS = [
 
 const THEMES = [
   { id: 'standard', name: 'Standard Outline', desc: 'Smooth outline contour with hanging key ring hole.' },
-  { id: 'floral', name: 'Floral Garden', desc: 'Edged with botanical vines, leaves, and petaled silhouettes.' },
-  { id: 'dogtag', name: 'Tactical Dog Tag', desc: 'Rugged badge outline with corner structural rivets.' },
-  { id: 'numberplate', name: 'Dhaka License Plate', desc: 'Bangladesh Flag strip and Dhaka Metro subtext header.' },
-  { id: 'football', name: 'Championship Football', desc: 'Soccer shield emblem with custom panel seams.' }
+  { id: 'licenseplate', name: 'License Plate', desc: 'Bangladeshi license plate design with custom region text and centered layouts.' }
 ];
 
 const PRESET_PALETTES = [
@@ -68,6 +65,39 @@ function getFontSize(name: string): number {
 // Dynamically calculates stroke width proportional to font size (narrower contour outline)
 function getStrokeWidth(fontSize: number): number {
   return Math.round(fontSize * 0.45);
+}
+
+// Helper to estimate text width based on font-family and character width ratios
+function estimateTextWidth(text: string, font: string, size: number): number {
+  const fontRatios: Record<string, number> = {
+    'Syne': 1.15,
+    'Hind Siliguri': 0.85,
+    'Outfit': 0.75,
+    'Cinzel': 0.9,
+    'Rubik Doodle Shadow': 1.0,
+    'Playfair Display': 0.8,
+    'Bebas Neue': 0.65,
+    'Space Mono': 0.7,
+    'Pacifico': 0.85,
+    'Galada': 0.95
+  };
+  const ratio = fontRatios[font] || 0.75;
+  let total = 0;
+  for (let i = 0; i < text.length; i++) {
+    const charCode = text.charCodeAt(i);
+    if (charCode >= 0x0980 && charCode <= 0x09FF) {
+      total += size * 0.85; // Bangla character
+    } else if (text[i] === ' ' || text[i] === '-') {
+      total += size * 0.35;
+    } else if (/[Iil1]/.test(text[i])) {
+      total += size * 0.3;
+    } else if (/[MWmw]/.test(text[i])) {
+      total += size * 0.95;
+    } else {
+      total += size * ratio;
+    }
+  }
+  return total * 1.05; // 5% safety margin for rendering differences across OS/browsers
 }
 
 export default function NameKeychainBuilder({ onAddToCart, activeColors = [] }: NameKeychainBuilderProps) {
@@ -126,10 +156,37 @@ export default function NameKeychainBuilder({ onAddToCart, activeColors = [] }: 
 
   const availableColors = activeColors;
 
+  // Best license plate colors helper
+  const getBestLicensePlateColors = () => {
+    let blackHex = '#000000';
+    let whiteHex = '#ffffff';
+    
+    if (activeColors.length > 0) {
+      const blackMatch = activeColors.find(c => 
+        c.name.toLowerCase().includes('black') || 
+        c.name.toLowerCase().includes('obsidian') ||
+        c.hex.toLowerCase() === '#000000' ||
+        c.hex.toLowerCase() === '#080c14'
+      );
+      if (blackMatch) blackHex = blackMatch.hex;
+      else blackHex = activeColors[0].hex;
+
+      const whiteMatch = activeColors.find(c => 
+        c.name.toLowerCase().includes('white') || 
+        c.name.toLowerCase().includes('pearl') ||
+        c.hex.toLowerCase() === '#ffffff'
+      );
+      if (whiteMatch) whiteHex = whiteMatch.hex;
+      else whiteHex = activeColors[Math.min(1, activeColors.length - 1)].hex;
+    }
+    return { blackHex, whiteHex };
+  };
+
   const [name, setName] = useState<string>('BELVIA');
   const [selectedFont, setSelectedFont] = useState<string>('Syne');
   const [size, setSize] = useState<'Small' | 'Medium' | 'Large'>('Medium');
-  const [theme, setTheme] = useState<'standard' | 'floral' | 'dogtag' | 'numberplate' | 'football'>('standard');
+  const [theme, setTheme] = useState<'standard' | 'licenseplate'>('standard');
+  const [licensePlateRegion, setLicensePlateRegion] = useState<string>('Dhaka Metro');
   const [quantity, setQuantity] = useState<number>(1);
   const [isAutoSpin, setIsAutoSpin] = useState<boolean>(false);
   const [selectedMaterial, setSelectedMaterial] = useState<string>('PLA (Matte)');
@@ -138,9 +195,61 @@ export default function NameKeychainBuilder({ onAddToCart, activeColors = [] }: 
   const [rotation, setRotation] = useState({ x: 20, y: -25 });
   const previewContainerRef = useRef<HTMLDivElement>(null);
 
-  // Sizing and outlines calculation based on name length
-  const fontSize = getFontSize(name);
-  const strokeWidth = getStrokeWidth(fontSize);
+  // Sizing and auto-fit parameters
+  const getAutoFitParams = () => {
+    const defaultFontSize = getFontSize(name);
+    
+    if (theme === 'standard') {
+      const estTextWidth = estimateTextWidth(name, selectedFont, defaultFontSize);
+      // Left margin: 42 (loop), right margin: 30
+      const calculatedWidth = Math.max(160, estTextWidth + 42 + 30);
+      return { fontSize: defaultFontSize, regionFontSize: 11, shapeWidth: calculatedWidth };
+    }
+    
+    // theme === 'licenseplate'
+    const leftMargin = 20;
+    const rightMargin = 20;
+    const maxDefaultWidth = 280;
+    const initialWSafe = maxDefaultWidth - leftMargin - rightMargin; // 240
+    
+    // Estimate width for bottom text (name) and top text (region)
+    const estWidthDefault = estimateTextWidth(name, selectedFont, defaultFontSize);
+    const regionDefaultFontSize = 11;
+    const estRegionWidthDefault = estimateTextWidth(licensePlateRegion, 'Syne', regionDefaultFontSize);
+    
+    const maxEstWidthDefault = Math.max(estWidthDefault, estRegionWidthDefault);
+    
+    // Step 1: Fits at default sizes within maxDefaultWidth
+    if (maxEstWidthDefault <= initialWSafe) {
+      const calculatedWidth = Math.min(280, Math.max(160, maxEstWidthDefault + leftMargin + rightMargin));
+      return { fontSize: defaultFontSize, regionFontSize: regionDefaultFontSize, shapeWidth: calculatedWidth };
+    }
+    
+    // Step 2: Scale down
+    const scaleName = initialWSafe / estWidthDefault;
+    const scaleRegion = initialWSafe / estRegionWidthDefault;
+    
+    if (scaleName >= 0.6 && scaleRegion >= 0.6) {
+      const finalFontSize = Math.max(Math.round(defaultFontSize * scaleName * 10) / 10, Math.round(defaultFontSize * 0.6 * 10) / 10);
+      const finalRegionFontSize = Math.max(Math.round(regionDefaultFontSize * scaleRegion * 10) / 10, Math.round(regionDefaultFontSize * 0.6 * 10) / 10);
+      return { fontSize: finalFontSize, regionFontSize: finalRegionFontSize, shapeWidth: maxDefaultWidth };
+    }
+    
+    // Step 3: Locked at 60% minimum, stretch shape width
+    const minFontSize = Math.round(defaultFontSize * 0.6 * 10) / 10;
+    const minRegionFontSize = Math.round(regionDefaultFontSize * 0.6 * 10) / 10;
+    
+    const requiredWSafeName = estimateTextWidth(name, selectedFont, minFontSize);
+    const requiredWSafeRegion = estimateTextWidth(licensePlateRegion, 'Syne', minRegionFontSize);
+    
+    const maxRequiredWSafe = Math.max(requiredWSafeName, requiredWSafeRegion);
+    const calculatedWidth = Math.round(leftMargin + maxRequiredWSafe + rightMargin);
+    
+    return { fontSize: minFontSize, regionFontSize: minRegionFontSize, shapeWidth: calculatedWidth };
+  };
+
+  const { fontSize: renderFontSize, regionFontSize, shapeWidth } = getAutoFitParams();
+  const strokeWidth = getStrokeWidth(renderFontSize);
 
   // Dynamic specs
   const specs = calculateKeychainSpecs({
@@ -155,6 +264,15 @@ export default function NameKeychainBuilder({ onAddToCart, activeColors = [] }: 
 
   // Validations
   const validation = validateKeychainInput(name, textColor, strokeColor);
+
+  // Pre-select Chalk White / Obsidian Black when License Plate theme is selected
+  useEffect(() => {
+    if (theme === 'licenseplate') {
+      const { blackHex, whiteHex } = getBestLicensePlateColors();
+      setTextColor(blackHex);
+      setStrokeColor(whiteHex);
+    }
+  }, [theme]);
 
   // Auto-detect script to change font language recommendation
   useEffect(() => {
@@ -236,6 +354,7 @@ export default function NameKeychainBuilder({ onAddToCart, activeColors = [] }: 
         strokeColor,
         size,
         theme,
+        licensePlateRegion: theme === 'licenseplate' ? licensePlateRegion : undefined,
         customizationVersion: 1
       }
     };
@@ -246,66 +365,21 @@ export default function NameKeychainBuilder({ onAddToCart, activeColors = [] }: 
   // Dynamic rendering helper for the theme layouts
   const renderThemeBackplate = (overrideColor?: string, isSideWall: boolean = false) => {
     const color = overrideColor || strokeColor;
-    const textWidth = Math.max(120, name.length * (fontSize * 0.85) + 45);
+    const textWidth = shapeWidth;
     
     switch (theme) {
-      case 'floral':
+      case 'licenseplate':
+        const backplateFill = color;
+        const borderStroke = isSideWall ? color : textColor;
         return (
           <g>
-            <rect x="0" y="20" width={textWidth} height="70" rx="25" fill={color} filter={isSideWall ? undefined : "url(#inset-shadow)"} />
-            <circle cx="20" cy="55" r="12" fill={color} />
-            <circle cx="20" cy="55" r="5" fill="#080c14" />
+            <rect x="5" y="15" width={textWidth - 10} height="74" rx="6" fill={backplateFill} stroke={borderStroke} strokeWidth="3" />
             {!isSideWall && (
               <>
-                <path d="M 40,20 C 50,5 60,5 70,20 C 60,30 50,30 40,20 Z" fill="#10b981" opacity="0.85" />
-                <path d={`M ${textWidth - 50},20 C ${textWidth - 40},5 ${textWidth - 30},5 ${textWidth - 20},20 C ${textWidth - 30},30 ${textWidth - 40},30 ${textWidth - 50},20 Z`} fill="#10b981" opacity="0.85" />
-                <circle cx="55" cy="12" r="5" fill="#ef4444" />
-                <circle cx={textWidth - 35} cy="12" r="5" fill="#ef4444" />
-              </>
-            )}
-          </g>
-        );
-      case 'dogtag':
-        return (
-          <g>
-            <rect x="5" y="15" width={textWidth - 10} height="74" rx="10" fill={color} stroke={isSideWall ? color : "#ffffff"} strokeWidth="2" opacity="0.9" />
-            {!isSideWall && (
-              <>
-                <rect x="10" y="20" width={textWidth - 20} height="64" rx="8" fill="none" stroke="#000000" strokeWidth="1.5" strokeDasharray="4 2" opacity="0.5" />
-                <circle cx="25" cy="52" r="6" fill="#080c14" />
-                <circle cx="18" cy="28" r="2.5" fill="#ffffff" opacity="0.8" />
-                <circle cx={textWidth - 18} cy="28" r="2.5" fill="#ffffff" opacity="0.8" />
-                <circle cx="18" cy="76" r="2.5" fill="#ffffff" opacity="0.8" />
-                <circle cx={textWidth - 18} cy="76" r="2.5" fill="#ffffff" opacity="0.8" />
-              </>
-            )}
-          </g>
-        );
-      case 'numberplate':
-        return (
-          <g>
-            <rect x="5" y="15" width={textWidth - 10} height="74" rx="6" fill={color} stroke={isSideWall ? color : "#ffffff"} strokeWidth="2.5" />
-            {!isSideWall && (
-              <>
-                <rect x="15" y="25" width="22" height="54" fill="#006a4e" rx="2" />
-                <circle cx="26" cy="52" r="6.5" fill="#f42a41" />
-                <text x={textWidth / 2 + 10} y="32" fill={textColor} fontSize="10" fontFamily="Syne" fontWeight="900" textAnchor="middle" letterSpacing="2">
-                  DHAKA METRO
+                <text x={textWidth / 2} y="34" fill={textColor} fontSize={regionFontSize} fontFamily="Syne" fontWeight="900" textAnchor="middle" letterSpacing="2">
+                  {(licensePlateRegion || 'DHAKA METRO').toUpperCase()}
                 </text>
-                <line x1="45" y1="36" x2={textWidth - 15} y2="36" stroke={textColor} strokeWidth="1" opacity="0.4" />
-              </>
-            )}
-          </g>
-        );
-      case 'football':
-        return (
-          <g>
-            <path d={`M 10,15 L ${textWidth - 10},15 L ${textWidth - 5},50 L ${textWidth / 2},90 L 5,50 Z`} fill={color} stroke={isSideWall ? color : "#ffffff"} strokeWidth="2" />
-            {!isSideWall && (
-              <>
-                <circle cx={textWidth / 2} cy="28" r="10" fill="#080c14" />
-                <path d={`M ${textWidth / 2 - 20},50 Q ${textWidth / 2},35 ${textWidth / 2 + 20},50`} stroke="#ffffff" strokeWidth="1" fill="none" opacity="0.25" />
-                <path d={`M ${textWidth / 2 - 20},50 Q ${textWidth / 2},65 ${textWidth / 2 + 20},50`} stroke="#ffffff" strokeWidth="1" fill="none" opacity="0.25" />
+                <line x1="15" y1="42" x2={textWidth - 15} y2="42" stroke={textColor} strokeWidth="1.5" opacity="0.85" />
               </>
             )}
           </g>
@@ -314,14 +388,7 @@ export default function NameKeychainBuilder({ onAddToCart, activeColors = [] }: 
       default:
         return (
           <g>
-            {/* Structural bridge connecting ring loop to letters */}
-            <rect x="22" y="46" width="22" height="12" fill={color} rx="2" />
-            
-            {/* Ring loop */}
-            <circle cx="26" cy="52" r="11" fill={color} />
-            <circle cx="26" cy="52" r="4.5" fill="#080c14" />
-            
-            {/* Contoured Text Silhouette Backplate */}
+            {/* Contoured Text Silhouette Backplate (Rendered first so loop/hole sits cleanly on top of outline) */}
             <text
               x={getThemeTranslationX()}
               y={getThemeTranslationY()}
@@ -329,25 +396,32 @@ export default function NameKeychainBuilder({ onAddToCart, activeColors = [] }: 
               stroke={color}
               strokeWidth={strokeWidth}
               strokeLinejoin="round"
-              fontSize={fontSize}
+              fontSize={renderFontSize}
               fontFamily={selectedFont}
               fontWeight="800"
               textAnchor="start"
             >
               {name || 'NAME'}
             </text>
+
+            {/* Structural bridge connecting ring loop to letters */}
+            <rect x="26" y="46" width="16" height="12" fill={color} rx="2" />
+            
+            {/* Ring loop (Positioned closer to the tag body at cx=30) */}
+            <circle cx="30" cy="52" r="11" fill={color} />
+            <circle cx="30" cy="52" r="4.5" fill="#080c14" />
           </g>
         );
     }
   };
 
   const getThemeTranslationY = () => {
-    if (theme === 'numberplate') return 62;
+    if (theme === 'licenseplate') return 72;
     return 56;
   };
 
   const getThemeTranslationX = () => {
-    if (theme === 'numberplate') return 52;
+    if (theme === 'licenseplate') return shapeWidth / 2;
     return 42;
   };
 
@@ -357,9 +431,9 @@ export default function NameKeychainBuilder({ onAddToCart, activeColors = [] }: 
       {/* Hidden SVG for Cart Thumbnail Capture */}
       <svg
         id="keychain-svg-rendered"
-        width="280"
+        width={shapeWidth}
         height="110"
-        viewBox="0 0 280 110"
+        viewBox={`0 0 ${shapeWidth} 110`}
         fill="none"
         className="hidden"
       >
@@ -378,10 +452,10 @@ export default function NameKeychainBuilder({ onAddToCart, activeColors = [] }: 
           x={getThemeTranslationX()}
           y={getThemeTranslationY()}
           fill={textColor}
-          fontSize={fontSize}
+          fontSize={renderFontSize}
           fontFamily={selectedFont}
           fontWeight="800"
-          textAnchor="start"
+          textAnchor={theme === 'licenseplate' ? 'middle' : 'start'}
         >
           {name || 'NAME'}
         </text>
@@ -418,7 +492,7 @@ export default function NameKeychainBuilder({ onAddToCart, activeColors = [] }: 
             style={{
               transformStyle: 'preserve-3d',
               transform: isAutoSpin ? undefined : `rotateX(${rotation.x}deg) rotateY(${rotation.y}deg) scale(1.35)`,
-              width: '280px',
+              width: `${shapeWidth}px`,
               height: '110px'
             }}
           >
@@ -430,7 +504,7 @@ export default function NameKeychainBuilder({ onAddToCart, activeColors = [] }: 
                 filter: 'blur(8px) brightness(0) opacity(0.35)',
               }}
             >
-              <svg width="280" height="110" viewBox="0 0 280 110" fill="none">
+              <svg width={shapeWidth} height="110" viewBox={`0 0 ${shapeWidth} 110`} fill="none">
                 {renderThemeBackplate(strokeColor, true)}
               </svg>
             </div>
@@ -449,7 +523,7 @@ export default function NameKeychainBuilder({ onAddToCart, activeColors = [] }: 
                     transform: `translateZ(${zOffset}px)`,
                   }}
                 >
-                  <svg width="280" height="110" viewBox="0 0 280 110" fill="none">
+                  <svg width={shapeWidth} height="110" viewBox={`0 0 ${shapeWidth} 110`} fill="none">
                     {renderThemeBackplate(layerColor, true)}
                   </svg>
                 </div>
@@ -463,7 +537,7 @@ export default function NameKeychainBuilder({ onAddToCart, activeColors = [] }: 
                 transform: 'translateZ(5.4px)',
               }}
             >
-              <svg width="280" height="110" viewBox="0 0 280 110" fill="none">
+              <svg width={shapeWidth} height="110" viewBox={`0 0 ${shapeWidth} 110`} fill="none">
                 <defs>
                   <linearGradient id="backplate-highlight" x1="0%" y1="0%" x2="0%" y2="100%">
                     <stop offset="0%" stopColor="#ffffff" stopOpacity="0.25" />
@@ -493,15 +567,15 @@ export default function NameKeychainBuilder({ onAddToCart, activeColors = [] }: 
                     transform: `translateZ(${zOffset}px)`,
                   }}
                 >
-                  <svg width="280" height="110" viewBox="0 0 280 110" fill="none">
+                  <svg width={shapeWidth} height="110" viewBox={`0 0 ${shapeWidth} 110`} fill="none">
                     <text
                       x={getThemeTranslationX()}
                       y={getThemeTranslationY()}
                       fill={layerColor}
-                      fontSize={fontSize}
+                      fontSize={renderFontSize}
                       fontFamily={selectedFont}
                       fontWeight="800"
-                      textAnchor="start"
+                      textAnchor={theme === 'licenseplate' ? 'middle' : 'start'}
                     >
                       {name || 'NAME'}
                     </text>
@@ -517,7 +591,7 @@ export default function NameKeychainBuilder({ onAddToCart, activeColors = [] }: 
                 transform: 'translateZ(9.5px)',
               }}
             >
-              <svg width="280" height="110" viewBox="0 0 280 110" fill="none">
+              <svg width={shapeWidth} height="110" viewBox={`0 0 ${shapeWidth} 110`} fill="none">
                 <defs>
                   <linearGradient id="text-highlight" x1="0%" y1="0%" x2="0%" y2="100%">
                     <stop offset="0%" stopColor="#ffffff" stopOpacity="0.4" />
@@ -530,10 +604,10 @@ export default function NameKeychainBuilder({ onAddToCart, activeColors = [] }: 
                   x={getThemeTranslationX()}
                   y={getThemeTranslationY()}
                   fill={textColor}
-                  fontSize={fontSize}
+                  fontSize={renderFontSize}
                   fontFamily={selectedFont}
                   fontWeight="800"
-                  textAnchor="start"
+                  textAnchor={theme === 'licenseplate' ? 'middle' : 'start'}
                 >
                   {name || 'NAME'}
                 </text>
@@ -543,10 +617,10 @@ export default function NameKeychainBuilder({ onAddToCart, activeColors = [] }: 
                   x={getThemeTranslationX()}
                   y={getThemeTranslationY()}
                   fill="url(#text-highlight)"
-                  fontSize={fontSize}
+                  fontSize={renderFontSize}
                   fontFamily={selectedFont}
                   fontWeight="800"
-                  textAnchor="start"
+                  textAnchor={theme === 'licenseplate' ? 'middle' : 'start'}
                   style={{ mixBlendMode: 'overlay' }}
                 >
                   {name || 'NAME'}
@@ -660,6 +734,25 @@ export default function NameKeychainBuilder({ onAddToCart, activeColors = [] }: 
               ))}
             </div>
           </div>
+
+          {/* Region / City Input (Only for License Plate theme) */}
+          {theme === 'licenseplate' && (
+            <div>
+              <label className="block text-[10px] font-mono text-text-secondary uppercase tracking-widest mb-1.5">
+                License Plate Region / City:
+              </label>
+              <input
+                type="text"
+                value={licensePlateRegion}
+                onChange={(e) => setLicensePlateRegion(e.target.value.substring(0, 25))}
+                placeholder="e.g. Dhaka Metro-Ga"
+                className="w-full bg-bg-base text-text-primary border border-border-premium rounded-xl py-2.5 px-3 text-sm font-semibold focus:border-accent"
+              />
+              <span className="block text-[9px] text-text-secondary mt-1 font-mono text-right">
+                {licensePlateRegion.length}/25 characters
+              </span>
+            </div>
+          )}
 
           {/* Colors picker */}
           <div>

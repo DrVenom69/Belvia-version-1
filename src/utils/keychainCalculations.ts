@@ -13,19 +13,13 @@ export function calculateKeychainSpecs(config: KeychainConfig) {
 
   const themePriceOffsets = {
     standard: 0,
-    floral: 150,
-    dogtag: 100,
-    numberplate: 200,
-    football: 150
+    licenseplate: 200
   };
-  const themeWeightOffsets = { standard: 0, floral: 2, dogtag: 4, numberplate: 3, football: 3 };
-  const themeTimeOffsets = { standard: 0, floral: 10, dogtag: 5, numberplate: 8, football: 12 };
+  const themeWeightOffsets = { standard: 0, licenseplate: 3 };
+  const themeTimeOffsets = { standard: 0, licenseplate: 8 };
   const themeComplexity = {
     standard: { mult: 1.0, fee: 0 },
-    floral: { mult: 1.1, fee: 50 },
-    dogtag: { mult: 1.0, fee: 0 },
-    numberplate: { mult: 1.0, fee: 0 },
-    football: { mult: 1.25, fee: 100 }
+    licenseplate: { mult: 1.0, fee: 0 }
   };
 
   // Calculate length factors

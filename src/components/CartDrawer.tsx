@@ -510,12 +510,15 @@ export default function CartDrawer({
                               Resin Finish (+৳{item.product.resin_price})
                             </span>
                           )}
-                          {item.customization && (
+                           {item.customization && (
                             <>
                               <span className="px-1 bg-bg-base border border-bg-elevated rounded">Name: {item.customization.name}</span>
                               <span className="px-1 bg-bg-base border border-bg-elevated rounded">Font: {item.customization.font}</span>
                               <span className="px-1 bg-bg-base border border-bg-elevated rounded">Size: {item.customization.size}</span>
-                              <span className="px-1 bg-bg-base border border-bg-elevated rounded">Theme: {item.customization.theme}</span>
+                              <span className="px-1 bg-bg-base border border-bg-elevated rounded">Theme: {item.customization.theme === 'licenseplate' ? 'License Plate' : item.customization.theme}</span>
+                              {item.customization.theme === 'licenseplate' && item.customization.licensePlateRegion && (
+                                <span className="px-1 bg-bg-base border border-bg-elevated rounded">Region: {item.customization.licensePlateRegion}</span>
+                              )}
                             </>
                           )}
                         </div>
